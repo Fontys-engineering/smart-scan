@@ -5,7 +5,7 @@
     1. Matlab = Matlab code used for the filtering
     2. SmartScanService - The main c++ project
 
-##Getting started:
+## Getting started:
 * Download a git client (i.e. [Github Desktop](https://desktop.github.com/) )
 * Clone this repository to a desired location
 * Open the .sln file with Visual Studio 2019
