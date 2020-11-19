@@ -1,6 +1,6 @@
-#SmartScan Software Repository
+# SmartScan Software Repository
 
-##Folder Structure:
+## Folder Structure:
 1. Root
     1. Matlab = Matlab code used for the filtering
     2. SmartScanService - The main c++ project
@@ -12,8 +12,8 @@
 * Run (F5)
 
 
-##Development workflow:
-###Git
+## Development workflow:
+### Git
 **NEVER WORK ON THE MAIN OR DEVELOP BRANCHES DIRECTLY**
 1. PULL the latest changes from upstream (i.e. in Github desktop: Repository>pull)
 2. Create a new branch for every important feature or fix you add (i.e. in Github desktop go to branch>new branch or ctrl+shift+n). name the branch accordingly (e.g. _feature/implement-filtering_ or _bugfix/CSV-memory-leak_)
@@ -24,5 +24,5 @@
 7. Repeat steps 4 5 and 6 until the feature or fix is done.
 8. Implement your changes into the develop branch by doing a *pull request*. (in github desktop: Branch> create pull request or ctrl+R). Make sure to add the repositiory maintainer (Eduard) and at least one of your team members as a reviewer. Once all reviewers have approved the pull request, the maintainer (Eduard) will merge the changes into the develop branch.
 
-###C++
+### C++
 To be added.
