@@ -8,6 +8,7 @@
 #include "Point3.h";
 #include "ReferencePoint.h";
 #include "Scan.h"
+#include "ScanDb.h"
 
 #include <vector>
 
@@ -16,7 +17,6 @@ namespace SmartScan
 	class SmartScanService
 	{
 	public:
-		///example comment
 
 		SmartScanService();
 
@@ -30,35 +30,19 @@ namespace SmartScan
 		/// </summary>
 		void CalibrateSensors();
 
-#pragma region reference_points
-		
-		/// <summary>
-		/// Routine for finding the reference points required for the filtering algorithm
-		/// </summary>
-		void SetReferences();
-
-		std::vector<ReferencePoint> GetReferences();
-
-		/// <summary>
-		/// Delete all existing reference points
-		/// </summary>
-		void ResetReferences();
-
-		/// <summary>
-		/// Remove an existing reference point. If the exact location of the reference is unknown (i.e. the glove is used
-		///	to erase the reference) then a radius can be specified. The clossest point to the origin of the deletion, within the readius,
-		///	will be removed.
-		/// </summary>
-		/// <param name="pos"> - The position at which the reference point is found</param>
-		/// <param name="radius"> - Range of deletion </param>
-		void DeleteReference(Point3 pos, double radius = 0);
-#pragma endregion
-
 #pragma region scan
-		std::vector
+		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
+		std::vector<Scan> scans;
+
+		void StartScan();
+		void StopScan();
+
+		Scan& GetScan() const;
+		Scan& GetScan(int id);
 #pragma endregion
 	
 	private:
-		std::vector<ReferencePoint> referencePoints;
+		//the scan files database object:
+		ScanDb scanDb;
 	};
 }
