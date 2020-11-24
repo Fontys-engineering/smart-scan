@@ -16,6 +16,8 @@ namespace SmartScan
 	class SmartScanService
 	{
 	public:
+		///example comment
+
 		SmartScanService();
 
 		/// <summary>
@@ -53,7 +55,7 @@ namespace SmartScan
 #pragma endregion
 
 #pragma region scan
-
+		std::vector
 #pragma endregion
 	
 	private:
