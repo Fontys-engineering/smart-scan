@@ -59,5 +59,14 @@
     <ClInclude Include="SmartScanCLI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ReferencePoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScanDb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
