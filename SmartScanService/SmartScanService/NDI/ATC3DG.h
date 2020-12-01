@@ -25,69 +25,69 @@
 #define ATC3DG_H
 
 #ifdef LINUX
-#define ATC3DG_API
+	#define ATC3DG_API
 #else
 #ifdef MAC
-#define ATC3DG_API
+	#define ATC3DG_API
 #else
 #ifdef DEF_FILE
-#define ATC3DG_API
+	#define ATC3DG_API
 #else
 #ifdef ATC3DG_EXPORTS
-#define ATC3DG_API extern "C" __declspec(dllexport)
+	#define ATC3DG_API extern "C" __declspec(dllexport)
 #else
-#define ATC3DG_API extern "C" __declspec(dllimport)
+	#define ATC3DG_API extern "C" __declspec(dllimport)
 #endif
 #endif
 #endif
 #endif
-
+ 
 /*****************************************************************************
 							ENUMERATED CONSTANTS
  *****************************************************************************/
 
- //*****************************************************************************
- //	
- //	ERROR MESSAGE format is as follows:
- //	===================================
- //
- //	All commands return a 32-bit integer with the following bit definitions:
- //
- //   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0
- //   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- //  +-+-+-+-+-+-+---------+---------+-------------------------------+
- //  |E|W|X|R|B|M| Reserved| Address |             Code              |
- //  +-+-+-+-+-+-+---------+---------+-------------------------------+
- //
- //  where
- //
- //		E - indicates an ERROR
- //			(Operation either cannot or will not proceed as intended
- //				e.g. EEPROM error of some kind. Requires hardware reset
- //				of system and/or replacement of hardware)
- //		W - indicates a WARNING
- //			(Operation may proceed but remedial action needs to be taken
- //				e.g. Sensor has been removed. Fix by replacing Sensor)
- //      X - indicates Transmitter related message
- //      R - indicates Sensor related message
- //			(If neither X nor R is set then the message is a SYSTEM message)
- //		B - indicates message originated in the BIRD hardware
- //		M - indicates there are more messages pending (no longer used)
- //
- //		Address gives the index number of the device generating the message
- //			(Driver and system messages always have address 0)
- //
- //      Code - is the status code as enumerated in BIRD_ERROR_CODES 
- //
- //*****************************************************************************
+//*****************************************************************************
+//	
+//	ERROR MESSAGE format is as follows:
+//	===================================
+//
+//	All commands return a 32-bit integer with the following bit definitions:
+//
+//   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0
+//   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+//  +-+-+-+-+-+-+---------+---------+-------------------------------+
+//  |E|W|X|R|B|M| Reserved| Address |             Code              |
+//  +-+-+-+-+-+-+---------+---------+-------------------------------+
+//
+//  where
+//
+//		E - indicates an ERROR
+//			(Operation either cannot or will not proceed as intended
+//				e.g. EEPROM error of some kind. Requires hardware reset
+//				of system and/or replacement of hardware)
+//		W - indicates a WARNING
+//			(Operation may proceed but remedial action needs to be taken
+//				e.g. Sensor has been removed. Fix by replacing Sensor)
+//      X - indicates Transmitter related message
+//      R - indicates Sensor related message
+//			(If neither X nor R is set then the message is a SYSTEM message)
+//		B - indicates message originated in the BIRD hardware
+//		M - indicates there are more messages pending (no longer used)
+//
+//		Address gives the index number of the device generating the message
+//			(Driver and system messages always have address 0)
+//
+//      Code - is the status code as enumerated in BIRD_ERROR_CODES 
+//
+//*****************************************************************************
 enum BIRD_ERROR_CODES
 {
-	//	ERROR CODE DISPOSITION
-	//    |		(Some error codes have been retired.
-	//    |      The column below describes which codes 
-	//	  |      have been retired and why. O = Obolete,
-	//    V      I = handled internally)
-	BIRD_ERROR_SUCCESS = 0,					//00 < > No error	
+											//	ERROR CODE DISPOSITION
+											//    |		(Some error codes have been retired.
+											//    |      The column below describes which codes 
+											//	  |      have been retired and why. O = Obolete,
+											//    V      I = handled internally)
+	BIRD_ERROR_SUCCESS=0,					//00 < > No error	
 	BIRD_ERROR_PCB_HARDWARE_FAILURE,		//01 < > indeterminate failure on PCB
 	BIRD_ERROR_TRANSMITTER_EEPROM_FAILURE,	//02 <I> transmitter bad eeprom
 	BIRD_ERROR_SENSOR_SATURATION_START,		//03 <I> sensor has gone into saturation
@@ -210,7 +210,7 @@ enum BIRD_ERROR_CODES
 #define	FALSE	0
 
 enum MESSAGE_TYPE
-{
+{	
 	SIMPLE_MESSAGE,							// short string describing error code
 	VERBOSE_MESSAGE,							// long string describing error code
 };
@@ -227,7 +227,7 @@ enum TRANSMITTER_PARAMETER_TYPE
 };
 
 enum SENSOR_PARAMETER_TYPE
-{
+{							
 	DATA_FORMAT,			// enumerated constant of type DATA_FORMAT_TYPE
 	ANGLE_ALIGN,			// structure of type DOUBLE_ANGLES_RECORD
 	HEMISPHERE,				// enumerated constant of type HEMISPHERE_TYPE
@@ -327,7 +327,7 @@ enum AUXILIARY_PORT_TYPE
 
 enum DATA_FORMAT_TYPE
 {
-	NO_FORMAT_SELECTED = 0,
+	NO_FORMAT_SELECTED=0,
 
 	// SHORT (integer) formats
 	SHORT_POSITION,
@@ -385,7 +385,7 @@ enum DATA_FORMAT_TYPE
 };
 
 enum BOARD_TYPES
-{
+{	
 	ATC3DG_MEDSAFE,					// Standalone, DSP, 4 sensor
 	PCIBIRD_STD1,					// single standard sensor
 	PCIBIRD_STD2,					// dual standard sensor
@@ -430,18 +430,18 @@ enum DEVICE_TYPES
 #ifndef BASETYPES
 #define BASETYPES
 typedef unsigned long	ULONG;
-typedef ULONG* PULONG;
+typedef ULONG			*PULONG;
 typedef unsigned short	USHORT;
-typedef USHORT* PUSHORT;
+typedef USHORT			*PUSHORT;
 typedef short			SHORT;
-typedef SHORT* PSHORT;
+typedef SHORT			*PSHORT;
 typedef unsigned char	UCHAR;
-typedef UCHAR* PUCHAR;
-typedef char* PSZ;
+typedef UCHAR			*PUCHAR;
+typedef char			*PSZ;
 #endif  /* !BASETYPES */
 
 typedef char			CHAR;
-typedef const CHAR* LPCSTR, * PCSTR;
+typedef const CHAR		*LPCSTR, *PCSTR;
 typedef int				BOOL;
 typedef	ULONG			DEVICE_STATUS;
 
@@ -770,7 +770,7 @@ typedef struct tagDOUBLE_POSITION_TIME_Q
 	double	y;
 	double	z;
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_POSITION_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_ANGLES_TIME_Q
@@ -779,21 +779,21 @@ typedef struct tagDOUBLE_ANGLES_TIME_Q
 	double	e;			// elevation
 	double	r;			// roll
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_ANGLES_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_MATRIX_TIME_Q
 {
 	double	s[3][3];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_MATRIX_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_QUATERNIONS_TIME_Q
 {
 	double	q[4];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_QUATERNIONS_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD
@@ -805,7 +805,7 @@ typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD
 	double	e;
 	double	r;
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_POSITION_ANGLES_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD
@@ -815,7 +815,7 @@ typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD
 	double	z;
 	double	s[3][3];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_POSITION_MATRIX_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_RECORD
@@ -825,7 +825,7 @@ typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_RECORD
 	double	z;
 	double	q[4];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 } DOUBLE_POSITION_QUATERNION_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD
@@ -848,7 +848,7 @@ typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD
 	double	z;
 	double	s[3][3];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 	USHORT	button;
 } DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD;
 
@@ -859,7 +859,7 @@ typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD
 	double	z;
 	double	q[4];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 	USHORT	button;
 } DOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD;
 
@@ -926,7 +926,7 @@ typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RECORD
 	double	s[3][3];
 	double	q[4];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 }DOUBLE_ALL_TIME_STAMP_Q_RECORD;
 
 typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD
@@ -940,7 +940,7 @@ typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD
 	double	s[3][3];
 	double	q[4];
 	double	time;
-	USHORT	quality;
+	USHORT	quality;		
 	double	raw[3][3];
 }DOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD;
 
@@ -951,41 +951,41 @@ typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD
 							FUNCTION PROTOTYPES
  *****************************************************************************/
 
- /*
-	 InitializeBIRDSystem	Starts and initializes driver, resets
-						 hardware and interrogates hardware. Builds
-						 local database of system resources.
+/*
+	InitializeBIRDSystem	Starts and initializes driver, resets
+						hardware and interrogates hardware. Builds
+						local database of system resources.
 
-	 Parameters Passed:  none
+	Parameters Passed:  none
 
-	 Return Value:       error status
+	Return Value:       error status
 
-	 Remarks:			Can be used anytime a catastrophic failure
-						 has occurred and the system needs to be
-						 restarted.
+    Remarks:			Can be used anytime a catastrophic failure
+						has occurred and the system needs to be
+						restarted.
 
- */
+*/
 ATC3DG_API int InitializeBIRDSystem(void);
 
 /*
 	GetBIRDSystemConfiguration
 
-	Parameters Passed:  SYSTEM_CONFIGURATION*
+	Parameters Passed:  SYSTEM_CONFIGURATION* 
 
 	Return Value:       error status
 
-	Remarks:            Returns SYSTEM_CONFIGURATION structure
+    Remarks:            Returns SYSTEM_CONFIGURATION structure
 						It contains values equal to the number of
 						transmitters, sensors and boards detected
-						in the system. (The board information is for
+						in the system. (The board information is for 
 						test/diagnostic purposes, all commands
-						reference sensors and transmitters only) Once
-						the number of devices is known, (e.g. n) the
+						reference sensors and transmitters only) Once 
+						the number of devices is known, (e.g. n) the 
 						range of IDs for those devices becomes 0..(n-1)
 */
 ATC3DG_API int GetBIRDSystemConfiguration(
 	SYSTEM_CONFIGURATION* systemConfiguration
-);
+	);
 
 /*
 	GetTransmitterConfiguration
@@ -995,7 +995,7 @@ ATC3DG_API int GetBIRDSystemConfiguration(
 
 	Return Value:       error status
 
-	Remarks:			After getting system config the user can then pass
+    Remarks:			After getting system config the user can then pass 
 						the index of a transmitter of interest to this function
 						which will then return the config for that transmitter.
 						Items of interest are the serial number and status.
@@ -1004,7 +1004,7 @@ ATC3DG_API int GetBIRDSystemConfiguration(
 ATC3DG_API int GetTransmitterConfiguration(
 	USHORT transmitterID,
 	TRANSMITTER_CONFIGURATION* transmitterConfiguration
-);
+	);
 
 /*
 	GetSensorConfiguration
@@ -1014,14 +1014,14 @@ ATC3DG_API int GetTransmitterConfiguration(
 
 	Return Value:       error status
 
-	Remarks:			Similar to the transmitter function.
+    Remarks:			Similar to the transmitter function.            
 
 */
 
 ATC3DG_API int GetSensorConfiguration(
 	USHORT sensorID,
 	SENSOR_CONFIGURATION* sensorConfiguration
-);
+	);
 
 /*
 	GetBoardConfiguration
@@ -1031,7 +1031,7 @@ ATC3DG_API int GetSensorConfiguration(
 
 	Return Value:       error status
 
-	Remarks:			Similar to the Sensor and Transmitter
+    Remarks:			Similar to the Sensor and Transmitter
 						functions. Also returns information on
 						how many sensors and transmitters are
 						attached. NOTE: Board information is not
@@ -1042,7 +1042,7 @@ ATC3DG_API int GetSensorConfiguration(
 ATC3DG_API int GetBoardConfiguration(
 	USHORT boardID,
 	BOARD_CONFIGURATION* boardConfiguration
-);
+	);
 
 /*
 	GetAsynchronousRecord
@@ -1053,20 +1053,20 @@ ATC3DG_API int GetBoardConfiguration(
 
 	Return Value:       error status
 
-	Remarks:			Returns data immediately in the currently
-						selected format from the last measurement
-						cycle. Requires user providing a buffer large
-						enough for the result otherwise an error is
+    Remarks:			Returns data immediately in the currently 
+						selected format from the last measurement 
+						cycle. Requires user providing a buffer large 
+						enough for the result otherwise an error is 
 						generated and data lost.
-						(Old style BIRD POINT mode)
+						(Old style BIRD POINT mode)            
 
 */
 
 ATC3DG_API int GetAsynchronousRecord(
 	USHORT sensorID,
-	void* pRecord,
+	void *pRecord,
 	int	recordSize
-);
+	);
 
 /*
 	GetSynchronousRecord
@@ -1077,20 +1077,20 @@ ATC3DG_API int GetAsynchronousRecord(
 
 	Return Value:       error status
 
-	Remarks:			Returns a record after next measurement cycle. Puts
+    Remarks:			Returns a record after next measurement cycle. Puts 
 						system into mode where records are generated 1/cycle.
 						Will return one and only one record per measurement
 						cycle. Will queue the records for each measurement
-						cycle if command not issued sufficiently often. If
+						cycle if command not issued sufficiently often. If 
 						command issued too often will time-out with no data.
-						(old style BIRD STREAM mode)
+						(old style BIRD STREAM mode)            
 
 */
 ATC3DG_API int GetSynchronousRecord(
 	USHORT sensorID,
-	void* pRecord,
+	void *pRecord,
 	int	recordSize
-);
+	);
 
 
 
@@ -1103,7 +1103,7 @@ ATC3DG_API int GetSynchronousRecord(
 
 	Return Value:       error status
 
-	Remarks:			When a properly enumerated parameter type constant
+    Remarks:			When a properly enumerated parameter type constant
 						is used, the command will return the parameter value
 						to the buffer provided by the user. An error is
 						generated if the buffer is incorrectly sized
@@ -1111,9 +1111,9 @@ ATC3DG_API int GetSynchronousRecord(
 */
 ATC3DG_API int GetSystemParameter(
 	enum SYSTEM_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 
 /*
@@ -1125,15 +1125,15 @@ ATC3DG_API int GetSystemParameter(
 
 	Return Value:       error status
 
-	Remarks:			Similar to GetSystemParameter but allows user
+    Remarks:			Similar to GetSystemParameter but allows user
 						to set (write) the parameter.
 
 */
 ATC3DG_API int SetSystemParameter(
 	enum SYSTEM_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 
 /*
@@ -1146,7 +1146,7 @@ ATC3DG_API int SetSystemParameter(
 
 	Return Value:       error status
 
-	Remarks:			When a sensor is selected with a valid index (ID)
+    Remarks:			When a sensor is selected with a valid index (ID) 
 						and a properly enumerated parameter type constant
 						is used, the command will return the parameter value
 						to the buffer provided by the user. An error is
@@ -1156,9 +1156,9 @@ ATC3DG_API int SetSystemParameter(
 ATC3DG_API int GetSensorParameter(
 	USHORT						sensorID,
 	enum SENSOR_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 
 /*
@@ -1171,16 +1171,16 @@ ATC3DG_API int GetSensorParameter(
 
 	Return Value:       error status
 
-	Remarks:			Similar to GetSensorParameter but allows user
+    Remarks:			Similar to GetSensorParameter but allows user
 						to set (write) the parameter.
 
 */
 ATC3DG_API int SetSensorParameter(
 	USHORT						sensorID,
 	enum SENSOR_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 
 /*
@@ -1193,15 +1193,15 @@ ATC3DG_API int SetSensorParameter(
 
 	Return Value:       error status
 
-	Remarks:			Same as Sensor command
+    Remarks:			Same as Sensor command            
 
 */
 ATC3DG_API int GetTransmitterParameter(
 	USHORT							transmitterID,
 	enum TRANSMITTER_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void							*pBuffer,
 	int								bufferSize
-);
+	);
 
 
 
@@ -1216,15 +1216,15 @@ ATC3DG_API int GetTransmitterParameter(
 
 	Return Value:       error status
 
-	Remarks:			Same as sensor command
+    Remarks:			Same as sensor command            
 
 */
 ATC3DG_API int SetTransmitterParameter(
 	USHORT							transmitterID,
 	enum TRANSMITTER_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void							*pBuffer,
 	int								bufferSize
-);
+	);
 
 /*
 	GetBIRDError
@@ -1233,13 +1233,13 @@ ATC3DG_API int SetTransmitterParameter(
 
 	Return Value:       error status
 
-	Remarks:			Returns next error in queue
+    Remarks:			Returns next error in queue 
 						if available
 
 */
 ATC3DG_API int GetBIRDError(
 	void
-);
+	);
 
 #define GetPOSTError	GetBIRDError
 #define GetDIAGError	GetBIRDError
@@ -1254,7 +1254,7 @@ ATC3DG_API int GetBIRDError(
 
 	Return Value:       error status as a text string
 
-	Remarks:			ErrorCode contains the error code returned from
+    Remarks:			ErrorCode contains the error code returned from 
 						either a command or in response to GetBIRDError
 						and which is to be described by a text string.
 						Pass a pointer pBuffer to a buffer to contain
@@ -1266,52 +1266,52 @@ ATC3DG_API int GetBIRDError(
 */
 ATC3DG_API int GetErrorText(
 	int					errorCode,
-	char* pBuffer,
+	char				*pBuffer,
 	int					bufferSize,
 	enum MESSAGE_TYPE	type
-);
+	);
 
 /*
 
 */
 ATC3DG_API DEVICE_STATUS GetSensorStatus(
 	USHORT sensorID
-);
+	);
 
 /*
 
 */
 ATC3DG_API DEVICE_STATUS GetTransmitterStatus(
 	USHORT transmitterID
-);
+	);
 
 /*
 
 */
 ATC3DG_API DEVICE_STATUS GetBoardStatus(
 	USHORT boardID
-);
+	);
 
 /*
 
 */
 ATC3DG_API DEVICE_STATUS GetSystemStatus(
 	// no id required
-);
+	);
 
 /*
 
 */
 ATC3DG_API int SaveSystemConfiguration(
 	LPCSTR	lpFileName
-);
+	);
 
 /*
 
 */
 ATC3DG_API int RestoreSystemConfiguration(
 	LPCSTR	lpFileName
-);
+	);
 
 /*
 
@@ -1319,9 +1319,9 @@ ATC3DG_API int RestoreSystemConfiguration(
 ATC3DG_API int GetBoardParameter(
 	USHORT						boardID,
 	enum BOARD_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 /*
 
@@ -1329,9 +1329,9 @@ ATC3DG_API int GetBoardParameter(
 ATC3DG_API int SetBoardParameter(
 	USHORT						boardID,
 	enum BOARD_PARAMETER_TYPE	parameterType,
-	void* pBuffer,
+	void						*pBuffer,
 	int							bufferSize
-);
+	);
 
 /*
 

@@ -3,6 +3,7 @@
 
 //include all the libraries and sub-classes:
 #include "SmartScanCLI.h"
+#include "TrakStarController.h"
 
 using namespace SmartScan;
 
@@ -17,6 +18,13 @@ int main()
     Point3 exampleDataPoint(x, y, z);
 
     std::cout << "Point3 Example: x=" << exampleDataPoint.x << " y=" << exampleDataPoint.y << " z=" << exampleDataPoint.z << std::endl;
+
+    TrakStarController tSCtrl;
+    tSCtrl.Init();
+    tSCtrl.Config();
+    tSCtrl.AttachSensor();
+    tSCtrl.ReadSensor();
+    tSCtrl.StopTransmit();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
