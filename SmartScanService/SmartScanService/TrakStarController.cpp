@@ -6,7 +6,7 @@ using namespace SmartScan;
 //constructor
 TrakStarController::TrakStarController()
 {
-	
+
 }
 //init func
 void TrakStarController::Init()
@@ -53,8 +53,50 @@ void TrakStarController::AttachSensor()
 			break;
 		}
 	}
+}
 
 
+int TrakStarController::GetNSensors()
+{
+	if (&ATC3DG)
+	{
+		return ATC3DG.m_config.numberSensors;
+	}
+	else
+	{
+		throw "Sensor config unnavailable.";
+	}
+}
+
+Point3 TrakStarController::GetRecord(int sensorID)
+{
+	if (++sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
+	{
+		throw "Sensor ID out if range";
+	}
+
+	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
+
+	// scan the sensor and request a record
+
+	// sensor attached so get record
+	errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+	if (errorCode != BIRD_ERROR_SUCCESS) { ErrorHandler(errorCode); }
+
+	// get the status of the last data record
+	// only report the data if everything is okay
+	unsigned int status = GetSensorStatus(sensorID);
+
+	if (status == VALID_STATUS)
+	{
+		return Point3(record.x, record.y, record.z, record.a, record.e, record.r);
+	}
+	else
+	{
+		throw "No valid sensor record found";
+	}
+
+	return Point3();
 }
 
 void TrakStarController::ReadSensor()

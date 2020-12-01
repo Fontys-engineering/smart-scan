@@ -33,8 +33,17 @@ namespace SmartScan
 	public:
 		TrakStarController();
 
+		/// <summary>
+		/// Initialie the system. Call this before making a measurement
+		/// </summary>
 		void Init();
+		/// <summary>
+		/// Configure the sensor system. Call this after init and before making a measurement.
+		/// </summary>
 		void Config();
+		/// <summary>
+		/// Attache the sensors to the system. Call this before making a measurement.
+		/// </summary>
 		void AttachSensor();
 
 		/// <summary>
@@ -56,6 +65,9 @@ namespace SmartScan
 		void ReadSensor();
 
 
+		/// <summary>
+		/// Turn off the referenece.
+		/// </summary>
 		void StopTransmit();
 
 	private:
