@@ -36,6 +36,9 @@
     <ClCompile Include="Trigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Point3.h">

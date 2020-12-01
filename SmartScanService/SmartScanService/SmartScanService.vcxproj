@@ -145,6 +145,7 @@
     <ClCompile Include="CSVExport.cpp" />
     <ClCompile Include="Filtering.cpp" />
     <ClCompile Include="Point3.cpp" />
+    <ClCompile Include="Scan.cpp" />
     <ClCompile Include="SmartScanCLI.cpp" />
     <ClCompile Include="SmartScanService.cpp" />
     <ClCompile Include="TrakStarController.cpp" />

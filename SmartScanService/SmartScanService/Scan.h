@@ -2,17 +2,23 @@
 
 #include "Point3.h"
 #include "ReferencePoint.h"
+#include "TrakStarController.h"
 
 #include <vector>
+#include <iostream>
+#include<thread> 
+
 namespace SmartScan
 {
 	class Scan
 	{
 	public:
-		const int id;
+		const int mId;
 
-		std::vector<Point3> inBuff;
-		std::vector<Point3> outBuff;
+		std::vector<Point3> mInBuff;
+		std::vector<Point3> mOutBuff;
+
+		Scan(const int id);
 
 		void Start();
 		void Stop(bool clearData = false);
@@ -45,6 +51,20 @@ namespace SmartScan
 #pragma endregion
 
 	private:
-		std::vector<ReferencePoint> referencePoints;
+		std::vector<ReferencePoint> mReferencePoints;
+
+		//track star controller obj:
+		std::unique_ptr<TrakStarController> pTSCtrl;
+
+		//data acquisition thread:
+		std::thread acquisitionThread;
+
+		/// <summary>
+		/// Polls the TrakstarController for new data, stores it and filters it.
+		/// </summary>
+		void DataAcquisition();
+
+		bool mStopDataAcquisition = false;
+
 	};
 }

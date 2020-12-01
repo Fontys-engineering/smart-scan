@@ -11,6 +11,7 @@
 #include "ScanDb.h"
 
 #include <vector>
+#include <thread>
 
 namespace SmartScan
 {
@@ -31,8 +32,6 @@ namespace SmartScan
 		void CalibrateSensors();
 
 #pragma region scan
-		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<Scan> scans;
 
 		void StartScan();
 		void StopScan();
@@ -42,6 +41,9 @@ namespace SmartScan
 #pragma endregion
 	
 	private:
+		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
+		std::vector<Scan> scans;
+
 		//the scan files database object:
 		ScanDb scanDb;
 	};
