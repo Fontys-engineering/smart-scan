@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <iostream>
-#include<thread> 
+#include <thread> 
 
 namespace SmartScan
 {
@@ -18,9 +18,9 @@ namespace SmartScan
 		std::vector<Point3> mInBuff;
 		std::vector<Point3> mOutBuff;
 
-		Scan(const int id);
+		Scan(const int id, TrakStarController* pTSCtrl);
 
-		void Start();
+		void Run();
 		void Stop(bool clearData = false);
 		double GetCompletion() const;
 		bool Complete() const;
@@ -54,10 +54,10 @@ namespace SmartScan
 		std::vector<ReferencePoint> mReferencePoints;
 
 		//track star controller obj:
-		std::unique_ptr<TrakStarController> pTSCtrl;
+		TrakStarController *pTSCtrl;
 
 		//data acquisition thread:
-		std::thread acquisitionThread;
+		std::unique_ptr<std::thread> acquisitionThread;
 
 		/// <summary>
 		/// Polls the TrakstarController for new data, stores it and filters it.

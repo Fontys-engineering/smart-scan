@@ -13,11 +13,11 @@ int main()
     std::cout << "Smart Scan Command Line Interface Application" << std::endl;
 
     //create a new SmartScanService object:
-    //SmartScanService s3;
+    SmartScanService s3;
 
     //initialise the service:
     try {
-        //s3.Init();
+        s3.Init();
     }
     catch (...)
     {
@@ -31,7 +31,11 @@ int main()
         std::cin >> cmd;
         if (!strcmp(cmd,"start"))
         {
-            //s3.StartScan();
+            s3.StartScan();
+        }
+        else if (!strcmp(cmd, "stop"))
+        {
+            s3.StopScan();
         }
         else
         {

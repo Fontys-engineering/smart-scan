@@ -9,9 +9,11 @@
 #include "ReferencePoint.h";
 #include "Scan.h"
 #include "ScanDb.h"
+#include "TrakStarController.h"
 
 #include <vector>
 #include <thread>
+#include <chrono>
 
 namespace SmartScan
 {
@@ -29,15 +31,15 @@ namespace SmartScan
 		/// <summary>
 		/// Routine for calibrating the position of the sensors relative to the fingertips
 		/// </summary>
-		void CalibrateSensors();
+		//void CalibrateSensors();
 
 #pragma region scan
 
 		void StartScan();
 		void StopScan();
 
-		Scan& GetScan() const;
-		Scan& GetScan(int id);
+		//Scan& GetScan() const;
+		//Scan& GetScan(int id);
 #pragma endregion
 	
 	private:
@@ -45,6 +47,9 @@ namespace SmartScan
 		std::vector<Scan> scans;
 
 		//the scan files database object:
-		ScanDb scanDb;
+		//ScanDb scanDb;
+
+		//trakstarcontroller obj
+		TrakStarController *tSCtrl;
 	};
 }
