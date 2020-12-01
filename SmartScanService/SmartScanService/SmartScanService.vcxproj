@@ -155,6 +155,9 @@
     <ClInclude Include="Filtering.h" />
     <ClInclude Include="NDI\ATC3DG.h" />
     <ClInclude Include="Point3.h" />
+    <ClInclude Include="ReferencePoint.h" />
+    <ClInclude Include="Scan.h" />
+    <ClInclude Include="ScanDb.h" />
     <ClInclude Include="SmartScanCLI.h" />
     <ClInclude Include="SmartScanService.h" />
     <ClInclude Include="TrakStarController.h" />

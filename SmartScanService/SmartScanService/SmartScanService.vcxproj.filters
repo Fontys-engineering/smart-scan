@@ -60,6 +60,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NDI\ATC3DG.h">
+    <ClInclude Include="ReferencePoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScanDb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
