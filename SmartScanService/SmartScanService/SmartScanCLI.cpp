@@ -4,6 +4,7 @@
 
 //include all the libraries and sub-classes:
 #include "SmartScanCLI.h"
+#include "Exceptions.h"
 
 using namespace SmartScan;
 
@@ -13,10 +14,11 @@ int main()
     std::cout << "Smart Scan Command Line Interface Application" << std::endl;
 
     //create a new SmartScanService object:
-    //SmartScanService s3;
+    SmartScanService s3;
 
     //initialise the service:
     try {
+        std::cout << "Initialising the TrakSTAR device. This can take up to a minute. \n";
         //s3.Init();
     }
     catch (...)
@@ -28,16 +30,44 @@ int main()
 
     char cmd[128];
     do {
+        std::cout << "SmartScan>";
         std::cin >> cmd;
         if (!strcmp(cmd,"start"))
         {
-            //s3.StartScan();
+            try
+            {
+                s3.StartScan();
+            }
+            catch(std::exception e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
+            catch (ex_trakStar e)
+            {
+                std::cerr << e.what() << "thrown in function "<< e.get_function()<< " in file "<<e.get_file()<< std::endl;
+            }
+            catch (ex_scan e)
+            {
+                std::cerr << e.what() << "thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+            }
+            catch (...)
+            {
+                std::cerr << "Unnable to start the scan \n";
+            }
+        }
+        else if (!strcmp(cmd, "stop"))
+        {
+            s3.StopScan();
+        }
+        else if (!strcmp(cmd, "dump"))
+        {
+            s3.DumpScan();
         }
         else
         {
             Usage();
         }
-    } while (!strcmp(cmd, "exit"));
+    } while (strcmp(cmd, "exit"));
 
     ////example Point3:
     //double x = 1;
@@ -61,6 +91,7 @@ void Usage()
     std::cout << "Measurement control" << std::endl;
     std::cout << "\t start \t\t\t Start a new measurement" << std::endl;
     std::cout << "\t stop \t\t\t Stop the current measurement" << std::endl;
+    std::cout << "\t dump \t\t\t Print all the records to the console (for debugging)" << std::endl;
     std::cout << "\t progress \t\t Get an estimate of the scan's completion" << std::endl;
     std::cout << "\t export [filename] \t Export the processed data as a CSV file with the given filename" << std::endl;
     std::cout << std::endl;

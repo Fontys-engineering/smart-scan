@@ -2,23 +2,36 @@
 
 #include "Point3.h"
 #include "ReferencePoint.h"
+#include "TrakStarController.h"
 
 #include <vector>
+#include <iostream>
+#include <thread> 
+#include <chrono>
+
 namespace SmartScan
 {
 	class Scan
 	{
 	public:
-		const int id;
+		const int mId;
 
-		std::vector<Point3> inBuff;
-		std::vector<Point3> outBuff;
+		std::vector<Point3> mInBuff;
+		std::vector<Point3> mOutBuff;
 
-		void Start();
+		Scan(const int id, TrakStarController* pTSCtrl);
+		//~Scan();
+
+		void Run();
 		void Stop(bool clearData = false);
 		double GetCompletion() const;
 		bool Complete() const;
 		void PostProcess();
+
+		/// <summary>
+		/// Dumps all samples for the inBuffer to the console
+		/// </summary>
+		void DumpData();
 
 #pragma region reference_points
 
@@ -42,9 +55,32 @@ namespace SmartScan
 		/// <param name="pos"> - The position at which the reference point is found</param>
 		/// <param name="radius"> - Range of deletion </param>
 		void DeleteReference(Point3 pos, double radius = 0);
-#pragma endregion
+#pragma endregion reference points:
 
 	private:
-		std::vector<ReferencePoint> referencePoints;
+#pragma region scan_properties
+		double sampleRate = 50;	//in hz
+
+#pragma endregion scan properties:
+
+		std::vector<ReferencePoint> mReferencePoints;
+
+		//track star controller obj:
+		TrakStarController *pTSCtrl;
+
+#pragma region data_acquisition
+		//data acquisition thread:
+		std::unique_ptr<std::thread> acquisitionThread;
+
+		/// <summary>
+		/// Polls the TrakstarController for new data, stores it and filters it.
+		/// </summary>
+		void DataAcquisition();
+		bool mStopDataAcquisition = false;
+
+		//timing:
+		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point scanStartTime = std::chrono::steady_clock::now();
+#pragma endregion data aquisition:
 	};
 }

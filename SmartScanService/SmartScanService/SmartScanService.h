@@ -9,8 +9,11 @@
 #include "ReferencePoint.h";
 #include "Scan.h"
 #include "ScanDb.h"
+#include "TrakStarController.h"
 
 #include <vector>
+#include <thread>
+#include <chrono>
 
 namespace SmartScan
 {
@@ -19,6 +22,7 @@ namespace SmartScan
 	public:
 
 		SmartScanService();
+		~SmartScanService();
 
 		/// <summary>
 		/// Initialise the Smart Scan service, Trak star device etc.
@@ -28,21 +32,26 @@ namespace SmartScan
 		/// <summary>
 		/// Routine for calibrating the position of the sensors relative to the fingertips
 		/// </summary>
-		void CalibrateSensors();
+		//void CalibrateSensors();
 
 #pragma region scan
-		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<Scan> scans;
 
 		void StartScan();
 		void StopScan();
+		void DumpScan();
 
-		Scan& GetScan() const;
-		Scan& GetScan(int id);
+		//Scan& GetScan() const;
+		//Scan& GetScan(int id);
 #pragma endregion
 	
 	private:
+		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
+		std::vector<Scan> scans;
+
 		//the scan files database object:
-		ScanDb scanDb;
+		//ScanDb scanDb;
+
+		//trakstarcontroller obj
+		TrakStarController *tSCtrl;
 	};
 }

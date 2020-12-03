@@ -145,6 +145,7 @@
     <ClCompile Include="CSVExport.cpp" />
     <ClCompile Include="Filtering.cpp" />
     <ClCompile Include="Point3.cpp" />
+    <ClCompile Include="Scan.cpp" />
     <ClCompile Include="SmartScanCLI.cpp" />
     <ClCompile Include="SmartScanService.cpp" />
     <ClCompile Include="TrakStarController.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVExport.h" />
+    <ClInclude Include="Exceptions.h" />
     <ClInclude Include="Filtering.h" />
     <ClInclude Include="NDI\ATC3DG.h" />
     <ClInclude Include="Point3.h" />
