@@ -22,6 +22,7 @@ namespace SmartScan
 	public:
 
 		SmartScanService();
+		~SmartScanService();
 
 		/// <summary>
 		/// Initialise the Smart Scan service, Trak star device etc.
@@ -37,6 +38,7 @@ namespace SmartScan
 
 		void StartScan();
 		void StopScan();
+		void DumpScan();
 
 		//Scan& GetScan() const;
 		//Scan& GetScan(int id);
