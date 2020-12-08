@@ -19,11 +19,17 @@ int main()
     //initialise the service:
     try {
         std::cout << "Initialising the TrakSTAR device. This can take up to a minute. \n";
-        //s3.Init();
+        s3.Init();
+        std::cout << "TrakSTAR device initialisation done. \n";
+    }
+    catch (ex_trakStar &e)
+    {
+        std::cerr << "TrakSTAR exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
     }
     catch (...)
     {
-        std::cerr << "ERROR: Could not initialise Smart Scan Service" << std::endl;
+        std::cerr << "Unknown exception. Could not initialise Smart Scan Service" << std::endl;
+        return -1;
     }
     //print the help screen:
     Usage();
@@ -31,7 +37,7 @@ int main()
     char cmd[128];
     do {
         std::cout << "SmartScan>";
-        std::cin >> cmd;
+        std::cin.getline(cmd, 128);
         if (!strcmp(cmd,"start"))
         {
             try
@@ -63,6 +69,21 @@ int main()
         {
             s3.DumpScan();
         }
+        else if (strlen(cmd) > 7 && !strncmp(cmd, "export " , 7))
+        {
+            //cut the filepath out:
+            std::string filepath = cmd;
+            std::cout << "exporting to " << filepath.substr(7) << std::endl;
+            try {
+                s3.ExportCSV(filepath.substr(7));
+                std::cout << "Done.\n";
+            }
+            catch (...)
+            {
+                std::cerr << "Could not export csv file \n";
+            }
+
+        }
         else
         {
             Usage();
@@ -93,7 +114,7 @@ void Usage()
     std::cout << "\t stop \t\t\t Stop the current measurement" << std::endl;
     std::cout << "\t dump \t\t\t Print all the records to the console (for debugging)" << std::endl;
     std::cout << "\t progress \t\t Get an estimate of the scan's completion" << std::endl;
-    std::cout << "\t export [filename] \t Export the processed data as a CSV file with the given filename" << std::endl;
+    std::cout << "\t export [filename] \t Export the processed data as a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
     std::cout << std::endl;
     std::cout << "System preferences" << std::endl;
     std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;

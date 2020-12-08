@@ -5,6 +5,7 @@
 #include "TrakStarController.h"
 
 #include <vector>
+#include <deque>
 #include <iostream>
 #include <thread> 
 #include <chrono>
@@ -16,8 +17,8 @@ namespace SmartScan
 	public:
 		const int mId;
 
-		std::vector<Point3> mInBuff;
-		std::vector<Point3> mOutBuff;
+		std::deque<Point3> mInBuff;
+		std::deque<Point3> mOutBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 		//~Scan();
@@ -31,7 +32,7 @@ namespace SmartScan
 		/// <summary>
 		/// Dumps all samples for the inBuffer to the console
 		/// </summary>
-		void DumpData();
+		void DumpData() const;
 
 #pragma region reference_points
 
@@ -70,13 +71,21 @@ namespace SmartScan
 
 #pragma region data_acquisition
 		//data acquisition thread:
-		std::unique_ptr<std::thread> acquisitionThread;
+		std::unique_ptr<std::thread> pAcquisitionThread;
 
 		/// <summary>
 		/// Polls the TrakstarController for new data, stores it and filters it.
 		/// </summary>
 		void DataAcquisition();
 		bool mStopDataAcquisition = false;
+
+		//filtering thread:
+		std::unique_ptr<std::thread> pFilteringThread;
+
+		void DataFiltering();
+		bool mStopFiltering = false;
+
+		int lastFilteredSample = 0;
 
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();

@@ -6,6 +6,7 @@
 #include "NDI/ATC3DG.h"				//TrakSTAR driver
 #include <time.h>
 #include "Point3.h"
+#include <string>
 
 namespace SmartScan
 {
@@ -64,7 +65,6 @@ namespace SmartScan
 		/// </summary>
 		void ReadSensor();
 
-
 		/// <summary>
 		/// Turn off the referenece.
 		/// </summary>
@@ -87,5 +87,7 @@ namespace SmartScan
 		clock_t			wait = 10;	// 10 ms delay
 
 		void ErrorHandler(int error);
+
+		const std::string GetErrorString(int error);
 	};
 }

@@ -10,6 +10,7 @@
 #include "Scan.h"
 #include "ScanDb.h"
 #include "TrakStarController.h"
+#include "CSVExport.h"
 
 #include <vector>
 #include <thread>
@@ -38,7 +39,8 @@ namespace SmartScan
 
 		void StartScan();
 		void StopScan();
-		void DumpScan();
+		void DumpScan() const;
+		void ExportCSV(const std::string filename);
 
 		//Scan& GetScan() const;
 		//Scan& GetScan(int id);
@@ -53,5 +55,8 @@ namespace SmartScan
 
 		//trakstarcontroller obj
 		TrakStarController *tSCtrl;
+
+		//csv eport:
+		CSVExport csvExport;
 	};
 }

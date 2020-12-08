@@ -4,8 +4,9 @@
 
 #include "Point3.h"
 
-#include <vector>
+#include <deque>
 #include <string>
+#include <fstream>
 namespace SmartScan
 {
 	class CSVExport
@@ -19,7 +20,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="data"> - reference to Point3 vector to be exported</param>
 		/// <param name="filename"> - the name under which the file will be stored. If the file already exists it will be overwritten</param>
-		void ExportPoint3(const std::vector<Point3>& data, const std::string filename);
+		void ExportPoint3(const std::deque<Point3>& data, const std::string filename);
 	private:
+		std::ofstream csvFile;
 	};
 }

@@ -63,6 +63,10 @@ namespace SmartScan {
 			what_arg{ what_arg }, function{ function }, file{ file }
 		{
 		}
+		ex_trakStar(std::string what_arg, const char* function, const char* file) :
+			what_arg{ what_arg.c_str() }, function{ function }, file{ file }
+		{
+		}
 		const char* get_file() {
 			return this->file;
 		}
