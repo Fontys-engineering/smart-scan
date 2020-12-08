@@ -1,5 +1,6 @@
 #include "TrakStarController.h"
 #include <iostream>
+#include "Exceptions.h"
 
 using namespace SmartScan;
 
@@ -13,8 +14,10 @@ void TrakStarController::Init()
 {
 	//printf("Initializing ATC3DG system...\n");
 	errorCode = InitializeBIRDSystem();
-	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
-
+	if (errorCode != BIRD_ERROR_SUCCESS)
+	{
+		throw ex_trakStar(GetErrorString(errorCode), __func__, __FILE__);
+	}
 }
 
 void TrakStarController::Config()
@@ -22,6 +25,7 @@ void TrakStarController::Config()
 	//system
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+
 	//sensor
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
 	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
@@ -29,6 +33,7 @@ void TrakStarController::Config()
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
+
 	//transmitter
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
 	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
@@ -36,7 +41,6 @@ void TrakStarController::Config()
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
-
 }
 
 void TrakStarController::AttachSensor()
@@ -76,8 +80,6 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	}
 
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
-
-	// scan the sensor and request a record
 
 	// sensor attached so get record
 	errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
@@ -173,8 +175,23 @@ void TrakStarController::ErrorHandler(int error)
 	{
 		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
 		numberBytes = strlen(buffer);
-		buffer[numberBytes] = '\n';		// append a newline to buffer
-		printf("%s", buffer);
+
+		throw ex_trakStar(buffer, __func__, __FILE__);
+		//printf("%s", buffer);
 	}
-	exit(0);
+}
+
+const std::string TrakStarController::GetErrorString(int error)
+{
+	char			buffer[1024];
+	char* pBuffer = &buffer[0];
+	int				numberBytes;
+	std::string errorString;
+
+	if (error != BIRD_ERROR_SUCCESS)
+	{
+		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
+		errorString =  buffer[0];
+		return errorString;
+	}
 }

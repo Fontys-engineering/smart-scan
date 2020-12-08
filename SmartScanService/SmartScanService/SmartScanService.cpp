@@ -53,7 +53,16 @@ void SmartScanService::StopScan()
 	scans.back().Stop();
 }
 
-void SmartScanService::DumpScan()
+void SmartScanService::DumpScan() const
 {
 	scans.back().DumpData();
+}
+
+void SmartScanService::ExportCSV(const std::string filename)
+{
+	if (scans.empty())
+	{
+		throw "No measurement available for export";
+	}
+	csvExport.ExportPoint3(scans.back().mOutBuff, filename);
 }
