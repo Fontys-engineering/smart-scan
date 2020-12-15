@@ -39,3 +39,4 @@ Point3::Point3(double x, double y, double z, double rx, double ry, double rz)
 	Rotation3 r(rx, ry, rz);
 	this->r = r;
 }
+

@@ -3,9 +3,8 @@
 
 using namespace SmartScan;
 
-SmartScanService::SmartScanService()
+SmartScanService::SmartScanService(bool useMockData) : mUseMockData {useMockData}
 {
-
 }
 
 SmartScanService::~SmartScanService()
@@ -15,7 +14,7 @@ SmartScanService::~SmartScanService()
 
 void SmartScanService::Init()
 {
-	tSCtrl = new TrakStarController();
+	tSCtrl = new TrakStarController(mUseMockData);
 	tSCtrl->Init();
 	tSCtrl->Config();
 	tSCtrl->AttachSensor();

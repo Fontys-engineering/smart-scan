@@ -12,6 +12,8 @@ namespace SmartScan
         Rotation3();
         Rotation3(double x, double y, double z);
     };
+
+
     class Point3
     {
     public:
@@ -22,6 +24,5 @@ namespace SmartScan
         Point3(double x, double y, double z);
         Point3(double x, double y, double z, Rotation3 r);
         Point3(double x, double y, double z, double rx, double ry, double rz);
-
     };
 }

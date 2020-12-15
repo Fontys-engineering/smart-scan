@@ -32,7 +32,12 @@ namespace SmartScan
 	class TrakStarController
 	{
 	public:
-		TrakStarController();
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="mock">when true, the TrakStarController will not attempt to use hardware TrakStar and use Mock data instead</param>
+		/// <returns></returns>
+		TrakStarController(bool mock = false);
 
 		/// <summary>
 		/// Initialie the system. Call this before making a measurement
@@ -71,6 +76,8 @@ namespace SmartScan
 		void StopTransmit();
 
 	private:
+		bool mMock;
+
 		CSystem			ATC3DG;
 		CSensor*		pSensor;
 		CXmtr*			pXmtr;
@@ -89,5 +96,13 @@ namespace SmartScan
 		void ErrorHandler(int error);
 
 		const std::string GetErrorString(int error);
+		
+		/// <summary>
+		/// Randomly returns a point on the edge of a sphere at a reasonable distance from the previous point.
+		/// </summary>
+		/// <returns></returns>
+		Point3 GetMockRecord();
+		//keep track of the last mock record so that the movement is realistic.
+		Point3 mPrevMockRecord;
 	};
 }
