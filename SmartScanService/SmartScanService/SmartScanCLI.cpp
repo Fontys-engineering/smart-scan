@@ -13,8 +13,8 @@ int main()
 {
     std::cout << "Smart Scan Command Line Interface Application" << std::endl;
 
-    //create a new SmartScanService object:
-    SmartScanService s3;
+    //create a new SmartScanService object with mock data:
+    SmartScanService s3(true);
 
     //initialise the service:
     try {

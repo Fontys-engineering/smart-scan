@@ -22,7 +22,7 @@ namespace SmartScan
 	{
 	public:
 
-		SmartScanService();
+		SmartScanService(bool useMockData = false);
 		~SmartScanService();
 
 		/// <summary>
@@ -47,6 +47,8 @@ namespace SmartScan
 #pragma endregion
 	
 	private:
+		bool mUseMockData;
+
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
 		std::vector<Scan> scans;
 

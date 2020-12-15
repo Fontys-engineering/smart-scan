@@ -1,17 +1,29 @@
 #include "TrakStarController.h"
+
 #include <iostream>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 #include "Exceptions.h"
 
 using namespace SmartScan;
 
 //constructor
-TrakStarController::TrakStarController()
+TrakStarController::TrakStarController(bool mock): mMock {mock}
 {
-
+	if (mock)
+	{
+		/* initialize random seed: */
+		srand(time(NULL));
+	}
 }
 //init func
 void TrakStarController::Init()
 {
+	//when in Mock mode do nothing:
+	if (mMock)
+	{
+		return;
+	}
 	//printf("Initializing ATC3DG system...\n");
 	errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
@@ -22,6 +34,11 @@ void TrakStarController::Init()
 
 void TrakStarController::Config()
 {
+	//when in mock mode do nothing:
+	if (mMock)
+	{
+		return;
+	}
 	//system
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
@@ -45,6 +62,11 @@ void TrakStarController::Config()
 
 void TrakStarController::AttachSensor()
 {
+	//when in mock mode do nothing:
+	if (mMock)
+	{
+		return;
+	}
 	for (id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
 	{
 		if ((pXmtr + id)->m_config.attached)
@@ -62,6 +84,12 @@ void TrakStarController::AttachSensor()
 
 int TrakStarController::GetNSensors()
 {
+	//when in mock mode use 4 sensors
+	if (mMock)
+	{
+		return 4;
+	}
+
 	if (&ATC3DG)
 	{
 		return ATC3DG.m_config.numberSensors;
@@ -74,6 +102,12 @@ int TrakStarController::GetNSensors()
 
 Point3 TrakStarController::GetRecord(int sensorID)
 {
+	//when in mock mode, return a random value on a sphere:
+	if (mMock)
+	{
+		return GetMockRecord();
+	}
+
 	if (++sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
 	{
 		throw "Sensor ID out if range";
@@ -103,6 +137,11 @@ Point3 TrakStarController::GetRecord(int sensorID)
 
 void TrakStarController::ReadSensor()
 {
+	//when in mock mode do nothing:
+	if (mMock)
+	{
+		return;
+	}
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
 
 	// Set up time delay for first loop
@@ -155,6 +194,11 @@ void TrakStarController::ReadSensor()
 
 void TrakStarController::StopTransmit()
 {
+	//when in mock mode do nothing:
+	if (mMock)
+	{
+		return;
+	}
 	id = -1;
 	errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
@@ -163,7 +207,24 @@ void TrakStarController::StopTransmit()
 	delete[] pXmtr;
 }
 
-
+Point3 TrakStarController::GetMockRecord()
+{
+	double radius = 100;
+	int randomMax = 10;
+	double randomMaxRadius = 200;
+	
+	if (mPrevMockRecord.x == 0 && mPrevMockRecord.y == 0 && mPrevMockRecord.z == 0)
+	{
+		//first mock value:
+		mPrevMockRecord = Point3(radius, 0, 0);
+		return mPrevMockRecord;
+	}
+	else {
+		//add some random noise to the previous mockRecord;
+		mPrevMockRecord = Point3(mPrevMockRecord.x + ((rand() % randomMax) - randomMax / 2), mPrevMockRecord.y + ((rand() % randomMax) - randomMax / 2), mPrevMockRecord.z + ((rand() % randomMax) - randomMax / 2));
+		return mPrevMockRecord;
+	}
+}
 
 void TrakStarController::ErrorHandler(int error)
 {
