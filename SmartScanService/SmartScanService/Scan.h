@@ -9,6 +9,7 @@
 #include <iostream>
 #include <thread> 
 #include <chrono>
+#include <functional>
 
 namespace SmartScan
 {
@@ -17,14 +18,20 @@ namespace SmartScan
 	public:
 		const int mId;
 
-		std::deque<Point3> mInBuff;
-		std::deque<Point3> mOutBuff;
+		std::vector<Point3> mInBuff;
+		std::vector<Point3> mOutBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 		//~Scan();
 
 		void Run();
 		void Stop(bool clearData = false);
+		/// <summary>
+		/// Register a new callback function to be called whenever new filtered data is available
+		/// </summary>
+		/// <param name="callback"> - the efunction to be called back.</param>
+		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+
 		double GetCompletion() const;
 		bool Complete() const;
 		void PostProcess();
@@ -90,6 +97,10 @@ namespace SmartScan
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
 		std::chrono::steady_clock::time_point scanStartTime = std::chrono::steady_clock::now();
+
+
+		//new data callback
+		std::function<void(std::vector<Point3>&)> mNewDataCallback;
 #pragma endregion data aquisition:
 	};
 }

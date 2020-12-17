@@ -21,10 +21,17 @@ int main()
         std::cout << "Initialising the TrakSTAR device. This can take up to a minute. \n";
         s3.Init();
         std::cout << "TrakSTAR device initialisation done. \n";
+
+        //register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
+        //s3.RegisterNewDataCallback(TestUICallback);
     }
     catch (ex_trakStar &e)
     {
         std::cerr << "TrakSTAR exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
+    }
+    catch (ex_scan& e)
+    {
+        std::cerr << "Smart Scan Service Exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
     }
     catch (...)
     {
@@ -124,6 +131,11 @@ void Usage()
     std::cout << "\t exit \t\t\t cleanly exit the application" << std::endl;
 
 
+}
+
+void TestUICallback(std::vector<SmartScan::Point3>& data)
+{
+    std::cout << "New data:" << data.back().x << std::endl;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

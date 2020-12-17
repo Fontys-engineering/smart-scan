@@ -81,7 +81,7 @@ void Scan::DataAcquisition()
 				try
 				{
 					//only sample one because one of the others is broken;
-					newSample = pTSCtrl->GetRecord(1);
+					newSample = pTSCtrl->GetRecord(i);
 					mInBuff.push_back(newSample);
 				}
 				catch (...)
@@ -125,6 +125,11 @@ void Scan::DataFiltering()
 				if (outSize < inSize && inSize > 0)
 				{
 					mOutBuff.push_back(mInBuff[inSize-1]);
+					//new data added. refresh the UI if callback available:
+					if (mNewDataCallback)
+					{
+						mNewDataCallback(mOutBuff);
+					}
 				}
 			}
 			catch (...)
@@ -144,4 +149,9 @@ void Scan::DumpData() const
 	{
 		std::cout << std::setprecision(16) << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\n";
 	}
+}
+
+void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback)
+{
+	mNewDataCallback = callback;
 }

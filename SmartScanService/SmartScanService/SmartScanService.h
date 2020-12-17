@@ -12,6 +12,7 @@
 #include "TrakStarController.h"
 #include "CSVExport.h"
 
+#include <functional>
 #include <vector>
 #include <thread>
 #include <chrono>
@@ -22,11 +23,17 @@ namespace SmartScan
 	{
 	public:
 
+		/// <summary>
+		/// Cosntructor. Creates a SmartScanService object that handles all the functionality. 
+		///	When debugging and the TrakSTAR device is unnavailable, set "useMockData" to "true". Otherwise,
+		///	the TrakStarController will fail to initialise and throw errors.
+		/// </summary>
+		/// <param name="useMockData"> - When set to "true", a mock trakSTAR device is used.</param>
 		SmartScanService(bool useMockData = false);
 		~SmartScanService();
 
 		/// <summary>
-		/// Initialise the Smart Scan service, Trak star device etc.
+		/// Initialise the Smart Scan service, Trak star device etc. Call this after the TrakStar system is pluged-in
 		/// </summary>
 		void Init();
 
@@ -37,11 +44,40 @@ namespace SmartScan
 
 #pragma region scan
 
+		/// <summary>
+		/// Start a new scan
+		/// </summary>
 		void StartScan();
+		/// <summary>
+		/// Stop the latest scan
+		/// </summary>
 		void StopScan();
+		/// <summary>
+		/// print the values from the latest scan to console. Debugging only. Not recommended.
+		/// </summary>
 		void DumpScan() const;
-		void ExportCSV(const std::string filename);
+		/// <summary>
+		/// Export the Point3 array in a csv format. Contains rotation.
+		/// </summary>
+		/// <param name="filename"> - the name of the output file</param>
+		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		void ExportCSV(const std::string filename, const bool raw = false);
+		/// <summary>
+		/// Export the filtered Point3 array in a Point Cloud format (only x,y,z)
+		/// </summary>
+		/// <param name="filename"> - the name of the output file</param>
+		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		void ExportPointCloud(const std::string filename, const bool raw = false);
 
+		/// <summary>
+		/// Register a new callback function to be called whenever new filtered data is available.
+		/// The filtered data vector is provided through a reference as a parameter of the callback function.
+		/// </summary>
+		/// <param name="callback"> - the efunction to be called back.</param>
+		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+
+		//TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
+		// while new data is acquired usign a different Scan object"
 		//Scan& GetScan() const;
 		//Scan& GetScan(int id);
 #pragma endregion
@@ -52,6 +88,7 @@ namespace SmartScan
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
 		std::vector<Scan> scans;
 
+		//TODO: handle older scans
 		//the scan files database object:
 		//ScanDb scanDb;
 
@@ -60,5 +97,8 @@ namespace SmartScan
 
 		//csv eport:
 		CSVExport csvExport;
+
+		//UI callback:
+		std::function<void(std::vector<Point3>&)> mUICallback;
 	};
 }
