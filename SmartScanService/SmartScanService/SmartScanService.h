@@ -23,11 +23,17 @@ namespace SmartScan
 	{
 	public:
 
+		/// <summary>
+		/// Cosntructor. Creates a SmartScanService object that handles all the functionality. 
+		///	When debugging and the TrakSTAR device is unnavailable, set "useMockData" to "true". Otherwise,
+		///	the TrakStarController will fail to initialise and throw errors.
+		/// </summary>
+		/// <param name="useMockData"> - When set to "true", a mock trakSTAR device is used.</param>
 		SmartScanService(bool useMockData = false);
 		~SmartScanService();
 
 		/// <summary>
-		/// Initialise the Smart Scan service, Trak star device etc.
+		/// Initialise the Smart Scan service, Trak star device etc. Call this after the TrakStar system is pluged-in
 		/// </summary>
 		void Init();
 
@@ -64,11 +70,14 @@ namespace SmartScan
 		void ExportPointCloud(const std::string filename, const bool raw = false);
 
 		/// <summary>
-		/// Register a new callback function to be called whenever new filtered data is available
+		/// Register a new callback function to be called whenever new filtered data is available.
+		/// The filtered data vector is provided through a reference as a parameter of the callback function.
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
+		//TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
+		// while new data is acquired usign a different Scan object"
 		//Scan& GetScan() const;
 		//Scan& GetScan(int id);
 #pragma endregion
@@ -79,6 +88,7 @@ namespace SmartScan
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
 		std::vector<Scan> scans;
 
+		//TODO: handle older scans
 		//the scan files database object:
 		//ScanDb scanDb;
 
