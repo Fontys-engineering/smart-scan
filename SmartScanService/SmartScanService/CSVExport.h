@@ -4,7 +4,7 @@
 
 #include "Point3.h"
 
-#include <deque>
+#include <vector>
 #include <string>
 #include <fstream>
 namespace SmartScan
@@ -20,7 +20,14 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="data"> - reference to Point3 vector to be exported</param>
 		/// <param name="filename"> - the name under which the file will be stored. If the file already exists it will be overwritten</param>
-		void ExportPoint3(const std::deque<Point3>& data, const std::string filename);
+		void ExportPoint3(const std::vector<Point3>& data, const std::string filename);
+		/// <summary>
+		/// Export a Point3 vector in a Point Cloud compatible format
+		/// Each line coresponds to the X, Y, Z coordinates for a point.
+		/// </summary>
+		/// <param name="data"> - reference to Point3 vector to be exported</param>
+		/// <param name="filename"> - the name under which the file will be stored. If the file already exists it will be overwritten</param>
+		void ExportPC(const std::vector<Point3>& data, const std::string filename);
 	private:
 		std::ofstream csvFile;
 	};

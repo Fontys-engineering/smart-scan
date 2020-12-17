@@ -12,6 +12,7 @@
 #include "TrakStarController.h"
 #include "CSVExport.h"
 
+#include <functional>
 #include <vector>
 #include <thread>
 #include <chrono>
@@ -37,10 +38,36 @@ namespace SmartScan
 
 #pragma region scan
 
+		/// <summary>
+		/// Start a new scan
+		/// </summary>
 		void StartScan();
+		/// <summary>
+		/// Stop the latest scan
+		/// </summary>
 		void StopScan();
+		/// <summary>
+		/// print the values from the latest scan to console. Debugging only. Not recommended.
+		/// </summary>
 		void DumpScan() const;
-		void ExportCSV(const std::string filename);
+		/// <summary>
+		/// Export the Point3 array in a csv format. Contains rotation.
+		/// </summary>
+		/// <param name="filename"> - the name of the output file</param>
+		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		void ExportCSV(const std::string filename, const bool raw = false);
+		/// <summary>
+		/// Export the filtered Point3 array in a Point Cloud format (only x,y,z)
+		/// </summary>
+		/// <param name="filename"> - the name of the output file</param>
+		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		void ExportPointCloud(const std::string filename, const bool raw = false);
+
+		/// <summary>
+		/// Register a new callback function to be called whenever new filtered data is available
+		/// </summary>
+		/// <param name="callback"> - the efunction to be called back.</param>
+		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
 		//Scan& GetScan() const;
 		//Scan& GetScan(int id);
@@ -60,5 +87,8 @@ namespace SmartScan
 
 		//csv eport:
 		CSVExport csvExport;
+
+		//UI callback:
+		std::function<void(std::vector<Point3>&)> mUICallback;
 	};
 }
