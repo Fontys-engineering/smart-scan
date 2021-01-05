@@ -59,7 +59,23 @@ void Scan::Stop(bool clearData)
 	std::cout << "Stopping the scan \n";
 	mStopDataAcquisition = true;
 	mStopFiltering = true;
+
+	if (clearData)
+	{
+		mInBuff.clear();
+		mOutBuff.clear();
+	}
 }
+
+void Scan::SetSampleRate(const double sampleRate)
+{
+	this->sampleRate = sampleRate;
+}
+const double Scan::GetSampleRate() const
+{
+	return this->sampleRate;
+}
+
 
 void Scan::DataAcquisition()
 {
@@ -154,4 +170,19 @@ void Scan::DumpData() const
 void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback)
 {
 	mNewDataCallback = callback;
+}
+
+void Scan::AddReference(const ReferencePoint ref)
+{
+	mReferencePoints.push_back(ref);
+}
+
+const std::vector<ReferencePoint>& Scan::GetReferences() const
+{
+	return mReferencePoints;
+}
+
+void Scan::ResetReferences()
+{
+	mReferencePoints.clear();
 }

@@ -89,7 +89,6 @@ int main()
             {
                 std::cerr << "Could not export csv file \n";
             }
-
         }
         else
         {

@@ -45,6 +45,12 @@ namespace SmartScan
 #pragma region scan
 
 		/// <summary>
+		/// Clears all existing references for the last scan and starts 
+		/// the reference callibration routine.
+		/// </summary>
+		void CalibrateReferencePoints();
+
+		/// <summary>
 		/// Start a new scan
 		/// </summary>
 		void StartScan();
