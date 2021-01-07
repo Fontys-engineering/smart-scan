@@ -22,6 +22,7 @@ namespace SmartScan
 		std::vector<Point3> mOutBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
+
 		//~Scan();
 
 		void Run();

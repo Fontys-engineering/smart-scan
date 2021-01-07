@@ -11,8 +11,7 @@ Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }
 
 //Scan::~Scan()
 //{
-//	//this->Stop();
-//	//this->acquisitionThread->join();
+//	this->Stop(true);
 //}
 
 void Scan::Run()

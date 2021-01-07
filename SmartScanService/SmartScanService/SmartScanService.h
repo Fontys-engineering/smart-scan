@@ -49,11 +49,25 @@ namespace SmartScan
 		/// the reference callibration routine.
 		/// </summary>
 		void CalibrateReferencePoints();
+		/// <summary>
+		/// Creates an empty new scan.
+		/// </summary>
+		void NewScan();
+		/// <summary>
+		/// Deletes the latest scan.
+		/// </summary>
+		void DeleteScan();
+		/// <summary>
+		/// Deletes the scan with the specified id.
+		/// </summary>
+		/// <param name="id"> - The id of the scan to be deleted</param>
+		void DeleteScan(int id);
 
 		/// <summary>
-		/// Start a new scan
+		/// Start the latest scan using only the specified sensors. If no scan exists, it will create a new one.
 		/// </summary>
-		void StartScan();
+		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
+		void StartScan(const std::vector<int> sensorIds = {});
 		/// <summary>
 		/// Stop the latest scan
 		/// </summary>
@@ -62,6 +76,13 @@ namespace SmartScan
 		/// print the values from the latest scan to console. Debugging only. Not recommended.
 		/// </summary>
 		void DumpScan() const;
+
+		/// <summary>
+		/// Specify which sensors are in use for the latest scan;
+		/// </summary>
+		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
+		void SetUsedSensors(const std::vector<int> sensorIds);
+
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.
 		/// </summary>
@@ -102,7 +123,7 @@ namespace SmartScan
 		bool mUseMockData;
 
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<Scan> scans;
+		std::vector<std::unique_ptr<Scan>> scans;
 
 		//TODO: handle older scans
 		//the scan files database object:
@@ -120,5 +141,8 @@ namespace SmartScan
 		//calibration and configuration:
 		int mThumbSensorId = 0;
 		int mIndexSensorId = 1;
+		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
+		const double tError = 10;			//tolerated translation error in mm
+		const double rError = 10;			//tolerated rotation error in mm
 	};
 }
