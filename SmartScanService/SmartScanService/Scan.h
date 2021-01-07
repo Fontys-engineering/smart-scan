@@ -45,7 +45,8 @@ namespace SmartScan
 
 		void SetSampleRate(const double sampleRate);
 		const double GetSampleRate() const;
-
+		void SetUsedSensors(const std::vector<int> usedSensors);
+		void SetUsedSensors();
 
 #pragma endregion configuration
 
@@ -89,6 +90,8 @@ namespace SmartScan
 		/// </summary>
 		void DataAcquisition();
 		bool mStopDataAcquisition = false;
+
+		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;

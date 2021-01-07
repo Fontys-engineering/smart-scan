@@ -43,9 +43,9 @@ int main()
 
     char cmd[128];
     do {
-        std::cout << "SmartScan>";
+        std::cout<<std::endl << "SmartScan>";
         std::cin.getline(cmd, 128);
-        if (!strcmp(cmd,"start"))
+         if (!strcmp(cmd,"start"))
         {
             try
             {

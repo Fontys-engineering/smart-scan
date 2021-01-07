@@ -84,8 +84,18 @@ namespace SmartScan
 
 		//TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
 		// while new data is acquired usign a different Scan object"
-		//Scan& GetScan() const;
-		//Scan& GetScan(int id);
+
+		/// <summary>
+		/// Get a reference to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <returns> - The latest scan (could be one still in progress)</returns>
+		const Scan& GetScan() const;
+		/// <summary>
+		/// Get a reference to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
+		/// <returns> - The scan with the given id (could be one still in progress)</returns>
+		const Scan& GetScan(int id) const;
 #pragma endregion
 	
 	private:
@@ -106,5 +116,9 @@ namespace SmartScan
 
 		//UI callback:
 		std::function<void(std::vector<Point3>&)> mUICallback;
+
+		//calibration and configuration:
+		int mThumbSensorId = 0;
+		int mIndexSensorId = 1;
 	};
 }
