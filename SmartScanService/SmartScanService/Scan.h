@@ -23,7 +23,7 @@ namespace SmartScan
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 
-		//~Scan();
+		~Scan();
 
 		void Run();
 		void Stop(bool clearData = false);
@@ -33,9 +33,14 @@ namespace SmartScan
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
-		double GetCompletion() const;
-		bool Complete() const;
-		void PostProcess();
+		/// <summary>
+		/// return the status of the scan
+		/// </summary>
+		/// <returns> - status (true if the scan is running)</returns>
+		const bool isRunning() const;
+		//double GetCompletion() const;
+		//bool Complete() const;
+		//void PostProcess();
 
 		/// <summary>
 		/// Dumps all samples for the inBuffer to the console
@@ -83,6 +88,9 @@ namespace SmartScan
 		TrakStarController *pTSCtrl;
 
 #pragma region data_acquisition
+		//status:
+		bool mRunning = false;
+
 		//data acquisition thread:
 		std::unique_ptr<std::thread> pAcquisitionThread;
 

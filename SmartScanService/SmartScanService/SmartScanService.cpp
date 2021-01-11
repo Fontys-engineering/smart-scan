@@ -55,8 +55,8 @@ void SmartScanService::DeleteScan(int id)
 }
 void SmartScanService::StartScan(const std::vector<int> sensorIds)
 {
-	//create new scan obj if none exists:
-	if (!scans.size())
+	//create new scan obj if none exists or the existing one is already running:
+	if (!scans.size() || scans.back()->isRunning())
 	{
 		this->scans.emplace_back(std::make_unique<Scan>(0, tSCtrl));
 	}
@@ -132,6 +132,11 @@ const Scan& SmartScanService::GetScan(int id) const
 	throw ex_smartScan("Scan id not found", __func__, __FILE__);
 }
 
+const std::vector<std::unique_ptr<Scan>>& SmartScanService::GetScansList() const
+{
+	return  scans;
+}
+
 void SmartScanService::ExportCSV(const std::string filename, const bool raw)
 {
 	if (scans.empty())
@@ -183,6 +188,11 @@ void SmartScanService::CalibrateReferencePoints()
 	std::cout << "[CALIBRATION] " << "Enter the number of desired reference points  (by default 3, as mentioned above): ";
 	std::cin >> refCount;
 
+	if (!refCount)
+	{
+		throw ex_smartScan("No reference point.", __func__, __FILE__);
+	}
+
 	std::cout << "[CALIBRATION] " << "Position your fingers on the first reference point and press any key to start." << std::endl;
 	std::cin.get();
 
@@ -208,15 +218,16 @@ void SmartScanService::CalibrateReferencePoints()
 		std::vector<Point3> prevFrame(sensorsUsed.size());
 		std::vector<Point3> currentFrame(sensorsUsed.size());
 		//wait for a 5 second stable reading (within a margin of error)
+
+		unsigned long recordId = 0;
 		while (!refSet)
 		{
-			int buffSize = scans.back()->mInBuff.size();
-			if (buffSize >= sensorsUsed.size() && buffSize % sensorsUsed.size() == 0)
+			for (unsigned int fingerIndex = 0; fingerIndex < prevFrame.size(); fingerIndex++)
 			{
-				for (int fingerIndex = 0; fingerIndex < prevFrame.size(); fingerIndex++)
+				if (scans.back()->mInBuff.size() > recordId)
 				{
-					//read the data for the finger from the buffer:
-					currentFrame[fingerIndex] = scans.back()->mInBuff[(buffSize - fingerIndex - 1)];
+					currentFrame[fingerIndex] = scans.back()->mInBuff[recordId];
+					++recordId;
 
 					if (abs(currentFrame[fingerIndex].x - prevFrame[fingerIndex].x) > tError ||
 						abs(currentFrame[fingerIndex].y - prevFrame[fingerIndex].y) > tError ||
@@ -225,7 +236,9 @@ void SmartScanService::CalibrateReferencePoints()
 						startTime = std::chrono::steady_clock::now();
 					}
 				}
+
 			}
+
 			auto endTime = std::chrono::steady_clock::now();
 			//check if 5 seconds have passed:
 			if (std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() > refSetTime)
@@ -255,7 +268,7 @@ void SmartScanService::CalibrateReferencePoints()
 			prevFrame.clear();
 			currentFrame.clear();
 
-			if (i < refCount)
+			if (i < refCount-1)
 			{
 				std::cout << "[CALIBRATION] " << "Press any key to move to the next one" << std::endl;
 				std::cin.get();
@@ -267,4 +280,6 @@ void SmartScanService::CalibrateReferencePoints()
 	scans.back()->Stop();
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
+	std::cout << "[CALIBRATION] " << "Press any key to get back to scanning." << std::endl;
+	std::cin.get();
 }

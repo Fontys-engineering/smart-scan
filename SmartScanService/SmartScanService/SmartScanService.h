@@ -117,6 +117,13 @@ namespace SmartScan
 		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
 		/// <returns> - The scan with the given id (could be one still in progress)</returns>
 		const Scan& GetScan(int id) const;
+
+		/// <summary>
+		/// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
+		const std::vector<std::unique_ptr<Scan>>& GetScansList() const;
+
 #pragma endregion
 	
 	private:

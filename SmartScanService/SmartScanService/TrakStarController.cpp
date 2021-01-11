@@ -212,6 +212,8 @@ Point3 TrakStarController::GetMockRecord()
 	double radius = 100;
 	int randomMax = 10;
 	double randomMaxRadius = 200;
+
+	return Point3();
 	
 	if (mPrevMockRecord.x == 0 && mPrevMockRecord.y == 0 && mPrevMockRecord.z == 0)
 	{

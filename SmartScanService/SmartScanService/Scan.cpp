@@ -9,10 +9,10 @@ Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }
 	this->pTSCtrl = pTSCtrl;
 }
 
-//Scan::~Scan()
-//{
-//	this->Stop(true);
-//}
+Scan::~Scan()
+{
+	this->Stop(true);
+}
 
 void Scan::Run()
 {
@@ -21,18 +21,25 @@ void Scan::Run()
 	//check wether trak star controller has been initialised 
 	if (!pTSCtrl)
 	{
-		throw ex_trakStar("No track star controller defined", "Scan::Run", __FILE__);
+		throw ex_trakStar("No track star controller defined", __func__, __FILE__);
+	}
+
+	//check if this scan is already running:
+	if (this->mRunning)
+	{
+		std::cout << "[SCAN] " << "Scan already in progress" << std::endl;
+		return;
 	}
 
 	//start the thread:
-	std::cout << "Starting scan with id " << mId << std::endl;
+	std::cout << "[SCAN] " << "Starting scan with id " << mId << std::endl;
 	try
 	{
 		this->pAcquisitionThread = std::make_unique<std::thread>(&Scan::DataAcquisition, this);
 	}
 	catch (...)
 	{
-		throw ex_scan("unnable to start thread", "Scan::Run", __FILE__);
+		throw ex_scan("unnable to start thread", __func__, __FILE__);
 	}
 	//let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
@@ -50,20 +57,37 @@ void Scan::Run()
 
 	//let it gooooo, let it gooo
 	this->pFilteringThread->detach();
+
+	mRunning = true;
 }
 
 void Scan::Stop(bool clearData)
 {
-
-	std::cout << "[SCAN] " << "Stopping the scan \n";
+	//check if this scan is already running:
+	if (!this->mRunning)
+	{
+		std::cout << "[SCAN] " << "Scan not running." << std::endl;
+		return;
+	}
+	std::cout << "[SCAN] " << "Stopping the scan. \n";
 	mStopDataAcquisition = true;
 	mStopFiltering = true;
+
+	//wait a bit for the other threads to finish:
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	if (clearData)
 	{
 		mInBuff.clear();
 		mOutBuff.clear();
 	}
+
+	mRunning = false;
+}
+
+const bool Scan::isRunning() const
+{
+	return mRunning;
 }
 
 void Scan::SetSampleRate(const double sampleRate)
@@ -79,7 +103,7 @@ const double Scan::GetSampleRate() const
 void Scan::DataAcquisition()
 {
 	//start the data aquisition:
-	std::cout << "[SCAN] " << "Running data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
+	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
 	Point3 newSample;
 
 	while (!mStopDataAcquisition)
