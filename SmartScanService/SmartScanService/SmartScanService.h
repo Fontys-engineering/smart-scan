@@ -60,6 +60,12 @@ namespace SmartScan
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
 		void NewScan(const std::vector<int> sensorIds = {});
 		/// <summary>
+		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
+		/// </summary>
+		/// <param name="scanId"> - unique scan id</param>
+		/// <param name="sensorIds"> - [optional] which sensors are used for the scan</param>
+		void NewScan(int scanId, const std::vector<int> sensorIds = {});
+		/// <summary>
 		/// Deletes the latest scan.
 		/// </summary>
 		void DeleteScan();
@@ -74,6 +80,13 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void StartScan(const std::vector<int> sensorIds = {});
+
+		/// <summary>
+		/// Start the scan with the specified ID.
+		/// </summary>
+		/// <param name="scanId"> - id of the scan to start</param>
+		/// <param name="sensorIds"> - [optional] which sensors will be used for the scan</param>
+		void StartScan(int scanId, const std::vector<int> sensorIds = {});
 		/// <summary>
 		/// Stop the latest scan
 		/// </summary>
@@ -157,5 +170,18 @@ namespace SmartScan
 		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
 		const double tError = 10;			//tolerated translation error in mm
 		const double rError = 10;			//tolerated rotation error in mm
+
+		/// <summary>
+		/// Looks at the scans and returns the first unused id;
+		/// </summary>
+		/// <returns> - unique, unused, id</returns>
+		const int FindNewScanId() const ;
+
+		/// <summary>
+		/// check if a scan with the same id already exists
+		/// </summary>
+		/// <param name="scanId"> - the id we are checking for</param>
+		/// <returns> - true if a scan with the same id exists</returns>
+		const bool IdExists(const int scanId) const;
 	};
 }
