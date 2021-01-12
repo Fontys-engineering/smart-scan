@@ -50,9 +50,15 @@ namespace SmartScan
 		/// </summary>
 		void CalibrateReferencePoints();
 		/// <summary>
+		/// Set the reference points for the latest scan object:
+		/// </summary>
+		/// <param name="referencePoints"> - vector of reference points</param>
+		void SetReferencePoints(const std::vector<ReferencePoint> referencePoints);
+		/// <summary>
 		/// Creates an empty new scan.
 		/// </summary>
-		void NewScan();
+		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
+		void NewScan(const std::vector<int> sensorIds = {});
 		/// <summary>
 		/// Deletes the latest scan.
 		/// </summary>

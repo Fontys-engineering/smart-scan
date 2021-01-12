@@ -20,10 +20,16 @@ void SmartScanService::Init()
 	tSCtrl->Config();
 	tSCtrl->AttachSensor();
 }
-void SmartScanService::NewScan()
+void SmartScanService::NewScan(const std::vector<int> sensorIds)
 {
 	//create new scan obj
 	this->scans.emplace_back(std::make_unique<Scan>(scans.size(), tSCtrl));
+
+	//use the specified sensors (if specified)
+	if (sensorIds.size() > 0)
+	{
+		this->scans.back()->SetUsedSensors(sensorIds);
+	}
 }
 
 void SmartScanService::DeleteScan()
@@ -67,13 +73,7 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		this->scans.back()->SetUsedSensors(sensorIds);
 	}
 
-	//calibrate reference points:
-	if (this->scans.back()->GetReferences().size() == 0)
-	{
-		CalibrateReferencePoints();
-	}
-
-	//create a new thread for this scan:
+	//start the scan:
 	try
 	{
 		//if UI callback is available, register it with this new Scan:
@@ -101,6 +101,23 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 	}
 }
 
+void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)
+{
+	if (scans.size() < 0)
+	{
+		std::cout << "[SMART SCAN] " << "Cannot set reference points because no new scan has been created." << std::endl;
+		return;
+	}
+	if (scans.back()->GetReferences().size() > 0)
+	{
+		//reset the reference points:
+		scans.back()->ResetReferences();
+	}
+	for (auto rp : referencePoints)
+	{
+		scans.back()->AddReference(rp);
+	}
+}
 
 void SmartScanService::StopScan()
 {
@@ -206,6 +223,7 @@ void SmartScanService::CalibrateReferencePoints()
 	scans.back()->SetUsedSensors(sensorsUsed);
 
 	//start reading sensor data:
+	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
 	scans.back()->Run();
 	//do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
@@ -280,6 +298,4 @@ void SmartScanService::CalibrateReferencePoints()
 	scans.back()->Stop();
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
-	std::cout << "[CALIBRATION] " << "Press any key to get back to scanning." << std::endl;
-	std::cin.get();
 }

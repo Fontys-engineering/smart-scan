@@ -8,17 +8,18 @@
 
 using namespace SmartScan;
 
+const bool mockMode = true;
 
 int main()
 {
 	std::cout << "Smart Scan Command Line Interface Application" << std::endl;
 
 	//create a new SmartScanService object with mock data:
-	SmartScanService s3(true);
+	SmartScanService s3(mockMode);
 
 	//initialise the service:
 	try {
-		std::cout << "Initialising the TrakSTAR device. This can take up to a minute. \n";
+		std::cout << (mockMode? "TrackSTAR device in MOCK DATA MODE" : "Initialising the TrakSTAR device. This can take up to a minute.")<<std::endl;
 		s3.Init();
 		//register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
 		//s3.RegisterNewDataCallback(TestUICallback);
@@ -102,6 +103,10 @@ int main()
 				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->isRunning() ? "running" : "stopped") << std::endl;
 			}
 		}
+		else if (!strcmp(cmd, "find-ref"))
+		{
+			s3.CalibrateReferencePoints();
+		}
 		else if (!strcmp(cmd, "dump"))
 		{
 			s3.DumpScan();
@@ -118,6 +123,20 @@ int main()
 			catch (...)
 			{
 				std::cerr << "Could not export csv file \n";
+			}
+		}
+		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
+		{
+			//cut the filepath out:
+			std::string filepath = cmd;
+			std::cout << "exporting to " << filepath.substr(12) << std::endl;
+			try {
+				s3.ExportPointCloud(filepath.substr(12));
+				std::cout << "Done.\n";
+			}
+			catch (...)
+			{
+				std::cerr << "Could not export point-cloud file \n";
 			}
 		}
 		else
@@ -146,21 +165,23 @@ void Usage()
 	std::cout << std::endl;
 	std::cout << "Once the service is running, you can controll the system by typing the following commands:" << std::endl << std::endl;
 	std::cout << "Measurement control" << std::endl;
-	std::cout << "\t new \t\t\t Create a new measurement" << std::endl;
+	std::cout << "\t new \t\t\t\t Create a new measurement" << std::endl;
 	std::cout << "\t delete \t\t\t Delete the last measurement" << std::endl;
-	std::cout << "\t start \t\t\t Start the latest new (not running) measurement or create a new one." << std::endl;
-	std::cout << "\t stop \t\t\t Stop the latest (running) measurement" << std::endl;
-	std::cout << "\t list \t\t\t Print all the existing Scans to the console" << std::endl;
-	std::cout << "\t dump \t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
-	std::cout << "\t progress \t\t Get an estimate of the latest scan's completion" << std::endl;
-	std::cout << "\t export [filename] \t Export the processed data of the latest scan as a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t start \t\t\t\t Start the latest new (not running) measurement or create a new one." << std::endl;
+	std::cout << "\t find-ref \t\t\t Start the routine for calibrating the reference points for the latest scan" << std::endl;
+	std::cout << "\t stop \t\t\t\t Stop the latest (running) measurement" << std::endl;
+	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
+	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
+	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
+	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "System preferences" << std::endl;
 	//std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;
 	std::cout << std::endl;
 	std::cout << "CLI usage" << std::endl;
-	std::cout << "\t help \t\t\t print this screen again" << std::endl;
-	std::cout << "\t exit \t\t\t cleanly exit the application" << std::endl;
+	std::cout << "\t help \t\t\t\t print this screen again" << std::endl;
+	std::cout << "\t exit \t\t\t\t cleanly exit the application" << std::endl;
 
 
 }
