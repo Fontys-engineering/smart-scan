@@ -45,9 +45,35 @@ namespace SmartScan
 #pragma region scan
 
 		/// <summary>
-		/// Start a new scan
+		/// Clears all existing references for the last scan and starts 
+		/// the reference callibration routine.
 		/// </summary>
-		void StartScan();
+		void CalibrateReferencePoints();
+		/// <summary>
+		/// Set the reference points for the latest scan object:
+		/// </summary>
+		/// <param name="referencePoints"> - vector of reference points</param>
+		void SetReferencePoints(const std::vector<ReferencePoint> referencePoints);
+		/// <summary>
+		/// Creates an empty new scan.
+		/// </summary>
+		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
+		void NewScan(const std::vector<int> sensorIds = {});
+		/// <summary>
+		/// Deletes the latest scan.
+		/// </summary>
+		void DeleteScan();
+		/// <summary>
+		/// Deletes the scan with the specified id.
+		/// </summary>
+		/// <param name="id"> - The id of the scan to be deleted</param>
+		void DeleteScan(int id);
+
+		/// <summary>
+		/// Start the latest scan using only the specified sensors. If no scan exists, it will create a new one.
+		/// </summary>
+		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
+		void StartScan(const std::vector<int> sensorIds = {});
 		/// <summary>
 		/// Stop the latest scan
 		/// </summary>
@@ -56,6 +82,13 @@ namespace SmartScan
 		/// print the values from the latest scan to console. Debugging only. Not recommended.
 		/// </summary>
 		void DumpScan() const;
+
+		/// <summary>
+		/// Specify which sensors are in use for the latest scan;
+		/// </summary>
+		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
+		void SetUsedSensors(const std::vector<int> sensorIds);
+
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.
 		/// </summary>
@@ -78,15 +111,32 @@ namespace SmartScan
 
 		//TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
 		// while new data is acquired usign a different Scan object"
-		//Scan& GetScan() const;
-		//Scan& GetScan(int id);
+
+		/// <summary>
+		/// Get a reference to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <returns> - The latest scan (could be one still in progress)</returns>
+		const Scan& GetScan() const;
+		/// <summary>
+		/// Get a reference to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
+		/// <returns> - The scan with the given id (could be one still in progress)</returns>
+		const Scan& GetScan(int id) const;
+
+		/// <summary>
+		/// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// </summary>
+		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
+		const std::vector<std::unique_ptr<Scan>>& GetScansList() const;
+
 #pragma endregion
 	
 	private:
 		bool mUseMockData;
 
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<Scan> scans;
+		std::vector<std::unique_ptr<Scan>> scans;
 
 		//TODO: handle older scans
 		//the scan files database object:
@@ -100,5 +150,12 @@ namespace SmartScan
 
 		//UI callback:
 		std::function<void(std::vector<Point3>&)> mUICallback;
+
+		//calibration and configuration:
+		int mThumbSensorId = 0;
+		int mIndexSensorId = 1;
+		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
+		const double tError = 10;			//tolerated translation error in mm
+		const double rError = 10;			//tolerated rotation error in mm
 	};
 }

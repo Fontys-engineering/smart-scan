@@ -22,7 +22,8 @@ namespace SmartScan
 		std::vector<Point3> mOutBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
-		//~Scan();
+
+		~Scan();
 
 		void Run();
 		void Stop(bool clearData = false);
@@ -32,22 +33,40 @@ namespace SmartScan
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
-		double GetCompletion() const;
-		bool Complete() const;
-		void PostProcess();
+		/// <summary>
+		/// return the status of the scan
+		/// </summary>
+		/// <returns> - status (true if the scan is running)</returns>
+		const bool isRunning() const;
+		//double GetCompletion() const;
+		//bool Complete() const;
+		//void PostProcess();
 
 		/// <summary>
 		/// Dumps all samples for the inBuffer to the console
 		/// </summary>
 		void DumpData() const;
 
+#pragma region configuration
+
+		void SetSampleRate(const double sampleRate);
+		const double GetSampleRate() const;
+		void SetUsedSensors(const std::vector<int> usedSensors);
+		void SetUsedSensors();
+
+#pragma endregion configuration
+
 #pragma region reference_points
 
 		/// <summary>
 		/// Routine for finding the reference points required for the filtering algorithm
 		/// </summary>
-		void SetReferences();
-
+		void AddReference(const ReferencePoint ref);
+	
+		/// <summary>
+		/// get a list of the existing reference points
+		/// </summary>
+		/// <returns> - vector containing the reference points</returns>
 		const std::vector<ReferencePoint>& GetReferences() const;
 
 		/// <summary>
@@ -55,14 +74,6 @@ namespace SmartScan
 		/// </summary>
 		void ResetReferences();
 
-		/// <summary>
-		/// Remove an existing reference point. If the exact location of the reference is unknown (i.e. the glove is used
-		///	to erase the reference) then a radius can be specified. The clossest point to the origin of the deletion, within the readius,
-		///	will be removed.
-		/// </summary>
-		/// <param name="pos"> - The position at which the reference point is found</param>
-		/// <param name="radius"> - Range of deletion </param>
-		void DeleteReference(Point3 pos, double radius = 0);
 #pragma endregion reference points:
 
 	private:
@@ -77,6 +88,9 @@ namespace SmartScan
 		TrakStarController *pTSCtrl;
 
 #pragma region data_acquisition
+		//status:
+		bool mRunning = false;
+
 		//data acquisition thread:
 		std::unique_ptr<std::thread> pAcquisitionThread;
 
@@ -85,6 +99,8 @@ namespace SmartScan
 		/// </summary>
 		void DataAcquisition();
 		bool mStopDataAcquisition = false;
+
+		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;

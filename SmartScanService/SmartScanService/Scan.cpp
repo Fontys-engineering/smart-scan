@@ -9,11 +9,10 @@ Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }
 	this->pTSCtrl = pTSCtrl;
 }
 
-//Scan::~Scan()
-//{
-//	//this->Stop();
-//	//this->acquisitionThread->join();
-//}
+Scan::~Scan()
+{
+	this->Stop(true);
+}
 
 void Scan::Run()
 {
@@ -22,18 +21,25 @@ void Scan::Run()
 	//check wether trak star controller has been initialised 
 	if (!pTSCtrl)
 	{
-		throw ex_trakStar("No track star controller defined", "Scan::Run", __FILE__);
+		throw ex_trakStar("No track star controller defined", __func__, __FILE__);
+	}
+
+	//check if this scan is already running:
+	if (this->mRunning)
+	{
+		std::cout << "[SCAN] " << "Scan already in progress" << std::endl;
+		return;
 	}
 
 	//start the thread:
-	std::cout << "Starting scan with id " << mId << std::endl;
+	std::cout << "[SCAN] " << "Starting scan with id " << mId << std::endl;
 	try
 	{
 		this->pAcquisitionThread = std::make_unique<std::thread>(&Scan::DataAcquisition, this);
 	}
 	catch (...)
 	{
-		throw ex_scan("unnable to start thread", "Scan::Run", __FILE__);
+		throw ex_scan("unnable to start thread", __func__, __FILE__);
 	}
 	//let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
@@ -51,20 +57,53 @@ void Scan::Run()
 
 	//let it gooooo, let it gooo
 	this->pFilteringThread->detach();
+
+	mRunning = true;
 }
 
 void Scan::Stop(bool clearData)
 {
-
-	std::cout << "Stopping the scan \n";
+	//check if this scan is already running:
+	if (!this->mRunning)
+	{
+		std::cout << "[SCAN] " << "Scan not running." << std::endl;
+		return;
+	}
+	std::cout << "[SCAN] " << "Stopping the scan. \n";
 	mStopDataAcquisition = true;
 	mStopFiltering = true;
+
+	//wait a bit for the other threads to finish:
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	if (clearData)
+	{
+		mInBuff.clear();
+		mOutBuff.clear();
+	}
+
+	mRunning = false;
 }
+
+const bool Scan::isRunning() const
+{
+	return mRunning;
+}
+
+void Scan::SetSampleRate(const double sampleRate)
+{
+	this->sampleRate = sampleRate;
+}
+const double Scan::GetSampleRate() const
+{
+	return this->sampleRate;
+}
+
 
 void Scan::DataAcquisition()
 {
 	//start the data aquisition:
-	std::cout << "Running data aquisition for " << pTSCtrl->GetNSensors() << " sensors \n";
+	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
 	Point3 newSample;
 
 	while (!mStopDataAcquisition)
@@ -80,9 +119,23 @@ void Scan::DataAcquisition()
 			{
 				try
 				{
-					//only sample one because one of the others is broken;
-					newSample = pTSCtrl->GetRecord(i);
-					mInBuff.push_back(newSample);
+					//only sample the sensors we are interested in:
+					if (mUsedSensors.size() == 0)
+					{
+						newSample = pTSCtrl->GetRecord(i);
+						mInBuff.push_back(newSample);
+					}
+					else
+					{
+						for (auto id : mUsedSensors)
+						{
+							if (i == id)
+							{
+								newSample = pTSCtrl->GetRecord(i);
+								mInBuff.push_back(newSample);
+							}
+						}
+					}
 				}
 				catch (...)
 				{
@@ -93,24 +146,24 @@ void Scan::DataAcquisition()
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
 			if (elapsed_seconds.count() > (1 / sampleRate))
 			{
-				std::cerr << "Sampling is too slow!" << std::endl;
+				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
 			//save current time
 			lastSampleTime = std::chrono::steady_clock::now();
 		}
 	}
 
-	std::cout << "Data acquisition completed \n";
+	std::cout<< "[SCAN] " << "Data acquisition completed \n";
 	mStopDataAcquisition = false;
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
-	std::cout << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
+	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
 }
 
 void Scan::DataFiltering()
 {
 	//start the data aquisition:
-	std::cout << "Running data filtering \n";
+	std::cout << "[SCAN] " << "Running data filtering \n";
 
 	while (!mStopFiltering)
 	{
@@ -139,7 +192,7 @@ void Scan::DataFiltering()
 		}
 	}
 
-	std::cout << "Data filtering completed \n";
+	std::cout << "[SCAN] " << "Data filtering completed \n";
 	mStopFiltering = false;
 }
 
@@ -154,4 +207,35 @@ void Scan::DumpData() const
 void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback)
 {
 	mNewDataCallback = callback;
+}
+
+void Scan::AddReference(const ReferencePoint ref)
+{
+	mReferencePoints.push_back(ref);
+}
+
+const std::vector<ReferencePoint>& Scan::GetReferences() const
+{
+	return mReferencePoints;
+}
+
+void Scan::ResetReferences()
+{
+	mReferencePoints.clear();
+}
+
+void Scan::SetUsedSensors(const std::vector<int> usedSensors)
+{
+	for (auto id : usedSensors)
+	{
+		if (id >= pTSCtrl->GetNSensors())
+		{
+			throw ex_scan("Cannot set used sensors list. Sensor ID out of range.", __func__, __FILE__);
+		}
+	}
+	mUsedSensors = usedSensors;
+}  
+void Scan::SetUsedSensors()
+{
+	mUsedSensors.clear();
 }
