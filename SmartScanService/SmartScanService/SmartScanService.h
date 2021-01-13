@@ -60,6 +60,12 @@ namespace SmartScan
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
 		void NewScan(const std::vector<int> sensorIds = {});
 		/// <summary>
+		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
+		/// </summary>
+		/// <param name="scanId"> - unique scan id</param>
+		/// <param name="sensorIds"> - [optional] which sensors are used for the scan</param>
+		void NewScan(int scanId, const std::vector<int> sensorIds = {});
+		/// <summary>
 		/// Deletes the latest scan.
 		/// </summary>
 		void DeleteScan();
@@ -74,6 +80,13 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void StartScan(const std::vector<int> sensorIds = {});
+
+		/// <summary>
+		/// Start the scan with the specified ID.
+		/// </summary>
+		/// <param name="scanId"> - id of the scan to start</param>
+		/// <param name="sensorIds"> - [optional] which sensors will be used for the scan</param>
+		void StartScan(int scanId, const std::vector<int> sensorIds = {});
 		/// <summary>
 		/// Stop the latest scan
 		/// </summary>
@@ -113,22 +126,22 @@ namespace SmartScan
 		// while new data is acquired usign a different Scan object"
 
 		/// <summary>
-		/// Get a reference to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <returns> - The latest scan (could be one still in progress)</returns>
-		const Scan& GetScan() const;
+		const std::shared_ptr<Scan> GetScan() const;
 		/// <summary>
-		/// Get a reference to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// Get a pointer to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
 		/// <returns> - The scan with the given id (could be one still in progress)</returns>
-		const Scan& GetScan(int id) const;
+		const std::shared_ptr<Scan> GetScan(int id) const;
 
 		/// <summary>
 		/// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
-		const std::vector<std::unique_ptr<Scan>>& GetScansList() const;
+		const std::vector<std::shared_ptr<Scan>>& GetScansList() const;
 
 #pragma endregion
 	
@@ -136,7 +149,7 @@ namespace SmartScan
 		bool mUseMockData;
 
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<std::unique_ptr<Scan>> scans;
+		std::vector<std::shared_ptr<Scan>> scans;
 
 		//TODO: handle older scans
 		//the scan files database object:
@@ -157,5 +170,18 @@ namespace SmartScan
 		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
 		const double tError = 10;			//tolerated translation error in mm
 		const double rError = 10;			//tolerated rotation error in mm
+
+		/// <summary>
+		/// Looks at the scans and returns the first unused id;
+		/// </summary>
+		/// <returns> - unique, unused, id</returns>
+		const int FindNewScanId() const ;
+
+		/// <summary>
+		/// check if a scan with the same id already exists
+		/// </summary>
+		/// <param name="scanId"> - the id we are checking for</param>
+		/// <returns> - true if a scan with the same id exists</returns>
+		const bool IdExists(const int scanId) const;
 	};
 }

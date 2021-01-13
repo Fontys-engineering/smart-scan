@@ -22,8 +22,20 @@ void SmartScanService::Init()
 }
 void SmartScanService::NewScan(const std::vector<int> sensorIds)
 {
+	//find the first unused id,
+	//create the scan with that id
+	NewScan(FindNewScanId(), sensorIds);
+}
+
+void SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds)
+{
+	//check if id is unique:
+	if (IdExists(scanId))
+	{
+		throw ex_smartScan("Scan object ID must be unique", __func__, __FILE__);
+	}
 	//create new scan obj
-	this->scans.emplace_back(std::make_unique<Scan>(scans.size(), tSCtrl));
+	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl));
 
 	//use the specified sensors (if specified)
 	if (sensorIds.size() > 0)
@@ -31,6 +43,7 @@ void SmartScanService::NewScan(const std::vector<int> sensorIds)
 		this->scans.back()->SetUsedSensors(sensorIds);
 	}
 }
+
 
 void SmartScanService::DeleteScan()
 {
@@ -64,9 +77,53 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 	//create new scan obj if none exists or the existing one is already running:
 	if (!scans.size() || scans.back()->isRunning())
 	{
-		this->scans.emplace_back(std::make_unique<Scan>(0, tSCtrl));
+		this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
 	}
 
+	//use the specified sensors (if specified)
+	if (sensorIds.size() > 0)
+	{
+		this->scans.back()->SetUsedSensors(sensorIds);
+	}
+
+	//start the scan:
+	try
+	{
+		//if UI callback is available, register it with this new Scan:
+		if (mUICallback)
+		{
+			this->scans.back()->RegisterNewDataCallback(mUICallback);
+		}
+		scans.back()->Run();
+	}
+	catch (ex_scan e)
+	{
+		throw e;
+	}
+	catch (ex_trakStar e)
+	{
+		throw e;
+	}
+	catch (std::exception e)
+	{
+		throw e;
+	}
+	catch (...)
+	{
+		throw "Cannot start scan";
+	}
+}
+
+void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
+{
+	if (!IdExists(scanId))
+	{
+		//create new scan obj with that id:
+		if (!scans.size() || scans.back()->isRunning())
+		{
+			this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
+		}
+	}
 	//use the specified sensors (if specified)
 	if (sensorIds.size() > 0)
 	{
@@ -134,24 +191,24 @@ void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 	scans.back()->SetUsedSensors(sensorIds);
 }
 
-const Scan& SmartScanService::GetScan() const
+const std::shared_ptr<Scan> SmartScanService::GetScan() const
 {
-	return *scans.back();
+	return scans.back();
 }
-const Scan& SmartScanService::GetScan(int id) const
+const std::shared_ptr<Scan> SmartScanService::GetScan(int id) const
 {
 	for (int s = 0; s < scans.size(); s++)
 	{
 		if (scans[s]->mId == id) {
-			return *scans[s];
+			return scans[s];
 		}
 	}
 	throw ex_smartScan("Scan id not found", __func__, __FILE__);
 }
 
-const std::vector<std::unique_ptr<Scan>>& SmartScanService::GetScansList() const
+const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
 {
-	return  scans;
+	return scans;
 }
 
 void SmartScanService::ExportCSV(const std::string filename, const bool raw)
@@ -298,4 +355,30 @@ void SmartScanService::CalibrateReferencePoints()
 	scans.back()->Stop();
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
+}
+
+const int SmartScanService::FindNewScanId() const
+{
+	int newId = 0;
+	for (int scn = 0; scn < scans.size(); scn++)
+	{
+		if (newId == scans[scn]->mId)
+		{
+			++newId;
+		}
+	}
+
+	return newId;
+}
+
+const bool SmartScanService::IdExists(const int scanId) const
+{
+	for (int scn = 0; scn < scans.size(); scn++)
+	{
+		if (scanId == scans[scn]->mId)
+		{
+			return true;
+		}
+	}
+	return false;
 }
