@@ -126,22 +126,22 @@ namespace SmartScan
 		// while new data is acquired usign a different Scan object"
 
 		/// <summary>
-		/// Get a reference to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <returns> - The latest scan (could be one still in progress)</returns>
-		const Scan& GetScan() const;
+		const std::shared_ptr<Scan> GetScan() const;
 		/// <summary>
-		/// Get a reference to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		/// Get a pointer to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
 		/// <returns> - The scan with the given id (could be one still in progress)</returns>
-		const Scan& GetScan(int id) const;
+		const std::shared_ptr<Scan> GetScan(int id) const;
 
 		/// <summary>
 		/// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
-		const std::vector<std::unique_ptr<Scan>>& GetScansList() const;
+		const std::vector<std::shared_ptr<Scan>>& GetScansList() const;
 
 #pragma endregion
 	
@@ -149,7 +149,7 @@ namespace SmartScan
 		bool mUseMockData;
 
 		//this vector stores the current scan objects. Once we are done with a scan we should remove it to free up memory.
-		std::vector<std::unique_ptr<Scan>> scans;
+		std::vector<std::shared_ptr<Scan>> scans;
 
 		//TODO: handle older scans
 		//the scan files database object:
