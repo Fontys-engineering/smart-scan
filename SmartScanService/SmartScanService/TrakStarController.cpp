@@ -105,7 +105,8 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	//when in mock mode, return a random value on a sphere:
 	if (mMock)
 	{
-		return GetMockRecord();
+		//return GetMockRecord();
+		return GetMockRecordFromFile();
 	}
 
 	if (++sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
@@ -227,6 +228,72 @@ Point3 TrakStarController::GetMockRecord()
 		return mPrevMockRecord;
 	}
 }
+
+Point3 TrakStarController::GetMockRecordFromFile()
+{
+	//open the file if not already open:
+	if (!mockDataFile.is_open())
+	{
+		mockDataFile.open(mockDataFilePath, std::ifstream::in);
+	}
+
+	//get the next line from the file
+	Point3 newPoint;
+	char line[512];
+	if (!mockDataFile.getline(line,512))
+	{
+		//no more lines to read
+		//close the file
+		mockDataFile.close();
+		//try again:
+		newPoint = GetMockRecordFromFile();
+	}
+	//parse the coorindates from the line:
+	for (int c = 5; c >= 0; c--)
+	{
+		//find the last comma
+		char* found = line;
+		if (c)
+		{
+			found = strrchr(line, ',');
+			++found;
+		}
+
+		//parse the number after that comma:
+		float f = std::atof(found);
+
+		//delete the number from the line
+		if (c) {
+			*(--found) = '\0';
+		}
+
+		//add it to the point:
+		switch (c)
+		{
+		case 0:
+			newPoint.x = f;
+			break;
+		case 1:
+			newPoint.y = f;
+			break;
+		case 2:
+			newPoint.z = f;
+			break;
+		case 3:
+			newPoint.r.x = f;
+			break;
+		case 4:
+			newPoint.r.y = f;
+			break;
+		case 5:
+			newPoint.r.z = f;
+			break;
+		}
+	}
+
+	return newPoint;
+}
+
 
 void TrakStarController::ErrorHandler(int error)
 {
