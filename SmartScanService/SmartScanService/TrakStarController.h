@@ -7,6 +7,7 @@
 #include <time.h>
 #include "Point3.h"
 #include <string>
+#include <fstream>
 
 namespace SmartScan
 {
@@ -77,6 +78,11 @@ namespace SmartScan
 
 	private:
 		bool mMock;
+		std::string mockDataFilePath = "MockData.csv";
+		std::ifstream mockDataFile;
+
+		long mockDataFileLine = 0;
+		long mockDataFileNOfLines;
 
 		CSystem			ATC3DG;
 		CSensor*		pSensor;
@@ -104,5 +110,11 @@ namespace SmartScan
 		Point3 GetMockRecord();
 		//keep track of the last mock record so that the movement is realistic.
 		Point3 mPrevMockRecord;
+		/// <summary>
+		/// Goes through the specified file and returns consecutive samples as Point3
+		/// </summary>
+		/// <returns></returns>
+		Point3 GetMockRecordFromFile();
+		
 	};
 }
