@@ -35,6 +35,8 @@ namespace SmartScan
 
 		void SetResolution(double res);
 	
+		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
+
 	private:
 		//reference points (for gradient smoothing)
 		std::vector<ReferencePoint> referencePoints;
@@ -47,14 +49,16 @@ namespace SmartScan
 
 		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint> referencePoints, double resolution);
 
-		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
-
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
 		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
 
 		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
+		// Sort the data point between which reference point is closest to it. 
+		// Inputs: m_data : Measurement Data
+		//		   s_data : Spherical coordinate Data
+		//         ref_data : Reference point Data
 		std::vector<std::vector<Point3>>& SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data);
 
 	};

@@ -25,7 +25,7 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     std::vector<Point3> outputData;
 
     // Recoordinate every point to the first point's orientation
-    for (int i = 0; i < data.size(); i++)
+    for (int i = 0; i < data.size() - 1; i++)
     {
         double pi = 3.14159265;
         // Declare new variables for new points
@@ -83,38 +83,48 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
 
     for (int i = 0; i < ref.size(); i++)
     {
-        for (int count = 1; count < data.size(); count++)
+        vectorSet.emplace_back(std::vector<Point3>());
+        for (int count = 0; count < data.size(); count++)
         {
+            vectorSet[i].emplace_back(Point3());
             vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
             vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
-            vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2)));
+            vectorSet[i][count].s.theta = acos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2))) * 180/pi;
         }
 	}
+
+    return vectorSet;
 }
 
 bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index)
 {
-    bool result = true;
+	bool result = true;
 
-    // Filter nearest points(true) from outliers(false)
+	// Filter nearest points(true) from outliers(false)
 
-    for (int j = 1; data.size(); j++) 
-    {
-        if (index < data.size())
-        {
-            if ((data[j].s.phi <= data[index].s.phi + phi_range / 2) && (data[j].s.phi >= data[index].s.phi - phi_range / 2))
-            {
-                if ((data[j].s.theta <= data[index].s.theta + theta_range / 2) && (data[j].s.theta >= data[index].s.theta - theta_range / 2))
-                {
-                    if (data[j].s.r < data[index].s.r)
-                    {
-                        result = false;
-                    }
-                }
-            }
-        }
-    }
-    return result;
+
+
+	for (int j = 0; data.size(); j++) 
+	{
+		if (index < data.size())
+		{
+			if ((data[j].s.phi <= data[index].s.phi + phi_range / 2) && (data[j].s.phi >= data[index].s.phi - phi_range / 2)) 
+
+			{
+				if ((data[j].s.phi <= data[index].s.phi + phi_range / 2) && (data[j].s.phi >= data[index].s.phi - phi_range / 2))
+				{
+					if ((data[j].s.theta <= data[index].s.theta + theta_range / 2) && (data[j].s.theta >= data[index].s.theta - theta_range / 2))
+					{
+						if (data[j].s.r < data[index].s.r)
+						{
+							result = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	return result;
 }
 
 std::vector<Point3>& SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range)
@@ -143,7 +153,7 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
     {
         int sI = 0;
         int I = 1;
-        for (auto r_count = 0; r_count < ref_data.size() - 1; r_count++)
+        for (auto r_count = 0; r_count < ref_data.size(); r_count++)
         {
             if (s_data[sI][p_count].s.r < s_data[I][p_count].s.r)
             {
