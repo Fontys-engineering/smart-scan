@@ -27,6 +27,7 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     // Recoordinate every point to the first point's orientation
     for (int i = 0; i < data.size(); i++)
     {
+        double pi = 3.14159265;
         // Declare new variables for new points
         double x_new = 0;
         double y_new = 0;
@@ -53,19 +54,19 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
 
         // Use the azimuth to calculate the rotation around the z-axis
         double azimuth_distance = sqrt(pow(x, 2) + pow(y, 2));
-        double a = arctan(x, y) - azimuth_diff;
+        double a = (atan2(y, x)*180/pi) - azimuth_diff;
         x_new = azimuth_distance * cos(a);
         y_new = azimuth_distance * sin(a);
       
         // Use the elevation to calculate the rotation around the y-axis
         double elevation_distance = sqrt(pow(x_new, 2) + pow(z, 2));
-        double b = arctan(x_new, z) + elevation_diff;
+        double b = (atan2(z, x_new) * 180/pi) + elevation_diff;
         x_new = elevation_distance * cos(b);
         y_new = elevation_distance * sin(b);
 
         // Use the roll difference to calculate the rotation around the x-axis
         double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
-        double c = arctan(y_new, z_new) - roll_diff;
+        double c = (atan2(z_new, y_new)*180/pi) - roll_diff;
         y_new = roll_distance * cos(c);
         z_new = roll_distance * sin(c);
         
