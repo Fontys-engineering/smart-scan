@@ -101,10 +101,7 @@ bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range
 	bool result = true;
 
 	// Filter nearest points(true) from outliers(false)
-
-
-
-	for (int j = 0; data.size(); j++) 
+	for (int j = 0; j< data.size(); j++) 
 	{
 		if (index < data.size())
 		{
@@ -136,6 +133,8 @@ std::vector<Point3>& SmartScan::Filtering::GradientSmoothing(std::vector<Point3>
         
     }
     // TODO: insert return statement here
+    std::vector<Point3> ss;
+    return ss;
 }
 
 std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)

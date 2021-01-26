@@ -37,6 +37,12 @@ namespace SmartScan
 	
 		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
 
+		// Tests if a point is valid or not, by testing if there are other points
+		// within the phiand theta range, somewhere in the array.Output is true or
+		// false depending on if the point is overlapping anotherand if it's R
+		// value is lower or not.
+		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
+
 	private:
 		//reference points (for gradient smoothing)
 		std::vector<ReferencePoint> referencePoints;
@@ -51,7 +57,6 @@ namespace SmartScan
 
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
-		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
 
 		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	

@@ -12,25 +12,6 @@ using namespace SmartScan;
 
 int main()
 {
-	Filtering f;
-
-	std::vector<ReferencePoint> ref;
-	ref.emplace_back();
-	ref[0].pos.x = 1;
-	ref[0].pos.y = 1;
-	ref[0].pos.z = 1;
-
-	std::vector<Point3> data;
-	data.emplace_back();
-	data[0].x = 3;
-	data[0].y = 4;
-	data[0].z = 5;
-
-	std::vector<std::vector<Point3>> spherical_set;
-
-	spherical_set = f.CalculateCoordinates(ref, data);
-
-	std::cout << spherical_set[0][0].s.r << "\n" << spherical_set[0][0].s.phi << "\n" << spherical_set[0][0].s.theta << "\n";
 
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
