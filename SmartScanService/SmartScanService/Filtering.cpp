@@ -25,7 +25,7 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     std::vector<Point3> outputData;
 
     // Recoordinate every point to the first point's orientation
-    for (int i = 0; i < data.size(); i++)
+    for (int i = 0; i < data.size() - 1; i++)
     {
         double pi = 3.14159265;
         // Declare new variables for new points
@@ -81,9 +81,9 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
     std::vector<std::vector<Point3>> vectorSet;
     double pi = 3.1415;
 
-    for (int i = 0; i < ref.size(); i++)
+    for (int i = 0; i < ref.size() - 1; i++)
     {
-        for (int count = 1; count < data.size(); count++)
+        for (int count = 0; count < data.size() - 1; count++)
         {
             vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
             vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
@@ -100,7 +100,7 @@ bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range
 
     // Filter nearest points(true) from outliers(false)
 
-    for (int j = 1; data.size(); j++) {
+    for (int j = 0; data.size() - 1; j++) {
         if ((data[j].s.phi <= data[index].s.phi + phi_range / 2) && (data[j].s.phi >= data[index].s.phi - phi_range / 2)) 
         {
             if ((data[j].s.theta <= data[index].s.theta + theta_range / 2) && (data[j].s.theta >= data[index].s.theta - theta_range / 2)) 
@@ -119,14 +119,14 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
 {
     // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
     std::vector<std::vector<Point3>> vectorSet;
-    for (auto i = 0; i < ref_data.size(); i++)
+    for (auto i = 0; i < ref_data.size() - 1; i++)
     {
         vectorSet.emplace_back(std::vector<Point3>());
     }
 
     // For each point, check the r value, whichever is smaller
     // is saved in the according vector.
-    for (auto p_count = 0; p_count < m_data.size(); p_count++)
+    for (auto p_count = 0; p_count < m_data.size() - 1; p_count++)
     {
         int sI = 0;
         int I = 1;
