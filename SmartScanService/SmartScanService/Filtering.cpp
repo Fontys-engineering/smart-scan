@@ -2,7 +2,12 @@
 
 using namespace SmartScan;
 
-//Filtering helper methods:
+// Filtering helper methods:
+
+SmartScan::Filtering::Filtering()
+{
+
+}
 
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
@@ -63,11 +68,12 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
         double c = arctan(y_new, z_new) - roll_diff;
         y_new = roll_distance * cos(c);
         z_new = roll_distance * sin(c);
-        //
+        
         outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
     }
     return outputData;
 }
+
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
 {
@@ -82,24 +88,57 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
             vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
             vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
         }
+	}
+}
+
+std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
+{
+    // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
+    std::vector<std::vector<Point3>> vectorSet;
+    for (auto i = 0; i < ref_data.size(); i++)
+    {
+        vectorSet.emplace_back(std::vector<Point3>());
+    }
+
+    // For each point, check the r value, whichever is smaller
+    // is saved in the according vector.
+    for (auto p_count = 0; p_count < m_data.size(); p_count++)
+    {
+        int sI = 0;
+        int I = 1;
+        for (auto r_count = 0; r_count < ref_data.size() - 1 ; r_count++)
+        {
+            if (s_data[sI][p_count].s.r < s_data[I][p_count].s.r)
+            {
+                I++;
+            }
+            else if (s_data[sI][p_count].s.r > s_data[I][p_count].s.r)
+            {
+                sI = I;
+                I++;
+            }
+        }
+        
+        vectorSet;
     }
 
 }
 
 double SmartScan::Filtering::arctan(double a, double b)
 {
+    double pi = 3.14159265;
     double result;
 
     if (a == 0 && b == 0)
         result = 0;
     else if (a >= 0 && b > 0)
-        result = atan2(b, a);
+        result = atan2(b, a)* 180/pi;
     else if (a < 0 && b >= 0)
-        result = atan2(b, a) + 180;
+        result = (atan2(b, a)*(180/pi)) + 180;
     else if (a <= 0 && b < 0)
-        result = atan2(b, a) - 180;
+        result = (atan2(b, a)*(180/pi)) - 180;
     else if (a > 0 && b <= 0)
-        result = atan2(b, a);
+        result = atan2(b, a)*180/pi;
     return result;
 }
 
