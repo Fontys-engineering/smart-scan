@@ -63,7 +63,7 @@ namespace SmartScan {
 			what_arg{ what_arg }, function{ function }, file{ file }
 		{
 		}
-		ex_trakStar(std::string what_arg, const char* function, const char* file) :
+		ex_trakStar(const std::string& what_arg, const char* function, const char* file) :
 			what_arg{ what_arg.c_str() }, function{ function }, file{ file }
 		{
 		}
@@ -77,10 +77,10 @@ namespace SmartScan {
 
 		const char* what()
 		{
-			return this->what_arg;
+			return this->what_arg.c_str();
 		}
 	private:
-		const char* what_arg;
+		const std::string what_arg;
 		const char* function;
 		const char* file;
 	};

@@ -108,7 +108,9 @@ namespace SmartScan
 		void DataFiltering();
 		bool mStopFiltering = false;
 
-		int lastFilteredSample = 0;
+		const unsigned int frameSize = 150;
+		unsigned int frameCounter = 0;
+		unsigned long lastFilteredSample = 0;
 
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
