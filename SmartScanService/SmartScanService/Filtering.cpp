@@ -74,6 +74,39 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     return outputData;
 }
 
+std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
+{
+    // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
+    std::vector<std::vector<Point3>> vectorSet;
+    for (auto i = 0; i < ref_data.size(); i++)
+    {
+        vectorSet.emplace_back(std::vector<Point3>());
+    }
+
+    // For each point, check the r value, whichever is smaller
+    // is saved in the according vector.
+    for (auto p_count = 0; p_count < m_data.size(); p_count++)
+    {
+        int sI = 0;
+        int I = 1;
+        for (auto r_count = 0; r_count < ref_data.size() - 1 ; r_count++)
+        {
+            if (s_data[sI][p_count].s.r < s_data[I][p_count].s.r)
+            {
+                I++;
+            }
+            else if (s_data[sI][p_count].s.r > s_data[I][p_count].s.r)
+            {
+                sI = I;
+                I++;
+            }
+        }
+        
+        vectorSet;
+    }
+
+}
+
 double SmartScan::Filtering::arctan(double a, double b)
 {
     double pi = 3.14159265;

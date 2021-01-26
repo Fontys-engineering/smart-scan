@@ -62,7 +62,7 @@ namespace SmartScan
 
 		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
-		std::vector<std::vector<Point3>>& SortArrays(std::vector<Point3>& data, std::vector<Point3> reference_data);
-	
+		std::vector<std::vector<Point3>>& SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
+
 	};
 }
