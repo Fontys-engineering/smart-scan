@@ -90,6 +90,8 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
             vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2)));
         }
 	}
+
+
 }
 
 bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index)
