@@ -2,7 +2,12 @@
 
 using namespace SmartScan;
 
-//Filtering helper methods:
+// Filtering helper methods:
+
+SmartScan::Filtering::Filtering()
+{
+
+}
 
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
@@ -63,7 +68,7 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
         double c = arctan(y_new, z_new) - roll_diff;
         y_new = roll_distance * cos(c);
         z_new = roll_distance * sin(c);
-        //
+        
         outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
     }
     return outputData;
@@ -71,18 +76,19 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
 
 double SmartScan::Filtering::arctan(double a, double b)
 {
+    double pi = 3.14159265;
     double result;
 
     if (a == 0 && b == 0)
         result = 0;
     else if (a >= 0 && b > 0)
-        result = atan2(b, a);
+        result = atan2(b, a)* 180/pi;
     else if (a < 0 && b >= 0)
-        result = atan2(b, a) + 180;
+        result = (atan2(b, a)*(180/pi)) + 180;
     else if (a <= 0 && b < 0)
-        result = atan2(b, a) - 180;
+        result = (atan2(b, a)*(180/pi)) - 180;
     else if (a > 0 && b <= 0)
-        result = atan2(b, a);
+        result = atan2(b, a)*180/pi;
     return result;
 }
 
