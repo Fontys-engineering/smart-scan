@@ -63,7 +63,7 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
         double c = arctan(y_new, z_new) - roll_diff;
         y_new = roll_distance * cos(c);
         z_new = roll_distance * sin(c);
-
+        //
         outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
     }
     return outputData;
