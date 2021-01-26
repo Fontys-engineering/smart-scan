@@ -33,13 +33,6 @@ namespace SmartScan
 		/// <param name="referencePoints"> - vector of points of type ReferencePoint</param>
 		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
 
-		/* <summary
-		* Calculate the arc tangent of two points. Output = arctan(b/a)
-		* Takes into account the four quadrants of the function, so range is from -180 to 180 degrees
-		* </summary>
-		*/
-		double arctan(double a, double b);
-
 		void SetResolution(double res);
 	
 	private:
@@ -58,11 +51,11 @@ namespace SmartScan
 
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
-		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range);
+		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
 
 		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
-		std::vector<std::vector<Point3>>& SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
+		std::vector<std::vector<Point3>>& SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data);
 
 	};
 }

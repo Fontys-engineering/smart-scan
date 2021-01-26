@@ -86,9 +86,30 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
         {
             vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
             vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
-            vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
+            vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2)));
         }
 	}
+}
+
+bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index)
+{
+    bool result = true;
+
+    // Filter nearest points(true) from outliers(false)
+
+    for (int j = 1; data.size(); j++) {
+        if ((data[j].s.phi <= data[index].s.phi + phi_range / 2) && (data[j].s.phi >= data[index].s.phi - phi_range / 2)) 
+        {
+            if ((data[j].s.theta <= data[index].s.theta + theta_range / 2) && (data[j].s.theta >= data[index].s.theta - theta_range / 2)) 
+            {
+                if (data[j].s.r < data[index].s.r) 
+                {
+                    result = false;
+                }
+            }
+        }
+    }
+    return result;
 }
 
 std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
@@ -124,23 +145,7 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
 
 }
 
-double SmartScan::Filtering::arctan(double a, double b)
-{
-    double pi = 3.14159265;
-    double result;
 
-    if (a == 0 && b == 0)
-        result = 0;
-    else if (a >= 0 && b > 0)
-        result = atan2(b, a)* 180/pi;
-    else if (a < 0 && b >= 0)
-        result = (atan2(b, a)*(180/pi)) + 180;
-    else if (a <= 0 && b < 0)
-        result = (atan2(b, a)*(180/pi)) - 180;
-    else if (a > 0 && b <= 0)
-        result = atan2(b, a)*180/pi;
-    return result;
-}
 
 
 
