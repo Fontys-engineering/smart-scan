@@ -46,7 +46,7 @@ namespace SmartScan
 
 		/// <summary>
 		/// Clears all existing references for the last scan and starts 
-		/// the reference callibration routine.
+		/// the reference calibration routine.
 		/// </summary>
 		void CalibrateReferencePoints();
 		/// <summary>

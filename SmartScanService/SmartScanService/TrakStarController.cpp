@@ -28,7 +28,7 @@ void TrakStarController::Init()
 	errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
 	{
-		throw ex_trakStar(GetErrorString(errorCode), __func__, __FILE__);
+		throw ex_trakStar(GetErrorString(errorCode).c_str() , __func__, __FILE__);
 	}
 }
 
@@ -42,6 +42,23 @@ void TrakStarController::Config()
 	//system
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
+	// contains the following:
+	printf("Number Boards          = %d\n", ATC3DG.m_config.numberBoards);
+	printf("Number Sensors         = %d\n", ATC3DG.m_config.numberSensors);
+	printf("Number Transmitters    = %d\n\n", ATC3DG.m_config.numberTransmitters);
+
+	printf("System AGC mode	       = %d\n", ATC3DG.m_config.agcMode);
+	printf("Maximum Range          = %6.2f\n", ATC3DG.m_config.maximumRange);
+	printf("Measurement Rate       = %10.6f\n", ATC3DG.m_config.measurementRate);
+	printf("Metric Mode            = %d\n", ATC3DG.m_config.metric);
+	printf("Line Frequency         = %6.2f\n", ATC3DG.m_config.powerLineFrequency);
+	printf("Transmitter ID Running = %d\n", ATC3DG.m_config.transmitterIDRunning);
 
 	//sensor
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
@@ -58,6 +75,24 @@ void TrakStarController::Config()
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
+	//line frquency
+	double buffer = 50.0;			// only 2 values are legal: 50 and 60 (Hz)
+	double* pBuffer = &buffer;
+	printf("POWER_LINE_FREQUENCY: %5.2f\n", buffer);
+	errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, pBuffer, sizeof(buffer));
+	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+
+	//sample rate
+	printf("MEASUREMENT_RATE: %5.2f\n", buffer);
+	errorCode = SetSystemParameter(MEASUREMENT_RATE, pBuffer, sizeof(buffer));
+	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+
+	//non-retard units:
+	BOOL bufferM = true;												// set metric reporting = true
+	BOOL* pBufferM = &bufferM;
+	printf("METRIC: %d\n", bufferM);
+	errorCode = SetSystemParameter(METRIC, pBufferM, sizeof(bufferM));
+	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 }
 
 void TrakStarController::AttachSensor()
@@ -108,17 +143,27 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		//return GetMockRecord();
 		return GetMockRecordFromFile();
 	}
-
-	if (++sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
+	++sensorID;
+	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
 	{
-		throw "Sensor ID out if range";
+		throw ex_smartScan( "Sensor ID out if range", __func__, __FILE__);
 	}
 
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
 
 	// sensor attached so get record
-	errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
-	if (errorCode != BIRD_ERROR_SUCCESS) { ErrorHandler(errorCode); }
+	try
+	{
+		errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+	}
+	catch(...)
+	{
+		if (errorCode != BIRD_ERROR_SUCCESS) 
+		{ 
+			ErrorHandler(errorCode); 
+		}
+	}
+	
 
 	// get the status of the last data record
 	// only report the data if everything is okay
@@ -130,7 +175,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	}
 	else
 	{
-		throw "No valid sensor record found";
+		throw ex_trakStar("No valid sensor record found", __func__, __FILE__);
 	}
 
 	return Point3();
@@ -306,8 +351,9 @@ void TrakStarController::ErrorHandler(int error)
 		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
 		numberBytes = strlen(buffer);
 
-		throw ex_trakStar(buffer, __func__, __FILE__);
-		//printf("%s", buffer);
+		printf("%s", buffer);
+		//throw ex_trakStar(buffer, __func__, __FILE__);
+		printf("%s", buffer);
 	}
 }
 

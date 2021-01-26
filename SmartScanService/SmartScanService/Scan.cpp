@@ -144,7 +144,7 @@ void Scan::DataAcquisition()
 			}
 			//make sure we are not slower than the required sample rate:
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
-			if (elapsed_seconds.count() > (1 / sampleRate))
+			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}

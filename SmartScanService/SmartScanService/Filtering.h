@@ -3,6 +3,7 @@
 //the code was exported from matlab and adapted to work with this architecture.
 
 #include "Point3.h";
+#include "ReferencePoint.h"
 #include <vector>;
 
 namespace SmartScan
@@ -18,6 +19,36 @@ namespace SmartScan
 		/// <param name="data"> - vector of data points as Point3 objects</param>
 		void Filter(std::vector<Point3> &data);
 
+		/// <summary>
+		/// process the data in place and keep only the filtered data points. use the reference data to reorientate
+		/// the model if moved
+		/// </summary>
+		/// <param name="data"> - vector of data points as Point3 objects</param>
+		/// <param name="referenceData"> - vector of reference data points as Point3 objects</param>
+		void Filter(std::vector<Point3>& data, std::vector<Point3> &referenceData);
+
+		/// <summary>
+		/// Set the reference points for this filtering object
+		/// </summary>
+		/// <param name="referencePoints"> - vector of points of type ReferencePoint</param>
+		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
+
+		void SetResolution(double res);
 	private:
+		//reference points (for gradient smoothing)
+		std::vector<ReferencePoint> referencePoints;
+
+		//properties:
+		double resolution = 4;
+
+		//Filtering helper methods:
+		void RotationOrientation(std::vector<Point3>& data, std::vector<Point3>& referenceData);
+
+		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint> referencePoints, double resolution);
+
+		void CalculateCoordinates(ReferencePoint ref, std::vector<Point3>& data);
+
+		void Outlier(std::vector<Point3>& data, ReferencePoint ref, double phi_range, double theta_range);
+
 	};
 }
