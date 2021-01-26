@@ -127,7 +127,7 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
     {
         int sI = 0;
         int I = 1;
-        for (auto r_count = 0; r_count < ref_data.size() - 1 ; r_count++)
+        for (auto r_count = 0; r_count < ref_data.size() - 1; r_count++)
         {
             if (s_data[sI][p_count].s.r < s_data[I][p_count].s.r)
             {
@@ -139,9 +139,11 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
                 I++;
             }
         }
-        
-        vectorSet;
+
+        vectorSet[sI].emplace_back(Point3(m_data[p_count].x, m_data[p_count].y, m_data[p_count].z, m_data[p_count].r.x, m_data[p_count].r.y, m_data[p_count].r.z, s_data[sI][p_count].s.r, s_data[sI][p_count].s.phi, s_data[sI][p_count].s.theta));
     }
+
+    return vectorSet;
 
 }
 
