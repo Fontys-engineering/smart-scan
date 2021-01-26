@@ -104,7 +104,7 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 	{
 		throw e;
 	}
-	catch (std::exception e)
+	catch (ex_smartScan e)
 	{
 		throw e;
 	}

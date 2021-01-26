@@ -7,7 +7,7 @@
 #include "Exceptions.h"
 
 using namespace SmartScan;
-
+#include <vector>;
 
 int main()
 {
@@ -28,7 +28,7 @@ int main()
 	}
 	catch (ex_trakStar& e)
 	{
-		std::cerr << "TrakSTAR exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
+		std::cerr << "\nTrakSTAR exception: " << e.what() << "\nthrown in " << e.get_function() << " in " << e.get_file() << std::endl << std::endl;
 	}
 	catch (ex_scan& e)
 	{
@@ -59,10 +59,6 @@ int main()
 			{
 				//start a scan using only the known good sensors:
 				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
-			}
-			catch (std::exception e)
-			{
-				std::cerr << e.what() << std::endl;
 			}
 			catch (ex_trakStar e)
 			{
