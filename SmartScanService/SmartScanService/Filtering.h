@@ -35,6 +35,8 @@ namespace SmartScan
 
 		void SetResolution(double res);
 	
+		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
+
 	private:
 		//reference points (for gradient smoothing)
 		std::vector<ReferencePoint> referencePoints;
@@ -46,8 +48,6 @@ namespace SmartScan
 		std::vector<Point3>& RotationOrientation(std::vector<Point3>& data);
 
 		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint> referencePoints, double resolution);
-
-		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
 
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
