@@ -74,6 +74,23 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     return outputData;
 }
 
+
+std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
+{
+    std::vector<std::vector<Point3>> vectorSet;
+    double pi = 3.1415;
+
+    for (int i = 0; i < ref.size(); i++)
+    {
+        for (int count = 1; count < data.size(); count++)
+        {
+            vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
+            vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
+            vectorSet[i][count].s.theta = cos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
+        }
+	}
+}
+
 std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
 {
     // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
