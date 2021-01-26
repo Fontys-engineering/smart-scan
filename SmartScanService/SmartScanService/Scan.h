@@ -17,9 +17,18 @@ namespace SmartScan
 	{
 	public:
 		const int mId;
-
+		/// <summary>
+		/// raw data vector
+		/// </summary>
 		std::vector<Point3> mInBuff;
+		/// <summary>
+		/// Filtered data vector
+		/// </summary>
 		std::vector<Point3> mOutBuff;
+		/// <summary>
+		/// reference sensor data vector
+		/// </summary>
+		std::vector<Point3> mRefBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 
@@ -101,6 +110,7 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;
 
 		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
+		int mRefSensorId = 0;
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;

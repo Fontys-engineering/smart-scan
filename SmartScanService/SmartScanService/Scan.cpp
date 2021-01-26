@@ -136,6 +136,10 @@ void Scan::DataAcquisition()
 							}
 						}
 					}
+					if (i == mRefSensorId)
+					{
+						mRefBuff.push_back(newSample);
+					}
 				}
 				catch (...)
 				{
