@@ -69,5 +69,23 @@ std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point
     return outputData;
 }
 
+double SmartScan::Filtering::arctan(double a, double b)
+{
+    double result;
+
+    if (a == 0 && b == 0)
+        result = 0;
+    else if (a >= 0 && b > 0)
+        result = atan2(b, a);
+    else if (a < 0 && b >= 0)
+        result = atan2(b, a) + 180;
+    else if (a <= 0 && b < 0)
+        result = atan2(b, a) - 180;
+    else if (a > 0 && b <= 0)
+        result = atan2(b, a);
+    return result;
+}
+
+
 
 
