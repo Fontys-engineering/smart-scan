@@ -124,17 +124,22 @@ bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range
 	return result;
 }
 
-std::vector<Point3>& SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range)
+void SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range)
 {
-    int index = 1;
+    int index = 0;
 
     while (index <= data.size())
     {
-        
+        if (index < data.size())
+        {
+            if (TestPoint(data, phi_range, theta_range, index) == false)
+            {
+                data.erase(data.begin() + index);
+                index--;
+            }
+        }
+        index++;
     }
-    // TODO: insert return statement here
-    std::vector<Point3> ss;
-    return ss;
 }
 
 std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)

@@ -58,7 +58,7 @@ namespace SmartScan
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
 
-		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
+		void GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
 		// Sort the data point between which reference point is closest to it. 
 		// Inputs: m_data : Measurement Data
