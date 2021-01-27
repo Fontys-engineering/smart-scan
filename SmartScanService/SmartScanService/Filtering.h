@@ -47,7 +47,7 @@ namespace SmartScan
 		// Inputs: m_data : Measurement Data
 		//		   s_data : Spherical coordinate Data
 		//         ref_data : Reference point Data
-		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data);
+		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
 
 	private:
 		//reference points (for gradient smoothing)
