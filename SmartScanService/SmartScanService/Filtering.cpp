@@ -12,7 +12,7 @@ SmartScan::Filtering::Filtering()
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
 // The output 'data' consists of new x-y-z values with the according azimuth, elevation and roll values.
-std::vector<Point3> SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data)
+void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::vector<Point3>& referenceData)
 {
     /* All points will be rotated to the fixed values given.This point's
     orientation will be taken as a reference to transform all other
@@ -20,59 +20,63 @@ std::vector<Point3> SmartScan::Filtering::RotationOrientation(std::vector<Point3
     double azimuth_ref = 0;
     double elevation_ref = 0;
     double roll_ref = 0;
-
+    
     // Declare the output data set
     std::vector<Point3> outputData;
-
+    unsigned int nOfSensors = data.size() / referenceData.size();
     // Recoordinate every point to the first point's orientation
-    for (int i = 0; i < data.size() - 1; i++)
+    for (unsigned int i = 0; i < referenceData.size() - 1; i++)
     {
-        double pi = 3.14159265;
-        // Declare new variables for new points
-        double x_new = 0;
-        double y_new = 0;
-        double z_new = 0;
+        for (unsigned int j = 0; j < nOfSensors; j++)
+        {
+            const double pi = 3.14159265;
+            // Declare new variables for new points
+            double x_new = 0;
+            double y_new = 0;
+            double z_new = 0;
 
-        // Check the orientation of the current point
-        double x = data[i].x;
-        double y = data[i].y;
-        double z = data[i].z;
-        double azimuth = data[i].r.z;
-        double elevation = data[i].r.y;
-        double roll = data[i].r.x;
+            // Check the orientation of the current point
+            const double x = data[(i*nOfSensors)+j].x - referenceData[i].x;
+            const double y = data[(i * nOfSensors) + j].y - referenceData[i].y;
+            const double z = data[(i * nOfSensors) + j].z - referenceData[i].z;
+            const double azimuth = referenceData[i].r.z;
+            const double elevation = referenceData[i].r.y;
+            const double roll = referenceData[i].r.x;
 
-        // Calculate the difference in azimuth between the current point and the reference point
-        double azimuth_diff = azimuth - azimuth_ref;
-        double elevation_diff = elevation - elevation_ref;
-        double roll_diff = roll - roll_ref;
+            // Calculate the difference in azimuth between the current point and the reference point
+            const double azimuth_diff = azimuth - azimuth_ref;
+            const double elevation_diff = elevation - elevation_ref;
+            const double roll_diff = roll - roll_ref;
 
-        // This difference can be used to change the phi angle of the
-        // current point, after this we can calculate the new XYZ values
-        // with the r, phiand theta values.We assume the Azimuth only
-        // affects the XY planeand Elevation the XZ plane, while the
-        // rotation affects the YZ plane
+            // This difference can be used to change the phi angle of the
+            // current point, after this we can calculate the new XYZ values
+            // with the r, phiand theta values.We assume the Azimuth only
+            // affects the XY planeand Elevation the XZ plane, while the
+            // rotation affects the YZ plane
 
-        // Use the azimuth to calculate the rotation around the z-axis
-        double azimuth_distance = sqrt(pow(x, 2) + pow(y, 2));
-        double a = (atan2(y, x)*180/pi) - azimuth_diff;
-        x_new = azimuth_distance * cos(a);
-        y_new = azimuth_distance * sin(a);
-      
-        // Use the elevation to calculate the rotation around the y-axis
-        double elevation_distance = sqrt(pow(x_new, 2) + pow(z, 2));
-        double b = (atan2(z, x_new) * 180/pi) + elevation_diff;
-        x_new = elevation_distance * cos(b);
-        y_new = elevation_distance * sin(b);
+            // Use the azimuth to calculate the rotation around the z-axis
+            const double azimuth_distance = sqrt(pow(x, 2) + pow(y, 2));
+            const double a = (atan2(y, x) * 180 / pi) - azimuth_diff;
+            x_new = azimuth_distance * cos(a);
+            y_new = azimuth_distance * sin(a);
 
-        // Use the roll difference to calculate the rotation around the x-axis
-        double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
-        double c = (atan2(z_new, y_new)*180/pi) - roll_diff;
-        y_new = roll_distance * cos(c);
-        z_new = roll_distance * sin(c);
-        
-        outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
+            // Use the elevation to calculate the rotation around the y-axis
+            const double elevation_distance = sqrt(pow(x_new, 2) + pow(z, 2));
+            const double b = (atan2(z, x_new) * 180 / pi) + elevation_diff;
+            x_new = elevation_distance * cos(b);
+            y_new = elevation_distance * sin(b);
+
+            // Use the roll difference to calculate the rotation around the x-axis
+            const double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
+            const double c = (atan2(z_new, y_new) * 180 / pi) - roll_diff;
+            y_new = roll_distance * cos(c);
+            z_new = roll_distance * sin(c);
+
+            outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
+            
+        }
     }
-    return outputData;
+    data = outputData;
 }
 
 void SmartScan::Filtering::Outlier(std::vector<Point3>& data, double phi_range, double theta_range)
@@ -145,7 +149,7 @@ void SmartScan::Filtering::Outlier(std::vector<Point3>& data, double phi_range, 
 }
 
 
-std::vector<Point3> SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
+void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
 {
     std::vector<std::vector<Point3>> vectorSet;
     std::vector<std::vector<Point3>> vectorSetSort;
@@ -157,14 +161,33 @@ std::vector<Point3> SmartScan::Filtering::FilterIteration(std::vector<Point3>& d
     for (int i = 0; i < referencePoints.size(); i++)
     {
         GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
+        Outlier(vectorSetSort[i], phi_range, theta_range);
         for (auto j = 0; j < vectorSetSort[i].size(); j++)
         {
             f_data.emplace_back(vectorSetSort[i][j]);
         }
     }
-    return f_data;
+    data = f_data;
 }
 
+
+void SmartScan::Filtering::Filter(std::vector<Point3>& data, std::vector<Point3>& referenceData)
+{
+    RotationOrientation(data, referenceData);
+    FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
+}
+
+void SmartScan::Filtering::SetReferencePoints(std::vector<ReferencePoint> referencePoints)
+{
+    this->referencePoints = referencePoints;
+
+}
+
+void SmartScan::Filtering::SetResolution(double phi_range, double theta_range)
+{
+    this->phi_range = phi_range;
+    this->theta_range = theta_range;
+}
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
 {

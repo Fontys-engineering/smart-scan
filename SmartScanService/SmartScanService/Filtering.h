@@ -25,7 +25,7 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="data"> - vector of data points as Point3 objects</param>
 		/// <param name="referenceData"> - vector of reference data points as Point3 objects</param>
-		void Filter(std::vector<Point3>& data, std::vector<Point3> &referenceData);
+		void Filter(std::vector<Point3>& data, std::vector<Point3>& referenceData);
 
 		/// <summary>
 		/// Set the reference points for this filtering object
@@ -33,7 +33,7 @@ namespace SmartScan
 		/// <param name="referencePoints"> - vector of points of type ReferencePoint</param>
 		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
 
-		void SetResolution(double res);
+		void SetResolution(double phi_range, double theta_range);
 	
 		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
 
@@ -49,17 +49,18 @@ namespace SmartScan
 		//         ref_data : Reference point Data
 		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
 
-		std::vector<Point3> FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
+		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
 
 	private:
 		//reference points (for gradient smoothing)
 		std::vector<ReferencePoint> referencePoints;
 
 		//properties:
-		double resolution = 4;
+		double phi_range = 4;
+		double theta_range = 4;
 
 		//Filtering helper methods:
-		std::vector<Point3> RotationOrientation(std::vector<Point3>& data);
+		void RotationOrientation(std::vector<Point3>& data, std::vector<Point3>& referenceData);
 
 
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
