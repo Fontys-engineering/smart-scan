@@ -73,7 +73,7 @@ Point3::Point3(double x, double y, double z, double rx, double ry, double rz, do
 
 	Rotation3 r(rx, ry, rz);
 	this->r = r;
-	Spherical3 s(rx, ry, rz);
+	Spherical3 s(sr, sphi, stheta);
 	this->s = s;
 }
 
