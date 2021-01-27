@@ -80,13 +80,17 @@ std::vector<Point3> SmartScan::Filtering::FilterIteration(std::vector<Point3>& d
     std::vector<std::vector<Point3>> vectorSet;
     std::vector<std::vector<Point3>> vectorSetSort;
     std::vector<Point3> f_data;
+    Filtering f;
     vectorSet = CalculateCoordinates(referencePoints, data);
     vectorSetSort = SortArrays(data, vectorSet, referencePoints);
     
     for (int i = 0; i < referencePoints.size(); i++)
     {
         GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
-        f_data.emplace_back(vectorSetSort[i]);
+        for (auto j = 0; j < vectorSetSort[i].size(); j++)
+        {
+            f_data.emplace_back(vectorSetSort[i][j]);
+        }
     }
     return f_data;
 }
