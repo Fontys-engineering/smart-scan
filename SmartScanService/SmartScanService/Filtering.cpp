@@ -12,7 +12,7 @@ SmartScan::Filtering::Filtering()
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
 // The output 'data' consists of new x-y-z values with the according azimuth, elevation and roll values.
-std::vector<Point3>& SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data)
+std::vector<Point3> SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data)
 {
     /* All points will be rotated to the fixed values given.This point's
     orientation will be taken as a reference to transform all other

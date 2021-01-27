@@ -57,7 +57,7 @@ namespace SmartScan
 		double resolution = 4;
 
 		//Filtering helper methods:
-		std::vector<Point3>& RotationOrientation(std::vector<Point3>& data);
+		std::vector<Point3> RotationOrientation(std::vector<Point3>& data);
 
 		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint> referencePoints, double resolution);
 
