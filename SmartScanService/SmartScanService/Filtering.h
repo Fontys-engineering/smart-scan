@@ -53,7 +53,7 @@ namespace SmartScan
 		//Filtering helper methods:
 		std::vector<Point3>& RotationOrientation(std::vector<Point3>& data);
 
-		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint> referencePoints, double resolution);
+		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double resolution);
 
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 

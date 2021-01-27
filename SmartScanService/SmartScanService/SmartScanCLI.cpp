@@ -12,6 +12,9 @@ using namespace SmartScan;
 
 int main()
 {
+	Filtering f;
+	std::vector<Point3> m_data;
+
 
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
