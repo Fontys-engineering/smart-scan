@@ -137,7 +137,7 @@ std::vector<Point3>& SmartScan::Filtering::GradientSmoothing(std::vector<Point3>
     return ss;
 }
 
-std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
+std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
 {
     // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
     std::vector<std::vector<Point3>> vectorSet;
@@ -152,7 +152,7 @@ std::vector<std::vector<Point3>>& SmartScan::Filtering::SortArrays(std::vector<P
     {
         int sI = 0;
         int I = 1;
-        for (auto r_count = 0; r_count < ref_data.size(); r_count++)
+        for (auto r_count = 1; r_count < ref_data.size(); r_count++)
         {
             if (s_data[sI][p_count].s.r < s_data[I][p_count].s.r)
             {
