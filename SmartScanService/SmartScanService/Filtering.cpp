@@ -75,6 +75,22 @@ std::vector<Point3> SmartScan::Filtering::RotationOrientation(std::vector<Point3
     return outputData;
 }
 
+std::vector<Point3> SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
+{
+    std::vector<std::vector<Point3>> vectorSet;
+    std::vector<std::vector<Point3>> vectorSetSort;
+    std::vector<Point3> f_data;
+    vectorSet = CalculateCoordinates(referencePoints, data);
+    vectorSetSort = SortArrays(data, vectorSet, referencePoints);
+    
+    for (int i = 0; i < referencePoints.size(); i++)
+    {
+        GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
+        f_data.emplace_back(vectorSetSort[i]);
+    }
+    return f_data;
+}
+
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
 {
