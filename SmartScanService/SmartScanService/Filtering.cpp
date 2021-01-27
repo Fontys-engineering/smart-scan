@@ -75,6 +75,76 @@ std::vector<Point3> SmartScan::Filtering::RotationOrientation(std::vector<Point3
     return outputData;
 }
 
+void SmartScan::Filtering::Outlier(std::vector<Point3>& data, double phi_range, double theta_range)
+{
+    for (int l = -180 + phi_range * 2; l < 180 - phi_range * 2; l += phi_range * 4) 
+    {
+        for (int m = -180 + theta_range * 2; m < theta_range * 4; m += 180 - theta_range * 2) 
+        {
+            int locationArray[] = { 0 };
+            int tempIndex = 1;
+            for (int k = 0; k < data.size(); k++) 
+            {
+                if ((data[k].s.phi <= l + phi_range * 2) && (data[k].s.phi >= l - phi_range * 2)) 
+                {
+                    if ((data[k].s.theta <= m + theta_range * 2) && (data[k].s.theta >= m - theta_range * 2)) 
+                    {
+                        locationArray[tempIndex] = k;
+                        tempIndex = tempIndex++;
+                    }
+                }
+            }
+
+            if (locationArray[1] > 0)
+            {
+                double checkArray[] = { 0 };
+                const int szloc = sizeof(locationArray);
+                for (int ind = 0; ind < szloc; ind++) 
+                {
+                    checkArray[ind] = data[locationArray[ind]].s.r;
+                }
+                if (szloc > 2)
+                {
+                    double mean = 0;
+                    mean = findMean(checkArray, sizeof(checkArray));
+                    int tf[szloc] = { 0 };
+                    for (int i = 0; i < szloc; i++)
+                    {
+                        if (checkArray[i] > mean * 1.2)
+                        {
+                            tf[i] = 1;
+                        }
+                    }
+                    int a[] = { 0 };
+                    int TI = 0;
+                    for (int j = 0; j < szloc; j++)
+                    {
+                        if (tf[j] > 0)
+                        {
+                            a[TI] = j;
+                            TI++;
+                        }
+                    }
+                
+                    int sza = sizeof(a);
+                    if (sza > 0) 
+                    {
+                        int deletedItems = 0;
+                        for (int inda = 0; inda < sza; inda++) 
+                        {
+                            int indexToRemove = locationArray[a[inda]] - deletedItems;
+
+                            data.erase(data.begin() + indexToRemove);
+                            deletedItems++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 std::vector<Point3> SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
 {
     std::vector<std::vector<Point3>> vectorSet;
@@ -160,6 +230,15 @@ void SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double p
         }
         index++;
     }
+}
+
+double SmartScan::Filtering::findMean(double a[], int n)
+{
+    int sum = 0;
+    for (int i = 0; i < n; i++)
+        sum += a[i];
+
+    return (double)sum / (double)n;
 }
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data)

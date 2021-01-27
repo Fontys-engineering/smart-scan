@@ -12,27 +12,6 @@ using namespace SmartScan;
 
 int main()
 {
-	Filtering f;
-	std::vector<Point3> m_data;
-	m_data.emplace_back();
-	m_data[0].x = 1;
-	m_data[0].y = 1;
-	m_data[0].z = 0;
-
-	m_data.emplace_back();
-	m_data[1].x = 2;
-	m_data[1].y = 2;
-	m_data[1].z = 0;
-
-	std::vector<ReferencePoint> ref_data;
-	ref_data.emplace_back();
-	ref_data[0].pos.x = 0;
-	ref_data[0].pos.y = 0;
-	ref_data[0].pos.z = 0;
-
-	std::vector<Point3> result;
-
-	result = f.FilterIteration(m_data, ref_data, 40, 40);
 
 
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;

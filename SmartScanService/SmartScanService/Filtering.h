@@ -67,7 +67,7 @@ namespace SmartScan
 
 		void GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
-		
+		double findMean(double a[], int n);
 
 	};
 }
