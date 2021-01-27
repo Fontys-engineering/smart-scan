@@ -64,7 +64,7 @@ namespace SmartScan
 		void Outlier(std::vector<Point3>& data, double phi_range, double theta_range);		
 
 
-		std::vector<Point3>& GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
+		void GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range);
 	
 		
 
