@@ -24,11 +24,12 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
     
     // Declare the output data set
     std::vector<Point3> outputData;
-    unsigned int nOfSensors = data.size() / referenceData.size();
+    unsigned int nOfSensors = mFramesize / referenceData.size();
+    unsigned long offset = data.size() - mFramesize; 
     // Recoordinate every point to the first point's orientation
-    for (unsigned int i = 0; i < referenceData.size(); i++)
+    for (unsigned long i = 0; i < referenceData.size(); i++)
     {
-        for (unsigned int j = 0; j < nOfSensors; j++)
+        for (unsigned long j = offset; j < nOfSensors + offset; j++)
         {
             const double pi = 3.14159265;
             // Declare new variables for new points
@@ -37,7 +38,7 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
             double z_new = 0;
 
             // Check the orientation of the current point
-            const double x = data[(i*nOfSensors)+j].x - referenceData[i].x;
+            const double x = data[(i * nOfSensors)+ j].x - referenceData[i].x;
             const double y = data[(i * nOfSensors) + j].y - referenceData[i].y;
             const double z = data[(i * nOfSensors) + j].z - referenceData[i].z;
             const double azimuth = referenceData[i].r.z;
@@ -162,7 +163,7 @@ void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vecto
     for (int i = 0; i < referencePoints.size(); i++)
     {
         GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
-        Outlier(vectorSetSort[i], phi_range, theta_range);
+        //Outlier(vectorSetSort[i], phi_range, theta_range);
         for (auto j = 0; j < vectorSetSort[i].size(); j++)
         {
             f_data.emplace_back(vectorSetSort[i][j]);
@@ -188,6 +189,11 @@ void SmartScan::Filtering::SetResolution(double phi_range, double theta_range)
 {
     this->phi_range = phi_range;
     this->theta_range = theta_range;
+}
+
+void SmartScan::Filtering::SetFrameSize(const unsigned int& framesize)
+{
+    this->mFramesize = framesize;
 }
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)

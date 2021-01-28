@@ -86,6 +86,11 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		this->scans.back()->SetUsedSensors(sensorIds);
 	}
 
+	std::vector<ReferencePoint> ref;
+	ref.emplace_back(ReferencePoint(0, 0, 0, 0));
+
+	SetReferencePoints(ref);
+
 	//start the scan:
 	try
 	{

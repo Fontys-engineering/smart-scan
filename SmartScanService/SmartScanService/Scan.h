@@ -2,6 +2,7 @@
 
 #include "Point3.h"
 #include "ReferencePoint.h"
+#include "Filtering.h"
 #include "TrakStarController.h"
 
 #include <vector>
@@ -144,5 +145,7 @@ namespace SmartScan
 		std::function<void(std::vector<Point3>&)> mRawDataCallback;
 
 #pragma endregion data aquisition:
+	
+		Filtering mF;
 	};
 }
