@@ -8,7 +8,13 @@ SmartScan::Filtering::Filtering()
 {
 
 }
+
 SmartScan::Filtering::Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }{}
+
+void SmartScan::Filtering::Filter(std::vector<Point3>& data)
+{
+    FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
+}
 
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
