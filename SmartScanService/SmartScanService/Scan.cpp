@@ -146,6 +146,10 @@ void Scan::DataAcquisition()
 					throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
 				}
 			}
+			//raw data callback
+			if (mRawDataCallback)
+				mRawDataCallback(mInBuff);
+
 			//make sure we are not slower than the required sample rate:
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
 			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
@@ -226,6 +230,10 @@ void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> cal
 {
 	mNewDataCallback = callback;
 }
+void Scan::RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback)
+{
+	mRawDataCallback = callback;
+}
 
 void Scan::AddReference(const ReferencePoint ref)
 {
@@ -256,4 +264,9 @@ void Scan::SetUsedSensors(const std::vector<int> usedSensors)
 void Scan::SetUsedSensors()
 {
 	mUsedSensors.clear();
+}
+
+const int SmartScan::Scan::NUsedSensors() const
+{
+	return mUsedSensors.size();
 }

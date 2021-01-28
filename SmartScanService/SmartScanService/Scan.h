@@ -41,6 +41,11 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+		/// <summary>
+		/// Register a new callback function to be called whenever new raw data is available
+		/// </summary>
+		/// <param name="callback"> - the efunction to be called back.</param>
+		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
 		/// <summary>
 		/// return the status of the scan
@@ -62,6 +67,12 @@ namespace SmartScan
 		const double GetSampleRate() const;
 		void SetUsedSensors(const std::vector<int> usedSensors);
 		void SetUsedSensors();
+
+		/// <summary>
+		/// return the number of sensors used for the measurement. Excluding the reference sensor(s)
+		/// </summary>
+		/// <returns> - number of sensors used</returns>
+		const int NUsedSensors() const;
 
 #pragma endregion configuration
 
@@ -129,6 +140,9 @@ namespace SmartScan
 
 		//new data callback
 		std::function<void(std::vector<Point3>&)> mNewDataCallback;
+		//raw data callback
+		std::function<void(std::vector<Point3>&)> mRawDataCallback;
+
 #pragma endregion data aquisition:
 	};
 }

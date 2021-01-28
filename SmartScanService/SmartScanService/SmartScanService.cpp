@@ -253,6 +253,16 @@ void SmartScanService::RegisterNewDataCallback(std::function<void(std::vector<Po
 	}
 }
 
+void SmartScanService::RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback)
+{
+	mRawCallback = callback;
+	//register this callback with all the existing Scans:
+	for (auto& scan : scans)
+	{
+		scan->RegisterRawDataCallback(mRawCallback);
+	}
+}
+
 void SmartScanService::CalibrateReferencePoints()
 {
 	int refCount;
