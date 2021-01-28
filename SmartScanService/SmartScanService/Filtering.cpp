@@ -299,9 +299,3 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Po
     return vectorSet;
 
 }
-
-
-
-
-
-

@@ -17,9 +17,18 @@ namespace SmartScan
 	{
 	public:
 		const int mId;
-
+		/// <summary>
+		/// raw data vector
+		/// </summary>
 		std::vector<Point3> mInBuff;
+		/// <summary>
+		/// Filtered data vector
+		/// </summary>
 		std::vector<Point3> mOutBuff;
+		/// <summary>
+		/// reference sensor data vector
+		/// </summary>
+		std::vector<Point3> mRefBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 
@@ -32,6 +41,11 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+		/// <summary>
+		/// Register a new callback function to be called whenever new raw data is available
+		/// </summary>
+		/// <param name="callback"> - the efunction to be called back.</param>
+		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
 		/// <summary>
 		/// return the status of the scan
@@ -53,6 +67,12 @@ namespace SmartScan
 		const double GetSampleRate() const;
 		void SetUsedSensors(const std::vector<int> usedSensors);
 		void SetUsedSensors();
+
+		/// <summary>
+		/// return the number of sensors used for the measurement. Excluding the reference sensor(s)
+		/// </summary>
+		/// <returns> - number of sensors used</returns>
+		const int NUsedSensors() const;
 
 #pragma endregion configuration
 
@@ -101,6 +121,7 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;
 
 		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
+		int mRefSensorId = 0;
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;
@@ -108,7 +129,9 @@ namespace SmartScan
 		void DataFiltering();
 		bool mStopFiltering = false;
 
-		int lastFilteredSample = 0;
+		const unsigned int frameSize = 150;
+		unsigned int frameCounter = 0;
+		unsigned long lastFilteredSample = 0;
 
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
@@ -117,6 +140,9 @@ namespace SmartScan
 
 		//new data callback
 		std::function<void(std::vector<Point3>&)> mNewDataCallback;
+		//raw data callback
+		std::function<void(std::vector<Point3>&)> mRawDataCallback;
+
 #pragma endregion data aquisition:
 	};
 }

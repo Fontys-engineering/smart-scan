@@ -136,12 +136,20 @@ void Scan::DataAcquisition()
 							}
 						}
 					}
+					if (i == mRefSensorId)
+					{
+						mRefBuff.push_back(newSample);
+					}
 				}
 				catch (...)
 				{
 					throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
 				}
 			}
+			//raw data callback
+			if (mRawDataCallback)
+				mRawDataCallback(mInBuff);
+
 			//make sure we are not slower than the required sample rate:
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
 			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
@@ -171,23 +179,37 @@ void Scan::DataFiltering()
 		const int inSize = mInBuff.size();
 		const int outSize = mOutBuff.size();
 
-		if (mInBuff.size() > mOutBuff.size()) {
-			//for now just add it to the out buff:
+		if (inSize > (lastFilteredSample) && frameCounter < frameSize)
+		{
+			//add the new data to the output buffer:
 			try
 			{
-				if (outSize < inSize && inSize > 0)
-				{
-					mOutBuff.push_back(mInBuff[inSize-1]);
-					//new data added. refresh the UI if callback available:
-					if (mNewDataCallback)
-					{
-						mNewDataCallback(mOutBuff);
-					}
-				}
+				mOutBuff.push_back(mInBuff.begin()[lastFilteredSample]);
+				++frameCounter;
+				++lastFilteredSample;
+
 			}
 			catch (...)
 			{
-				throw ex_scan("Can't add record to output buffer", __func__, __FILE__);
+				throw ex_scan("Could not get sample from input buffer", __func__, __FILE__);
+			}
+		}
+		else if (frameCounter >= frameSize){
+			try
+			{
+				//done with the frame, filter it:
+				//for example, only keep a third (middle):
+				mOutBuff.erase(mOutBuff.end() - frameSize, mOutBuff.end() - (2 * frameSize / 3));
+				mOutBuff.erase(mOutBuff.end() - (frameSize / 3) , mOutBuff.end());
+				//when filtering is done, execute the callback:
+				if(mNewDataCallback)
+					mNewDataCallback(mOutBuff);
+
+				frameCounter = 0;
+			}
+			catch (...)
+			{
+				throw "nasty";
 			}
 		}
 	}
@@ -207,6 +229,10 @@ void Scan::DumpData() const
 void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback)
 {
 	mNewDataCallback = callback;
+}
+void Scan::RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback)
+{
+	mRawDataCallback = callback;
 }
 
 void Scan::AddReference(const ReferencePoint ref)
@@ -238,4 +264,9 @@ void Scan::SetUsedSensors(const std::vector<int> usedSensors)
 void Scan::SetUsedSensors()
 {
 	mUsedSensors.clear();
+}
+
+const int SmartScan::Scan::NUsedSensors() const
+{
+	return mUsedSensors.size();
 }

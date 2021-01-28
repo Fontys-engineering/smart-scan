@@ -9,14 +9,12 @@
 
 using namespace SmartScan;
 
+#include <iomanip>;
 
 int main()
 {
 	
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
-
-	//create a new SmartScanService object with mock data:
-	SmartScanService s3(mockMode);
 
 	//initialise the service:
 	try {
@@ -30,7 +28,7 @@ int main()
 	}
 	catch (ex_trakStar& e)
 	{
-		std::cerr << "TrakSTAR exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
+		std::cerr << "\nTrakSTAR exception: " << e.what() << "\nthrown in " << e.get_function() << " in " << e.get_file() << std::endl << std::endl;
 	}
 	catch (ex_scan& e)
 	{
@@ -61,10 +59,6 @@ int main()
 			{
 				//start a scan using only the known good sensors:
 				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
-			}
-			catch (std::exception e)
-			{
-				std::cerr << e.what() << std::endl;
 			}
 			catch (ex_trakStar e)
 			{
@@ -135,6 +129,44 @@ int main()
 		{
 			s3.DumpScan();
 		}
+		else if (!strcmp(cmd, "raw-dump"))
+		{
+			//make sure:
+			std::cout << "This command will start printing the raw values of the latest started scan to console as they come in with no option to stop. Do you want to proceed? (y/n)" << std::endl;
+			char c;
+			std::cin >> c;
+			if (c == 'y' || c == 'Y')
+			{
+				//register the callback:
+				try
+				{
+					//slow it down a bit first:
+					s3.GetScan()->SetSampleRate(10);
+					s3.RegisterRawDataCallback(RawPrintCallback);
+				}
+				catch (ex_trakStar e)
+				{
+					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				}
+				catch (ex_smartScan e)
+				{
+					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				}
+				catch (ex_scan e)
+				{
+					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				}
+				catch (...)
+				{
+					std::cerr << "Unnable to attach callback due to an unknow error. \n";
+				}
+
+			}
+			else
+			{
+				std::cout << "operation aborted" << std::endl;
+			}
+		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7))
 		{
 			//cut the filepath out:
@@ -167,15 +199,7 @@ int main()
 		{
 			Usage();
 		}
-	} while (strcmp(cmd, "exit"));
-
-	////example Point3:
-	//double x = 1;
-	//double y = 2;
-	//double z = 3;
-	//Point3 exampleDataPoint(x, y, z);
-
-	//std::cout << "Point3 Example: x=" << exampleDataPoint.x << " y=" << exampleDataPoint.y << " z=" << exampleDataPoint.z << std::endl;
+	} while (strcmp(cmd, "exit"));	
 }
 
 
@@ -197,6 +221,7 @@ void Usage()
 	std::cout << "\t stop [id]\t\t\t Stop the latest (running) measurement" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
+	std::cout << "\t raw-dump \t\t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
@@ -212,9 +237,17 @@ void Usage()
 
 }
 
-void TestUICallback(std::vector<SmartScan::Point3>& data)
+void RawPrintCallback(std::vector<SmartScan::Point3>& data)
 {
-	std::cout << "New data:" << data.back().x << std::endl;
+	if (data.size() > s3.GetScan()->NUsedSensors() && data.size() % s3.GetScan()->NUsedSensors() == 0)
+	{
+		std::cout<<"\r                                                          \rsz:"<< data.size()<< "\t";
+		for (int i = s3.GetScan()->NUsedSensors(); i > 0; i--)
+		{
+			std::cout << "\t"<< std::setprecision(5) << data.end()[-i].x << "\t" << data.end()[-i].y << "\t" << data.end()[-i].z << "\t";
+		}
+	}
+	
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

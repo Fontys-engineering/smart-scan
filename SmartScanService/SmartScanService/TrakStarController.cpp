@@ -28,7 +28,8 @@ void TrakStarController::Init()
 	errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
 	{
-		throw ex_trakStar(GetErrorString(errorCode).c_str() , __func__, __FILE__);
+		//ErrorHandler(errorCode);
+		throw ex_trakStar(GetErrorString(errorCode), __func__, __FILE__);
 	}
 }
 
@@ -75,24 +76,12 @@ void TrakStarController::Config()
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
-	//line frquency
-	double buffer = 50.0;			// only 2 values are legal: 50 and 60 (Hz)
-	double* pBuffer = &buffer;
-	printf("POWER_LINE_FREQUENCY: %5.2f\n", buffer);
-	errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, pBuffer, sizeof(buffer));
-	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
-	//sample rate
-	printf("MEASUREMENT_RATE: %5.2f\n", buffer);
-	errorCode = SetSystemParameter(MEASUREMENT_RATE, pBuffer, sizeof(buffer));
-	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
-
-	//non-retard units:
-	BOOL bufferM = true;												// set metric reporting = true
-	BOOL* pBufferM = &bufferM;
-	printf("METRIC: %d\n", bufferM);
-	errorCode = SetSystemParameter(METRIC, pBufferM, sizeof(bufferM));
-	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+	SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER, 0);
+	SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY, 50.0);
+	SET_SYSTEM_PARAMETER(MEASUREMENT_RATE, 50);
+	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
+	SET_SYSTEM_PARAMETER(METRIC, true);
 }
 
 void TrakStarController::AttachSensor()
@@ -291,7 +280,7 @@ Point3 TrakStarController::GetMockRecordFromFile()
 		//close the file
 		mockDataFile.close();
 		//try again:
-		newPoint = GetMockRecordFromFile();
+		return GetMockRecordFromFile();
 	}
 	//parse the coorindates from the line:
 	for (int c = 5; c >= 0; c--)
@@ -353,21 +342,18 @@ void TrakStarController::ErrorHandler(int error)
 
 		printf("%s", buffer);
 		//throw ex_trakStar(buffer, __func__, __FILE__);
-		printf("%s", buffer);
 	}
 }
 
 const std::string TrakStarController::GetErrorString(int error)
 {
 	char			buffer[1024];
-	char* pBuffer = &buffer[0];
-	int				numberBytes;
 	std::string errorString;
 
 	if (error != BIRD_ERROR_SUCCESS)
 	{
-		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
-		errorString =  buffer[0];
+		error = GetErrorText(error, buffer, sizeof(buffer), SIMPLE_MESSAGE);
+		errorString =  buffer;
 		return errorString;
 	}
 }
