@@ -17,6 +17,7 @@ Scan::~Scan()
 void Scan::Run(bool acqusitionOnly)
 {
 	//check if reference points have been defined:
+	mStopDataAcquisition = mStopFiltering = false;
 
 	//check wether trak star controller has been initialised 
 	if (!pTSCtrl)
@@ -50,7 +51,7 @@ void Scan::Run(bool acqusitionOnly)
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetResolution(0, 0);
+			mF.SetResolution(20, 20);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -93,6 +94,7 @@ void Scan::Stop(bool clearData)
 	{
 		mInBuff.clear();
 		mOutBuff.clear();
+		mRefBuff.clear();
 	}
 
 	mRunning = false;
@@ -212,9 +214,9 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				//auto refCopy = mRefBuff;
+				auto refCopy = mRefBuff;
 				auto mOutCopy = mOutBuff;
-				mF.Filter(mOutCopy);
+				mF.Filter(mOutCopy, refCopy);
 				mRefBuff.clear();
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)

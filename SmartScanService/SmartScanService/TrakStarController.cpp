@@ -44,23 +44,6 @@ void TrakStarController::Config()
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
-	// contains the following:
-	printf("Number Boards          = %d\n", ATC3DG.m_config.numberBoards);
-	printf("Number Sensors         = %d\n", ATC3DG.m_config.numberSensors);
-	printf("Number Transmitters    = %d\n\n", ATC3DG.m_config.numberTransmitters);
-
-	printf("System AGC mode	       = %d\n", ATC3DG.m_config.agcMode);
-	printf("Maximum Range          = %6.2f\n", ATC3DG.m_config.maximumRange);
-	printf("Measurement Rate       = %10.6f\n", ATC3DG.m_config.measurementRate);
-	printf("Metric Mode            = %d\n", ATC3DG.m_config.metric);
-	printf("Line Frequency         = %6.2f\n", ATC3DG.m_config.powerLineFrequency);
-	printf("Transmitter ID Running = %d\n", ATC3DG.m_config.transmitterIDRunning);
-
 	//sensor
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
 	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
@@ -82,6 +65,24 @@ void TrakStarController::Config()
 	SET_SYSTEM_PARAMETER(MEASUREMENT_RATE, 50);
 	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
 	SET_SYSTEM_PARAMETER(METRIC, true);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
+	// contains the following:
+	printf("Number Boards          = %d\n", ATC3DG.m_config.numberBoards);
+	printf("Number Sensors         = %d\n", ATC3DG.m_config.numberSensors);
+	printf("Number Transmitters    = %d\n\n", ATC3DG.m_config.numberTransmitters);
+
+	printf("System AGC mode	       = %d\n", ATC3DG.m_config.agcMode);
+	printf("Maximum Range          = %6.2f\n", ATC3DG.m_config.maximumRange);
+	printf("Measurement Rate       = %10.6f\n", ATC3DG.m_config.measurementRate);
+	printf("Metric Mode            = %d\n", ATC3DG.m_config.metric);
+	printf("Line Frequency         = %6.2f\n", ATC3DG.m_config.powerLineFrequency);
+	printf("Transmitter ID Running = %d\n", ATC3DG.m_config.transmitterIDRunning);
+
 }
 
 void TrakStarController::AttachSensor()

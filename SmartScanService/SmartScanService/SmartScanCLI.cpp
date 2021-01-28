@@ -181,6 +181,20 @@ int main()
 				std::cerr << "Could not export csv file \n";
 			}
 		}
+		else if (strlen(cmd) > 7 && !strncmp(cmd, "export-raw ", 11))
+		{
+		//cut the filepath out:
+		std::string filepath = cmd;
+		std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
+		try {
+			s3.ExportCSV(filepath.substr(11), true);
+			std::cout << "Done.\n";
+		}
+		catch (...)
+		{
+			std::cerr << "Could not export csv file \n";
+		}
+		}
 		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
 		{
 			//cut the filepath out:
@@ -224,6 +238,7 @@ void Usage()
 	std::cout << "\t raw-dump \t\t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export-raw [filename] \t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "System preferences" << std::endl;

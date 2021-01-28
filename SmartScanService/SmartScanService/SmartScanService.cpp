@@ -1,6 +1,7 @@
 #include "SmartScanService.h"
 #include "Exceptions.h"
 #include <chrono>
+#include <iomanip>
 
 using namespace SmartScan;
 
@@ -144,7 +145,7 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 		{
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
-		scans.back()->Run();
+		scans.back()->Run(false);
 	}
 	catch (ex_scan e)
 	{
@@ -314,6 +315,7 @@ void SmartScanService::CalibrateReferencePoints()
 		unsigned long recordId = 0;
 		while (!refSet)
 		{
+			std::cout << "\r";
 			for (unsigned int fingerIndex = 0; fingerIndex < prevFrame.size(); fingerIndex++)
 			{
 				if (scans.back()->mInBuff.size() > recordId)
@@ -327,6 +329,8 @@ void SmartScanService::CalibrateReferencePoints()
 					{
 						startTime = std::chrono::steady_clock::now();
 					}
+
+					std::cout << std::setprecision(5) << currentFrame[fingerIndex].x << "\t" << currentFrame[fingerIndex].y << "\t" << currentFrame[fingerIndex].z << "\t";
 				}
 
 			}
@@ -369,7 +373,7 @@ void SmartScanService::CalibrateReferencePoints()
 	}
 
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
-	scans.back()->Stop();
+	scans.back()->Stop(true);
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
 }
