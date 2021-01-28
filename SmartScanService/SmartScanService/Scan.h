@@ -122,7 +122,7 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;
 
 		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
-		int mRefSensorId = 0;
+		int mRefSensorId = 2;
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;
@@ -130,7 +130,7 @@ namespace SmartScan
 		void DataFiltering();
 		bool mStopFiltering = false;
 
-		const unsigned int frameSize = 150;
+		const unsigned int frameSize = 100;
 		unsigned int frameCounter = 0;
 		unsigned long lastFilteredSample = 0;
 
