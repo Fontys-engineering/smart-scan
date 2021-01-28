@@ -14,7 +14,7 @@ Scan::~Scan()
 	this->Stop(true);
 }
 
-void Scan::Run()
+void Scan::Run(bool acqusitionOnly)
 {
 	//check if reference points have been defined:
 
@@ -44,31 +44,33 @@ void Scan::Run()
 	//let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
-	// Set up Filtering object
-	try
+	if (!acqusitionOnly)
 	{
-		mF.SetReferencePoints(mReferencePoints);
-		mF.SetResolution(0 , 0);
-		mF.SetFrameSize(frameSize);
-	}
-	catch (...)
-	{
-		throw ex_scan("Unable to set Filtering References and Resolution", __func__, __FILE__);
-	}
+		// Set up Filtering object
+		try
+		{
+			mF.SetReferencePoints(mReferencePoints);
+			mF.SetResolution(0, 0);
+			mF.SetFrameSize(frameSize);
+		}
+		catch (...)
+		{
+			throw ex_scan("Unable to set Filtering References and Resolution", __func__, __FILE__);
+		}
 
-	//start the filtering thread:
-	try
-	{
-		this->pFilteringThread = std::make_unique<std::thread>(&Scan::DataFiltering, this);
-	}
-	catch (...)
-	{
-		throw ex_scan("unnable to start filtering thread", __func__, __FILE__);
-	}
+		//start the filtering thread:
+		try
+		{
+			this->pFilteringThread = std::make_unique<std::thread>(&Scan::DataFiltering, this);
+		}
+		catch (...)
+		{
+			throw ex_scan("unnable to start filtering thread", __func__, __FILE__);
+		}
 
-	//let it gooooo, let it gooo
-	this->pFilteringThread->detach();
-
+		//let it gooooo, let it gooo
+		this->pFilteringThread->detach();
+	}
 	mRunning = true;
 }
 
@@ -210,9 +212,9 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				auto refCopy = mRefBuff;
+				//auto refCopy = mRefBuff;
 				auto mOutCopy = mOutBuff;
-				mF.Filter(mOutCopy, refCopy);
+				mF.Filter(mOutCopy);
 				mRefBuff.clear();
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)

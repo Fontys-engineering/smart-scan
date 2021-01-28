@@ -35,7 +35,7 @@ namespace SmartScan
 
 		~Scan();
 
-		void Run();
+		void Run(bool acqusitionOnly = false);
 		void Stop(bool clearData = false);
 		/// <summary>
 		/// Register a new callback function to be called whenever new filtered data is available

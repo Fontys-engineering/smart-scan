@@ -86,10 +86,11 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		this->scans.back()->SetUsedSensors(sensorIds);
 	}
 
-	std::vector<ReferencePoint> ref;
-	ref.emplace_back(ReferencePoint(0, 0, 0, 0));
-
-	SetReferencePoints(ref);
+	//check if reference points have been set;
+	if (!scans.back()->GetReferences().size())
+	{
+		throw ex_smartScan("cannot start scan without reference points set.", __func__, __FILE__);
+	}
 
 	//start the scan:
 	try
@@ -296,7 +297,8 @@ void SmartScanService::CalibrateReferencePoints()
 
 	//start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
-	scans.back()->Run();
+	//acquisition only
+	scans.back()->Run(true);
 	//do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
 	{
