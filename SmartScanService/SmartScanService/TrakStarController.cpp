@@ -66,6 +66,26 @@ void TrakStarController::Config()
 	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
 	SET_SYSTEM_PARAMETER(METRIC, true);
 
+	//system
+	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
+	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+
+	//sensor
+	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
+	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	{
+		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
+		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+	}
+
+	//transmitter
+	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
+	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
+	{
+		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
+		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
