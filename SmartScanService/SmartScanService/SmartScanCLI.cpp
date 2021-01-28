@@ -5,6 +5,7 @@
 //include all the libraries and sub-classes:
 #include "SmartScanCLI.h"
 #include "Exceptions.h"
+#include "Filtering.h"
 
 using namespace SmartScan;
 
@@ -12,6 +13,7 @@ using namespace SmartScan;
 
 int main()
 {
+	
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
 	//initialise the service:

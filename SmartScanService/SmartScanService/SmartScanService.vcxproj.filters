@@ -9,6 +9,7 @@
     <ClCompile Include="SmartScanService.cpp" />
     <ClCompile Include="TrakStarController.cpp" />
     <ClCompile Include="Trigger.cpp" />
+    <ClCompile Include="ReferencePoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVExport.h" />

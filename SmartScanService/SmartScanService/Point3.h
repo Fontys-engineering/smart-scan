@@ -13,16 +13,28 @@ namespace SmartScan
         Rotation3(double x, double y, double z);
     };
 
+    class Spherical3
+    {
+    public:
+        double r, phi, theta;
+
+        Spherical3();
+        Spherical3(double r, double phi, double theta);
+    };
 
     class Point3
     {
     public:
         double x, y, z;
         Rotation3 r;
+        Spherical3 s;
 
         Point3();
         Point3(double x, double y, double z);
         Point3(double x, double y, double z, Rotation3 r);
+        Point3(double x, double y, double z, Spherical3 s);
+        Point3(double x, double y, double z, Rotation3 r, Spherical3 s);
         Point3(double x, double y, double z, double rx, double ry, double rz);
+        Point3(double x, double y, double z, double rx, double ry, double rz, double sr, double sphi, double stheta);
     };
 }
