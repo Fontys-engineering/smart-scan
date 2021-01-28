@@ -280,7 +280,7 @@ Point3 TrakStarController::GetMockRecordFromFile()
 		//close the file
 		mockDataFile.close();
 		//try again:
-		newPoint = GetMockRecordFromFile();
+		return GetMockRecordFromFile();
 	}
 	//parse the coorindates from the line:
 	for (int c = 5; c >= 0; c--)

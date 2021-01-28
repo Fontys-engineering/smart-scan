@@ -121,6 +121,12 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+		/// <summary>
+		/// Register a new callback function to be called whenever new raw data is available.
+		/// The raw data vector is provided through a reference as a parameter of the callback function.
+		/// </summary>
+		/// <param name="callback"></param>
+		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
 		//TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
 		// while new data is acquired usign a different Scan object"
@@ -163,6 +169,8 @@ namespace SmartScan
 
 		//UI callback:
 		std::function<void(std::vector<Point3>&)> mUICallback;
+		//raw callback:
+		std::function<void(std::vector<Point3>&)> mRawCallback;
 
 		//calibration and configuration:
 		int mThumbSensorId = 0;
