@@ -12,8 +12,7 @@ using namespace SmartScan;
 
 int main()
 {
-
-
+	
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
 	//create a new SmartScanService object with mock data:

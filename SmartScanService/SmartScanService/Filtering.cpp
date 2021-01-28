@@ -8,6 +8,7 @@ SmartScan::Filtering::Filtering()
 {
 
 }
+SmartScan::Filtering::Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }{}
 
 // RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
@@ -25,7 +26,7 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
     std::vector<Point3> outputData;
     unsigned int nOfSensors = data.size() / referenceData.size();
     // Recoordinate every point to the first point's orientation
-    for (unsigned int i = 0; i < referenceData.size() - 1; i++)
+    for (unsigned int i = 0; i < referenceData.size(); i++)
     {
         for (unsigned int j = 0; j < nOfSensors; j++)
         {
@@ -57,20 +58,20 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
             // Use the azimuth to calculate the rotation around the z-axis
             const double azimuth_distance = sqrt(pow(x, 2) + pow(y, 2));
             const double a = (atan2(y, x) * 180 / pi) - azimuth_diff;
-            x_new = azimuth_distance * cos(a);
-            y_new = azimuth_distance * sin(a);
+            x_new = azimuth_distance * cos(a * pi/180);
+            y_new = azimuth_distance * sin(a * pi/180);
 
             // Use the elevation to calculate the rotation around the y-axis
             const double elevation_distance = sqrt(pow(x_new, 2) + pow(z, 2));
             const double b = (atan2(z, x_new) * 180 / pi) + elevation_diff;
-            x_new = elevation_distance * cos(b);
-            y_new = elevation_distance * sin(b);
+            x_new = elevation_distance * cos(b * pi / 180);
+            z_new = elevation_distance * sin(b * pi / 180);
 
             // Use the roll difference to calculate the rotation around the x-axis
             const double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
             const double c = (atan2(z_new, y_new) * 180 / pi) - roll_diff;
-            y_new = roll_distance * cos(c);
-            z_new = roll_distance * sin(c);
+            y_new = roll_distance * cos(c * pi / 180);
+            z_new = roll_distance * sin(c * pi / 180);
 
             outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
             

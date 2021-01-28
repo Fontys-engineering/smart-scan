@@ -12,6 +12,7 @@ namespace SmartScan
 	{
 	public:
 		Filtering();
+		Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range);
 
 		/// <summary>
 		/// process the data in place and keep only the filtered data points
@@ -34,22 +35,6 @@ namespace SmartScan
 		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
 
 		void SetResolution(double phi_range, double theta_range);
-	
-		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
-
-		// Tests if a point is valid or not, by testing if there are other points
-		// within the phiand theta range, somewhere in the array.Output is true or
-		// false depending on if the point is overlapping anotherand if it's R
-		// value is lower or not.
-		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
-
-		// Sort the data point between which reference point is closest to it. 
-		// Inputs: m_data : Measurement Data
-		//		   s_data : Spherical coordinate Data
-		//         ref_data : Reference point Data
-		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
-
-		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
 
 	private:
 		//reference points (for gradient smoothing)
@@ -70,5 +55,20 @@ namespace SmartScan
 	
 		double findMean(double a[], int n);
 
+		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
+
+		// Tests if a point is valid or not, by testing if there are other points
+		// within the phiand theta range, somewhere in the array.Output is true or
+		// false depending on if the point is overlapping anotherand if it's R
+		// value is lower or not.
+		bool TestPoint(std::vector<Point3>& data, double phi_range, double theta_range, int index);
+
+		// Sort the data point between which reference point is closest to it. 
+		// Inputs: m_data : Measurement Data
+		//		   s_data : Spherical coordinate Data
+		//         ref_data : Reference point Data
+		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
+
+		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
 	};
 }
