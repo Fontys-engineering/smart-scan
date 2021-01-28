@@ -51,7 +51,7 @@ void Scan::Run(bool acqusitionOnly)
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetResolution(20, 20);
+			mF.SetResolution(4, 4);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -214,9 +214,9 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				auto refCopy = mRefBuff;
-				auto mOutCopy = mOutBuff;
-				mF.Filter(mOutCopy, refCopy);
+				//auto refCopy = mRefBuff;
+				//auto mOutCopy = mOutBuff;
+				mF.Filter(mOutBuff);
 				mRefBuff.clear();
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)

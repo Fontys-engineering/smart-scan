@@ -75,5 +75,8 @@ namespace SmartScan
 		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
 
 		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
+	
+
+		
 	};
 }
