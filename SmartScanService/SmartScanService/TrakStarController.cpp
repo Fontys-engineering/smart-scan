@@ -160,7 +160,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 
 	if (status == VALID_STATUS)
 	{
-		return Point3(record.x, record.y, record.z, record.a, record.e, record.r);
+		return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
 	}
 	else
 	{
