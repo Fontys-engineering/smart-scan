@@ -8,7 +8,7 @@
 ## Getting started:
 * Download a git client (i.e. [Github Desktop](https://desktop.github.com/) )
 * Clone this repository to a desired location
-* Open the .sln file from SmartScanCLI with *Visual Studio 2019*
+* Open the .sln file from SmartScanCLI with **Visual Studio 2019**
 * Switch to Debug/x64 (if necessary)
 * (if necessary) Go to project>SmartScanCLI Properties
 * * In C++ add the path to the SmartScanService.h file, and the path to ATC3DG.h (inside the NDI folder) to "Additional Include directories"
@@ -32,4 +32,13 @@
 8. Implement your changes into the develop branch by doing a *pull request*. (in github desktop: Branch> create pull request or ctrl+R). Make sure to add the repositiory maintainer (Eduard) and at least one of your team members as a reviewer. Once all reviewers have approved the pull request, the maintainer (Eduard) will merge the changes into the develop branch.
 
 ### C++
-To be added.
+#### SmartScanService
+1. Make desired changes
+2. Build for x64/Debug
+3. Test by building and running SmartScanCLI for x64/Debug
+
+#### SmartScanCLI
+1. Make changes 
+2. Make sure there is a SmartScanService.lib already compiled, otherwise build SmartScanService first
+3. Build for x64/Debug
+4. Run the generated .exe (make sure you have ATC3DG64.DLL in the same folder)
