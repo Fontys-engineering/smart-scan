@@ -2,15 +2,22 @@
 
 ## Folder Structure:
 1. Root
-    1. Matlab = Matlab code used for the filtering
-    2. SmartScanService - The main c++ project
+    1. SmartScanCLI - Command Line User Interface implementation of the library
+    2. SmartScanService - The SmartScan library 
 
 ## Getting started:
 * Download a git client (i.e. [Github Desktop](https://desktop.github.com/) )
 * Clone this repository to a desired location
-* Open the .sln file with Visual Studio 2019
-* Run (F5)
-
+* Open the .sln file from SmartScanCLI with *Visual Studio 2019*
+* Switch to Debug/x64 (if necessary)
+* (if necessary) Go to project>SmartScanCLI Properties
+* * In C++ add the path to the SmartScanService.h file, and the path to ATC3DG.h (inside the NDI folder) to "Additional Include directories"
+* * In Linker>General add the path to the SmartScanService.lib file (SmartScanService/x64/Debug/) and the path to ATC3DG.lib (SmartScanService/NDI/) to "Additional Library Directories". if SmartScanService.lib is missing, build the SmartScanService project first
+* * In Linker>Input add the complete path (including the lib name and extension) to both SmartScanService.lib and ATC3DG.lib to "Additional Deppendencies"
+* Pick between mock data mode or real data mode by changin the variable in SmartScanCLI.h
+* Run (F5). It will fail due to missing ATC3DG64.DLL.
+* Add the "ATC3DG64.DLL" file from SmartScanService/NDI to the same folder as the generated SmartScanCLI.exe (x64/Debug/)
+* Run (F5).
 
 ## Development workflow:
 ### Git
