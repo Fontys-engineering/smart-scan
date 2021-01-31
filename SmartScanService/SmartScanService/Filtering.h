@@ -36,6 +36,8 @@ namespace SmartScan
 
 		void SetResolution(double phi_range, double theta_range);
 
+		void SetFrameSize(const unsigned int& framesize);
+
 	private:
 		//reference points (for gradient smoothing)
 		std::vector<ReferencePoint> referencePoints;
@@ -43,6 +45,9 @@ namespace SmartScan
 		//properties:
 		double phi_range = 4;
 		double theta_range = 4;
+
+		// Frame size of the measurement
+		unsigned int mFramesize;
 
 		//Filtering helper methods:
 		void RotationOrientation(std::vector<Point3>& data, std::vector<Point3>& referenceData);
@@ -70,5 +75,8 @@ namespace SmartScan
 		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
 
 		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
+	
+
+		
 	};
 }

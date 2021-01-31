@@ -14,9 +14,10 @@ Scan::~Scan()
 	this->Stop(true);
 }
 
-void Scan::Run()
+void Scan::Run(bool acqusitionOnly)
 {
 	//check if reference points have been defined:
+	mStopDataAcquisition = mStopFiltering = false;
 
 	//check wether trak star controller has been initialised 
 	if (!pTSCtrl)
@@ -44,20 +45,33 @@ void Scan::Run()
 	//let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
-
-	//start the filtering thread:
-	try
+	if (!acqusitionOnly)
 	{
-		this->pFilteringThread = std::make_unique<std::thread>(&Scan::DataFiltering, this);
-	}
-	catch (...)
-	{
-		throw ex_scan("unnable to start filtering thread", __func__, __FILE__);
-	}
+		// Set up Filtering object
+		try
+		{
+			mF.SetReferencePoints(mReferencePoints);
+			mF.SetResolution(4, 4);
+			mF.SetFrameSize(frameSize);
+		}
+		catch (...)
+		{
+			throw ex_scan("Unable to set Filtering References and Resolution", __func__, __FILE__);
+		}
 
-	//let it gooooo, let it gooo
-	this->pFilteringThread->detach();
+		//start the filtering thread:
+		try
+		{
+			this->pFilteringThread = std::make_unique<std::thread>(&Scan::DataFiltering, this);
+		}
+		catch (...)
+		{
+			throw ex_scan("unnable to start filtering thread", __func__, __FILE__);
+		}
 
+		//let it gooooo, let it gooo
+		this->pFilteringThread->detach();
+	}
 	mRunning = true;
 }
 
@@ -80,6 +94,7 @@ void Scan::Stop(bool clearData)
 	{
 		mInBuff.clear();
 		mOutBuff.clear();
+		mRefBuff.clear();
 	}
 
 	mRunning = false;
@@ -199,8 +214,10 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				mOutBuff.erase(mOutBuff.end() - frameSize, mOutBuff.end() - (2 * frameSize / 3));
-				mOutBuff.erase(mOutBuff.end() - (frameSize / 3) , mOutBuff.end());
+				//auto refCopy = mRefBuff;
+				//auto mOutCopy = mOutBuff;
+				mF.Filter(mOutBuff);
+				mRefBuff.clear();
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)
 					mNewDataCallback(mOutBuff);

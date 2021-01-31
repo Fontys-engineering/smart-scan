@@ -2,6 +2,7 @@
 
 #include "Point3.h"
 #include "ReferencePoint.h"
+#include "Filtering.h"
 #include "TrakStarController.h"
 
 #include <vector>
@@ -34,7 +35,7 @@ namespace SmartScan
 
 		~Scan();
 
-		void Run();
+		void Run(bool acqusitionOnly = false);
 		void Stop(bool clearData = false);
 		/// <summary>
 		/// Register a new callback function to be called whenever new filtered data is available
@@ -121,7 +122,7 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;
 
 		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
-		int mRefSensorId = 0;
+		int mRefSensorId = 2;
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;
@@ -129,7 +130,7 @@ namespace SmartScan
 		void DataFiltering();
 		bool mStopFiltering = false;
 
-		const unsigned int frameSize = 150;
+		const unsigned int frameSize = 100;
 		unsigned int frameCounter = 0;
 		unsigned long lastFilteredSample = 0;
 
@@ -144,5 +145,7 @@ namespace SmartScan
 		std::function<void(std::vector<Point3>&)> mRawDataCallback;
 
 #pragma endregion data aquisition:
+	
+		Filtering mF;
 	};
 }

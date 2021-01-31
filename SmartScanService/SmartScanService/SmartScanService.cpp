@@ -1,6 +1,7 @@
 #include "SmartScanService.h"
 #include "Exceptions.h"
 #include <chrono>
+#include <iomanip>
 
 using namespace SmartScan;
 
@@ -86,6 +87,12 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		this->scans.back()->SetUsedSensors(sensorIds);
 	}
 
+	//check if reference points have been set;
+	if (!scans.back()->GetReferences().size())
+	{
+		throw ex_smartScan("cannot start scan without reference points set.", __func__, __FILE__);
+	}
+
 	//start the scan:
 	try
 	{
@@ -138,7 +145,7 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 		{
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
-		scans.back()->Run();
+		scans.back()->Run(false);
 	}
 	catch (ex_scan e)
 	{
@@ -291,7 +298,8 @@ void SmartScanService::CalibrateReferencePoints()
 
 	//start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
-	scans.back()->Run();
+	//acquisition only
+	scans.back()->Run(true);
 	//do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
 	{
@@ -307,6 +315,7 @@ void SmartScanService::CalibrateReferencePoints()
 		unsigned long recordId = 0;
 		while (!refSet)
 		{
+			std::cout << "\r";
 			for (unsigned int fingerIndex = 0; fingerIndex < prevFrame.size(); fingerIndex++)
 			{
 				if (scans.back()->mInBuff.size() > recordId)
@@ -320,6 +329,8 @@ void SmartScanService::CalibrateReferencePoints()
 					{
 						startTime = std::chrono::steady_clock::now();
 					}
+
+					std::cout << std::setprecision(5) << currentFrame[fingerIndex].x << "\t" << currentFrame[fingerIndex].y << "\t" << currentFrame[fingerIndex].z << "\t";
 				}
 
 			}
@@ -346,6 +357,9 @@ void SmartScanService::CalibrateReferencePoints()
 		newRef.pos.y = ((prevFrame[0].y + prevFrame[1].y) / 2);
 		newRef.pos.z = ((prevFrame[0].z + prevFrame[1].z) / 2);
 
+		//add the referenceSensorPos:
+		newRef.refSensorPos = scans.back()->mRefBuff.back();
+
 		scans.back()->AddReference(newRef);
 		std::cout << "[CALIBRATION] " << "Reference point at (" << newRef.pos.x << "," << newRef.pos.y << "," << newRef.pos.z << ") with index " << newRef.index << " set" << std::endl;
 		if (i < refCount)
@@ -362,7 +376,7 @@ void SmartScanService::CalibrateReferencePoints()
 	}
 
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
-	scans.back()->Stop();
+	scans.back()->Stop(true);
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
 }
