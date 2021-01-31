@@ -357,6 +357,9 @@ void SmartScanService::CalibrateReferencePoints()
 		newRef.pos.y = ((prevFrame[0].y + prevFrame[1].y) / 2);
 		newRef.pos.z = ((prevFrame[0].z + prevFrame[1].z) / 2);
 
+		//add the referenceSensorPos:
+		newRef.refSensorPos = scans.back()->mRefBuff.back();
+
 		scans.back()->AddReference(newRef);
 		std::cout << "[CALIBRATION] " << "Reference point at (" << newRef.pos.x << "," << newRef.pos.y << "," << newRef.pos.z << ") with index " << newRef.index << " set" << std::endl;
 		if (i < refCount)
