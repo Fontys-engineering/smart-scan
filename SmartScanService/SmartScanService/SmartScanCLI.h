@@ -9,7 +9,7 @@
 #include "Point3.h"
 
 const bool mockMode = false;
-const std::vector<int> usedSensors = { 0,1};
+const std::vector<int> usedSensors = { 0,1,2};
 
 //create a new SmartScanService object with mock data:
 SmartScan::SmartScanService s3(mockMode);

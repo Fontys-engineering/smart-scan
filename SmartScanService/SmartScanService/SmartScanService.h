@@ -176,8 +176,8 @@ namespace SmartScan
 		int mThumbSensorId = 0;
 		int mIndexSensorId = 1;
 		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
-		const double tError = 10;			//tolerated translation error in mm
-		const double rError = 10;			//tolerated rotation error in mm
+		const double tError = 20;			//tolerated translation error in mm
+		const double rError = 20;			//tolerated rotation error in mm
 
 		/// <summary>
 		/// Looks at the scans and returns the first unused id;

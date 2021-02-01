@@ -180,6 +180,20 @@ int main()
 				std::cerr << "Could not export csv file \n";
 			}
 		}
+		else if (strlen(cmd) > 7 && !strncmp(cmd, "export-raw ", 11))
+		{
+		//cut the filepath out:
+		std::string filepath = cmd;
+		std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
+		try {
+			s3.ExportCSV(filepath.substr(11), true);
+			std::cout << "Done.\n";
+		}
+		catch (...)
+		{
+			std::cerr << "Could not export csv file \n";
+		}
+		}
 		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
 		{
 			//cut the filepath out:

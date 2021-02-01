@@ -51,7 +51,7 @@ void Scan::Run(bool acqusitionOnly)
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetResolution(4, 4);
+			mF.SetResolution(0, 0);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -153,6 +153,7 @@ void Scan::DataAcquisition()
 					}
 					if (i == mRefSensorId)
 					{
+						newSample = pTSCtrl->GetRecord(i);
 						mRefBuff.push_back(newSample);
 					}
 				}
