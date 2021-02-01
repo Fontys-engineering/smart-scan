@@ -28,8 +28,8 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
     double elevation_ref = 0;
     double roll_ref = 0;
     
-    // Declare the output data set
-    std::vector<Point3> outputData;
+    // Derive the amount of new data that comes in with the framesize
+    // and an offset at which this new data starts, also calculate the number of sensors used.
     unsigned int nOfSensors = mFramesize / referenceData.size();
     unsigned long offset = data.size() - mFramesize; 
     // Recoordinate every point to the first point's orientation
@@ -80,11 +80,11 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
             y_new = roll_distance * cos(c * pi / 180);
             z_new = roll_distance * sin(c * pi / 180);
 
-            outputData.push_back(Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0));
+            // Replace the data with the new values
+            data[(i * nOfSensors) + j] = Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0);
             
         }
     }
-    data = outputData;
 }
 
 void SmartScan::Filtering::Outlier(std::vector<Point3>& data, double phi_range, double theta_range)
