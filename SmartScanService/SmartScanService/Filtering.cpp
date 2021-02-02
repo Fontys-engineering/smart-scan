@@ -191,7 +191,7 @@ void SmartScan::Filtering::SetReferencePoints(std::vector<ReferencePoint> refere
 
 }
 
-void SmartScan::Filtering::SetResolution(double phi_range, double theta_range)
+void SmartScan::Filtering::SetPrecision(double phi_range, double theta_range)
 {
     this->phi_range = phi_range;
     this->theta_range = theta_range;

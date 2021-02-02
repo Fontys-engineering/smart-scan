@@ -106,7 +106,10 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		{
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
+		//set the resolution:
+		scans.back()->SetFilteringPrecision(mFilteringPrecision);
 		scans.back()->Run();
+
 	}
 	catch (ex_scan e)
 	{
@@ -170,6 +173,48 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 	}
 }
 
+void SmartScan::SmartScanService::CalibrateSingleRefPoint()
+{
+	if (scans.size() == 0)
+	{
+		throw ex_smartScan("No existing scan object found", __func__, __FILE__);
+	}
+
+	//reset the Scan's reference points if some already exist:
+	if (scans.back()->GetReferences().size() > 0)
+	{
+		scans.back()->ResetReferences();
+	}
+	//only use thumb and index finger:
+	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
+
+	scans.back()->SetUsedSensors(sensorsUsed);
+
+	scans.back()->Run(true);
+
+	ReferencePoint newRef;
+
+	//wait for values:
+	while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
+	{
+	}
+
+
+	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
+	//add the referenceSensorPos:
+	newRef.refSensorPos = scans.back()->mRefBuff.back();
+
+	newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2) - newRef.refSensorPos.x;
+	newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
+	newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2) - newRef.refSensorPos.z;
+
+	scans.back()->AddReference(newRef);
+
+	scans.back()->Stop(true);
+	//reset used sensors:
+	scans.back()->SetUsedSensors();
+}
+
 void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)
 {
 	if (scans.size() < 0)
@@ -201,6 +246,11 @@ void SmartScanService::DumpScan() const
 void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 {
 	scans.back()->SetUsedSensors(sensorIds);
+}
+
+void SmartScan::SmartScanService::SetFilteringPrecision(const bool precision)
+{
+	mFilteringPrecision = precision;
 }
 
 const std::shared_ptr<Scan> SmartScanService::GetScan() const
@@ -321,7 +371,7 @@ void SmartScanService::CalibrateReferencePoints()
 		ReferencePoint newRef;
 
 		//wait for values:
-		while (scans.back()->mInBuff.size() < 2)
+		while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
 		{
 		}
 

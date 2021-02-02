@@ -42,6 +42,10 @@ int main()
 	//print the help screen:
 	Usage();
 
+	//single point calibration example (For Mohamed):
+	//s3.NewScan(usedSensors,refSensorId);
+	//s3.CalibrateSingleRefPoint();
+
 	char cmd[128];
 	do {
 		std::cout << std::endl << "SmartScan>";
@@ -59,6 +63,8 @@ int main()
 			{
 				//start a scan using only the known good sensors:
 				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
+				//set the scan precision:
+				s3.SetFilteringPrecision(5);
 			}
 			catch (ex_trakStar e)
 			{

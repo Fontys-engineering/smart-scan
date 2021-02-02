@@ -63,7 +63,7 @@ void Scan::Run(bool acqusitionOnly)
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetResolution(0, 0);
+			mF.SetPrecision(mFilteringPrecision, mFilteringPrecision);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -320,4 +320,19 @@ const int SmartScan::Scan::GetReferenceSensorId()
 const int SmartScan::Scan::NUsedSensors() const
 {
 	return mUsedSensors.size();
+}
+
+void SmartScan::Scan::SetFilteringPrecision(const double precision)
+{
+	if (precision < 0)
+	{
+		throw ex_scan("Filtering precision must be positive", __func__, __FILE__);
+	}
+	mFilteringPrecision = precision;
+	mF.SetPrecision(precision,precision);
+}
+
+const double SmartScan::Scan::GetFilteringPrecision()
+{
+	return mFilteringPrecision;
 }

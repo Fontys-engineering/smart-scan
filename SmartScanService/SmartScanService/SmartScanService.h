@@ -49,6 +49,12 @@ namespace SmartScan
 		/// the reference calibration routine.
 		/// </summary>
 		void CalibrateReferencePoints();
+
+		/// <summary>
+		/// When called, it sets a single reference point between the thub and index finger
+		/// No CMDL interaction required
+		/// </summary>
+		void CalibrateSingleRefPoint();
 		/// <summary>
 		/// Set the reference points for the latest scan object:
 		/// </summary>
@@ -106,6 +112,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void SetUsedSensors(const std::vector<int> sensorIds);
+
+		void SetFilteringPrecision(const bool precision);
 
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.
@@ -183,6 +191,8 @@ namespace SmartScan
 		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
 		const double tError = 20;			//tolerated translation error in mm
 		const double rError = 20;			//tolerated rotation error in mm
+
+		double mFilteringPrecision = 4;
 
 		/// <summary>
 		/// Looks at the scans and returns the first unused id;

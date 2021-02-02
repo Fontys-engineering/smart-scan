@@ -80,6 +80,9 @@ namespace SmartScan
 		/// <returns> - number of sensors used</returns>
 		const int NUsedSensors() const;
 
+		void SetFilteringPrecision(const double precision);
+		const double GetFilteringPrecision();
+
 #pragma endregion configuration
 
 #pragma region reference_points
@@ -138,6 +141,8 @@ namespace SmartScan
 		const unsigned int frameSize = 100;
 		unsigned int frameCounter = 0;
 		unsigned long lastFilteredSample = 0;
+
+		double mFilteringPrecision = 4;
 
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();

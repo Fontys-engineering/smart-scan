@@ -34,7 +34,7 @@ namespace SmartScan
 		/// <param name="referencePoints"> - vector of points of type ReferencePoint</param>
 		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
 
-		void SetResolution(double phi_range, double theta_range);
+		void SetPrecision(double phi_range, double theta_range);
 
 		void SetFrameSize(const unsigned int& framesize);
 
@@ -43,8 +43,8 @@ namespace SmartScan
 		std::vector<ReferencePoint> referencePoints;
 
 		//properties:
-		double phi_range = 4;
-		double theta_range = 4;
+		double phi_range;
+		double theta_range;
 
 		// Frame size of the measurement
 		unsigned int mFramesize;
