@@ -113,7 +113,7 @@ namespace SmartScan
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void SetUsedSensors(const std::vector<int> sensorIds);
 
-		void SetFilteringPrecision(const bool precision);
+		void SetFilteringPrecision(const double precision);
 
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.

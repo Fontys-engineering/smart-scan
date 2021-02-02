@@ -61,10 +61,11 @@ int main()
 			}
 			try
 			{
+				//set the scan precision:
+				s3.SetFilteringPrecision(filteringPrecision);
 				//start a scan using only the known good sensors:
 				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
-				//set the scan precision:
-				s3.SetFilteringPrecision(5);
+
 			}
 			catch (ex_trakStar e)
 			{

@@ -248,7 +248,7 @@ void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 	scans.back()->SetUsedSensors(sensorIds);
 }
 
-void SmartScan::SmartScanService::SetFilteringPrecision(const bool precision)
+void SmartScan::SmartScanService::SetFilteringPrecision(const double precision)
 {
 	mFilteringPrecision = precision;
 }
@@ -342,8 +342,6 @@ void SmartScanService::CalibrateReferencePoints()
 	{
 		throw ex_smartScan("No reference point.", __func__, __FILE__);
 	}
-
-
 
 
 	//reset the Scan's reference points if some already exist:

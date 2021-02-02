@@ -172,7 +172,7 @@ void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vecto
         //Outlier(vectorSetSort[i], phi_range, theta_range);
         for (auto j = 0; j < vectorSetSort[i].size(); j++)
         {
-            f_data.emplace_back(vectorSetSort[i][j]);
+            f_data.push_back(vectorSetSort[i][j]);
         }
     }
     data = f_data;

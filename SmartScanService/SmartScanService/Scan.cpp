@@ -144,6 +144,11 @@ void Scan::DataAcquisition()
 			{
 				try
 				{
+					if (i == mRefSensorId)
+					{
+						mRefBuff.push_back(pTSCtrl->GetRecord(i));
+					}
+
 					//only sample the sensors we are interested in:
 					if (mUsedSensors.size() == 0)
 					{
@@ -158,11 +163,6 @@ void Scan::DataAcquisition()
 								mInBuff.push_back(pTSCtrl->GetRecord(i));
 							}
 						}
-					}
-
-					if (i == mRefSensorId)
-					{
-						mRefBuff.push_back(pTSCtrl->GetRecord(i));
 					}
 				}
 				catch (...)
@@ -199,7 +199,7 @@ void Scan::DataFiltering()
 	//start the data aquisition:
 	std::cout << "[SCAN] " << "Running data filtering \n";
 
-	while (!mStopFiltering || (mStopFiltering && lastFilteredSample < mInBuff.size()))
+	while (!mStopFiltering)
 	{
 		auto startTime = std::chrono::steady_clock::now();
 		
@@ -228,10 +228,17 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				//auto refCopy = mRefBuff;
+				while(mRefBuff.size() % (frameSize / NUsedSensors()))
+				{
+					
+				}
+				std::vector<Point3>::const_iterator refBufStartIt =  mRefBuff.cbegin() + (lastFilteredSample - frameSize)/NUsedSensors();
+				int refBufOffset = (lastFilteredSample- frameSize) / NUsedSensors() + frameSize / NUsedSensors();
+				std::vector<Point3>::const_iterator refBufEndIt = mRefBuff.cbegin() + refBufOffset;
+				//make a copy of the ref vector that coresponds to the current frame:
+				std::vector<Point3> refCopy(refBufStartIt, refBufEndIt);
 				//auto mOutCopy = mOutBuff;
-				mF.Filter(mOutBuff);
-				mRefBuff.clear();
+				mF.Filter(mOutBuff, refCopy);
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)
 					mNewDataCallback(mOutBuff);
@@ -250,6 +257,13 @@ void Scan::DataFiltering()
 			std::cerr << "[SCAN] " << "Filtering "<< elapsed_seconds.count() - (1 / sampleRate * frameSize)<< "s slower than real-time! " << std::endl;
 		}
 	}
+
+	//handle the leftover stuff:
+	if (lastFilteredSample < mInBuff.size() - 1)
+	{
+		//send the rest to be filtered
+	}
+
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
 	std::cout << "[SCAN] " << "Data filtering completed in " << totalScanTime.count() << " seconds" << std::endl;
 	mStopFiltering = false;
