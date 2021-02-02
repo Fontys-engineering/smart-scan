@@ -180,11 +180,6 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 		throw ex_smartScan("No existing scan object found", __func__, __FILE__);
 	}
 
-	//reset the Scan's reference points if some already exist:
-	if (scans.back()->GetReferences().size() > 0)
-	{
-		scans.back()->ResetReferences();
-	}
 	//only use thumb and index finger:
 	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
 
