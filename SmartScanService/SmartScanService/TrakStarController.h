@@ -78,8 +78,14 @@ namespace SmartScan
 
 	private:
 		bool mMock;
-		std::string mockDataFilePath = "MockData.csv";
-		std::ifstream mockDataFile;
+
+		std::string s0MockDataFilePath = "MockData/s0.csv";
+		std::string s1MockDataFilePath = "MockData/s1.csv";
+		std::string s2MockDataFilePath = "MockData/s2.csv";
+
+		std::ifstream s0MockDataFile;
+		std::ifstream s1MockDataFile;
+		std::ifstream s2MockDataFile;
 
 		long mockDataFileLine = 0;
 		long mockDataFileNOfLines;
@@ -114,7 +120,7 @@ namespace SmartScan
 		/// Goes through the specified file and returns consecutive samples as Point3
 		/// </summary>
 		/// <returns></returns>
-		Point3 GetMockRecordFromFile();
+		Point3 GetMockRecordFromFile(int sensorId = 0);
 		
 	};
 }

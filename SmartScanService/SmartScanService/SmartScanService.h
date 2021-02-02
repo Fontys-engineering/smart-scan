@@ -59,6 +59,11 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
 		void NewScan(const std::vector<int> sensorIds = {});
+
+		void NewScan(const std::vector<int> sensorIds, const int refSensorId, const double sampleRate = 50);
+
+		void NewScan(const int scanIdconst, std::vector<int> sensorIds, const int refSensorId, const double sampleRate = 50);
+		
 		/// <summary>
 		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
 		/// </summary>

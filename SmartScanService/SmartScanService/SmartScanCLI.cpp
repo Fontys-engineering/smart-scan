@@ -79,7 +79,7 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(usedSensors);
+			s3.NewScan(usedSensors, refSensorId, sampleRate);
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))

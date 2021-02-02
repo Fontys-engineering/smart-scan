@@ -32,6 +32,7 @@ namespace SmartScan
 		std::vector<Point3> mRefBuff;
 
 		Scan(const int id, TrakStarController* pTSCtrl);
+		Scan(const int id, TrakStarController* pTSCtrl, const double sampleRate, const std::vector<int> usedSensors, const int refSensorId);
 
 		~Scan();
 
@@ -66,9 +67,13 @@ namespace SmartScan
 
 		void SetSampleRate(const double sampleRate);
 		const double GetSampleRate() const;
+		
 		void SetUsedSensors(const std::vector<int> usedSensors);
+		const std::vector<int> GetUsedSensors() const;
 		void SetUsedSensors();
 
+		void SetReferenceSensorId(const int sensorId);
+		const int GetReferenceSensorId();
 		/// <summary>
 		/// return the number of sensors used for the measurement. Excluding the reference sensor(s)
 		/// </summary>
@@ -122,7 +127,7 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;
 
 		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
-		int mRefSensorId = 2;
+		int mRefSensorId;
 
 		//filtering thread:
 		std::unique_ptr<std::thread> pFilteringThread;
@@ -145,7 +150,8 @@ namespace SmartScan
 		std::function<void(std::vector<Point3>&)> mRawDataCallback;
 
 #pragma endregion data aquisition:
-	
+
+		//filtering object:
 		Filtering mF;
 	};
 }

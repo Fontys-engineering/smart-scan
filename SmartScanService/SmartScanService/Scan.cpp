@@ -4,9 +4,21 @@
 
 using namespace SmartScan;
 
-Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }
+Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}
 {
-	this->pTSCtrl = pTSCtrl;
+}
+
+SmartScan::Scan::Scan(
+	const int id, TrakStarController* pTSCtrl, 
+	const double sampleRate, 
+	const std::vector<int> usedSensors, 
+	const int refSensorId) : 
+		mId{ id }, 
+		pTSCtrl{ pTSCtrl }, 
+		mRefSensorId{ refSensorId },
+		sampleRate {sampleRate},
+		mUsedSensors {usedSensors}
+{
 }
 
 Scan::~Scan()
@@ -119,7 +131,6 @@ void Scan::DataAcquisition()
 {
 	//start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
-	Point3 newSample;
 
 	while (!mStopDataAcquisition)
 	{
@@ -129,7 +140,6 @@ void Scan::DataAcquisition()
 		{
 			//sample:
 			//std::chrono::duration<double> totalTime = scanStartTime - startTime;
-
 			for (int i = 0; i < pTSCtrl->GetNSensors(); i++)
 			{
 				try
@@ -137,24 +147,22 @@ void Scan::DataAcquisition()
 					//only sample the sensors we are interested in:
 					if (mUsedSensors.size() == 0)
 					{
-						newSample = pTSCtrl->GetRecord(i);
-						mInBuff.push_back(newSample);
+						mInBuff.push_back(pTSCtrl->GetRecord(i));
 					}
 					else
 					{
-						for (auto id : mUsedSensors)
+						for (int id = 0; id<mUsedSensors.size();id++)
 						{
 							if (i == id)
 							{
-								newSample = pTSCtrl->GetRecord(i);
-								mInBuff.push_back(newSample);
+								mInBuff.push_back(pTSCtrl->GetRecord(i));
 							}
 						}
 					}
+
 					if (i == mRefSensorId)
 					{
-						newSample = pTSCtrl->GetRecord(i);
-						mRefBuff.push_back(newSample);
+						mRefBuff.push_back(pTSCtrl->GetRecord(i));
 					}
 				}
 				catch (...)
@@ -278,10 +286,24 @@ void Scan::SetUsedSensors(const std::vector<int> usedSensors)
 		}
 	}
 	mUsedSensors = usedSensors;
-}  
+}
+const std::vector<int> SmartScan::Scan::GetUsedSensors() const
+{
+	return this->mUsedSensors;
+}
 void Scan::SetUsedSensors()
 {
 	mUsedSensors.clear();
+}
+
+void SmartScan::Scan::SetReferenceSensorId(const int sensorId)
+{
+	mRefSensorId = sensorId;
+}
+
+const int SmartScan::Scan::GetReferenceSensorId()
+{
+	return mRefSensorId;
 }
 
 const int SmartScan::Scan::NUsedSensors() const

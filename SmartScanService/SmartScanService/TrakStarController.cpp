@@ -8,7 +8,7 @@
 using namespace SmartScan;
 
 //constructor
-TrakStarController::TrakStarController(bool mock): mMock {mock}
+TrakStarController::TrakStarController(bool mock) : mMock{ mock }
 {
 	if (mock)
 	{
@@ -151,12 +151,12 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	if (mMock)
 	{
 		//return GetMockRecord();
-		return GetMockRecordFromFile();
+		return GetMockRecordFromFile(sensorID);
 	}
 	++sensorID;
 	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
 	{
-		throw ex_smartScan( "Sensor ID out if range", __func__, __FILE__);
+		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);
 	}
 
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
@@ -166,14 +166,14 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	{
 		errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
 	}
-	catch(...)
+	catch (...)
 	{
-		if (errorCode != BIRD_ERROR_SUCCESS) 
-		{ 
-			ErrorHandler(errorCode); 
+		if (errorCode != BIRD_ERROR_SUCCESS)
+		{
+			ErrorHandler(errorCode);
 		}
 	}
-	
+
 
 	// get the status of the last data record
 	// only report the data if everything is okay
@@ -270,7 +270,7 @@ Point3 TrakStarController::GetMockRecord()
 	double randomMaxRadius = 200;
 
 	//return Point3();
-	
+
 	if (mPrevMockRecord.x == 0 && mPrevMockRecord.y == 0 && mPrevMockRecord.z == 0)
 	{
 		//first mock value:
@@ -284,24 +284,48 @@ Point3 TrakStarController::GetMockRecord()
 	}
 }
 
-Point3 TrakStarController::GetMockRecordFromFile()
+Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 {
 	//open the file if not already open:
-	if (!mockDataFile.is_open())
+	if (!s0MockDataFile.is_open())
 	{
-		mockDataFile.open(mockDataFilePath, std::ifstream::in);
+		s0MockDataFile.open(s0MockDataFilePath, std::ifstream::in);
+	}
+	if (!s1MockDataFile.is_open())
+	{
+		s1MockDataFile.open(s1MockDataFilePath, std::ifstream::in);
+	}
+	if (!s2MockDataFile.is_open())
+	{
+		s2MockDataFile.open(s2MockDataFilePath, std::ifstream::in);
 	}
 
 	//get the next line from the file
 	Point3 newPoint;
 	char line[512];
-	if (!mockDataFile.getline(line,512))
+	if (sensorId == 0 && !s0MockDataFile.getline(line, 512))
 	{
 		//no more lines to read
 		//close the file
-		mockDataFile.close();
+		s0MockDataFile.close();
 		//try again:
-		return GetMockRecordFromFile();
+		return GetMockRecordFromFile(sensorId);
+	}
+	else if (sensorId == 1 && !s1MockDataFile.getline(line, 512))
+	{
+		//no more lines to read
+		//close the file
+		s1MockDataFile.close();
+		//try again:
+		return GetMockRecordFromFile(sensorId);
+	}
+	else if (sensorId == 2 && !s2MockDataFile.getline(line, 512))
+	{
+		//no more lines to read
+		//close the file
+		s2MockDataFile.close();
+		//try again:
+		return GetMockRecordFromFile(sensorId);
 	}
 	//parse the coorindates from the line:
 	for (int c = 5; c >= 0; c--)
@@ -374,7 +398,7 @@ const std::string TrakStarController::GetErrorString(int error)
 	if (error != BIRD_ERROR_SUCCESS)
 	{
 		error = GetErrorText(error, buffer, sizeof(buffer), SIMPLE_MESSAGE);
-		errorString =  buffer;
+		errorString = buffer;
 		return errorString;
 	}
 }

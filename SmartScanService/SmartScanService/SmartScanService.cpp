@@ -28,7 +28,18 @@ void SmartScanService::NewScan(const std::vector<int> sensorIds)
 	NewScan(FindNewScanId(), sensorIds);
 }
 
+
 void SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds)
+{
+	NewScan(scanId, sensorIds, sensorIds[0]);
+}
+
+void SmartScan::SmartScanService::NewScan(const std::vector<int> sensorIds, const int refSensorId, const double sampleRate)
+{
+	NewScan(FindNewScanId(), sensorIds, refSensorId, sampleRate);
+}
+
+void SmartScan::SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds, const int refSensorId, const double sampleRate)
 {
 	//check if id is unique:
 	if (IdExists(scanId))
@@ -36,13 +47,7 @@ void SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds)
 		throw ex_smartScan("Scan object ID must be unique", __func__, __FILE__);
 	}
 	//create new scan obj
-	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl));
-
-	//use the specified sensors (if specified)
-	if (sensorIds.size() > 0)
-	{
-		this->scans.back()->SetUsedSensors(sensorIds);
-	}
+	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl, sampleRate, sensorIds, refSensorId));
 }
 
 
@@ -280,7 +285,7 @@ void SmartScanService::CalibrateReferencePoints()
 	std::cout << "[CALIBRATION] " << "Before starting the scan, reference points must be calibrated. Use the thumb and index finger to point out the knee, ankle and foot ecnter \n";
 	std::cout << "[CALIBRATION] " << "Enter the number of desired reference points  (by default 3, as mentioned above): ";
 	std::cin >> refCount;
-
+	std::cin.get();
 
 
 	if (!refCount)
@@ -312,20 +317,26 @@ void SmartScanService::CalibrateReferencePoints()
 	//do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
 	{
-		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to acpture it" << std::endl;
-		std::cin.get();
 		//store the latest values:
 		ReferencePoint newRef;
+
+		//wait for values:
+		while (scans.back()->mInBuff.size() < 2)
+		{
+		}
+
+		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to capture it" << std::endl;
+		std::cin.get();
+
 		std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
-		newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2);
-		newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2);
-		newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2);
-
-
-
 		//add the referenceSensorPos:
 		newRef.refSensorPos = scans.back()->mRefBuff.back();
 
+		newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2) - newRef.refSensorPos.x;
+		newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
+		newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2) - newRef.refSensorPos.z;
+
+		newRef.index = i;
 
 
 		scans.back()->AddReference(newRef);
