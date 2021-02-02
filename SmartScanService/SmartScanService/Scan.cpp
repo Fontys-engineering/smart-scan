@@ -190,6 +190,8 @@ void Scan::DataAcquisition()
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
+
+	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
 
 void Scan::DataFiltering()
@@ -197,8 +199,11 @@ void Scan::DataFiltering()
 	//start the data aquisition:
 	std::cout << "[SCAN] " << "Running data filtering \n";
 
-	while (!mStopFiltering)
+	while (!mStopFiltering || (mStopFiltering && lastFilteredSample < mInBuff.size()))
 	{
+		auto startTime = std::chrono::steady_clock::now();
+		
+
 		//check if there is new data available:
 		const int inSize = mInBuff.size();
 		const int outSize = mOutBuff.size();
@@ -238,9 +243,15 @@ void Scan::DataFiltering()
 				throw "nasty";
 			}
 		}
-	}
 
-	std::cout << "[SCAN] " << "Data filtering completed \n";
+		std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - startTime;
+		if (elapsed_seconds.count() > 1/sampleRate * frameSize)
+		{
+			std::cerr << "[SCAN] " << "Filtering "<< elapsed_seconds.count() - (1 / sampleRate * frameSize)<< "s slower than real-time! " << std::endl;
+		}
+	}
+	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
+	std::cout << "[SCAN] " << "Data filtering completed in " << totalScanTime.count() << " seconds" << std::endl;
 	mStopFiltering = false;
 }
 
