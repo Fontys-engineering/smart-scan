@@ -142,7 +142,7 @@ namespace SmartScan
 		unsigned int frameCounter = 0;
 		unsigned long lastFilteredSample = 0;
 
-		double mFilteringPrecision = 4;
+		double mFilteringPrecision = 30;
 
 		//timing:
 		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();

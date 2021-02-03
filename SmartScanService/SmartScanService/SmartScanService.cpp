@@ -379,6 +379,38 @@ void SmartScanService::CalibrateReferencePoints()
 		newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
 		newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2) - newRef.refSensorPos.z;
 
+		// Reorientate the reference points to the 0-0-0 angles where all points are oriented to
+		const double azimuth = newRef.refSensorPos.r.z;
+		const double elevation = newRef.refSensorPos.r.y;
+		const double roll = newRef.refSensorPos.r.x;
+		// Declare new variables for new points
+		double x_new = 0;
+		double y_new = 0;
+		double z_new = 0;
+		const double pi = 3.14159265;
+
+		// Use the azimuth to calculate the rotation around the z-axis
+		const double azimuth_distance = sqrt(pow(newRef.pos.x, 2) + pow(newRef.pos.y, 2));
+		const double a = (atan2(newRef.pos.y, newRef.pos.x) * 180 / pi) - azimuth;
+		x_new = azimuth_distance * cos(a * pi / 180);
+		y_new = azimuth_distance * sin(a * pi / 180);
+
+		// Use the elevation to calculate the rotation around the y-axis
+		const double elevation_distance = sqrt(pow(x_new, 2) + pow(newRef.pos.z, 2));
+		const double b = (atan2(newRef.pos.z, x_new) * 180 / pi) + elevation;
+		x_new = elevation_distance * cos(b * pi / 180);
+		z_new = elevation_distance * sin(b * pi / 180);
+
+		// Use the roll difference to calculate the rotation around the x-axis
+		const double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
+		const double c = (atan2(z_new, y_new) * 180 / pi) - roll;
+		y_new = roll_distance * cos(c * pi / 180);
+		z_new = roll_distance * sin(c * pi / 180);
+
+		newRef.pos.x = x_new;
+		newRef.pos.y = y_new;
+		newRef.pos.z = z_new;
+
 		newRef.index = i;
 
 
