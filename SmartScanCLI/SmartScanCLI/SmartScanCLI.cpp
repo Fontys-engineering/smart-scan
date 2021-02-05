@@ -4,7 +4,8 @@
 
 //include all the libraries and sub-classes:
 #include "SmartScanCLI.h"
-
+#include "Exceptions.h"
+#include "Filtering.h"
 
 using namespace SmartScan;
 
@@ -12,7 +13,7 @@ using namespace SmartScan;
 
 int main()
 {
-	
+
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
 	//initialise the service:
@@ -41,6 +42,10 @@ int main()
 	//print the help screen:
 	Usage();
 
+	//single point calibration example (For Mohamed):
+	//s3.NewScan(usedSensors,refSensorId);
+	//s3.CalibrateSingleRefPoint();
+
 	char cmd[128];
 	do {
 		std::cout << std::endl << "SmartScan>";
@@ -56,8 +61,11 @@ int main()
 			}
 			try
 			{
+				//set the scan precision:
+				s3.SetFilteringPrecision(filteringPrecision);
 				//start a scan using only the known good sensors:
 				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
+
 			}
 			catch (ex_trakStar e)
 			{
@@ -78,7 +86,7 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(usedSensors);
+			s3.NewScan(usedSensors, refSensorId, sampleRate);
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))
@@ -182,17 +190,17 @@ int main()
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export-raw ", 11))
 		{
-		//cut the filepath out:
-		std::string filepath = cmd;
-		std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
-		try {
-			s3.ExportCSV(filepath.substr(11), true);
-			std::cout << "Done.\n";
-		}
-		catch (...)
-		{
-			std::cerr << "Could not export csv file \n";
-		}
+			//cut the filepath out:
+			std::string filepath = cmd;
+			std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
+			try {
+				s3.ExportCSV(filepath.substr(11), true);
+				std::cout << "Done.\n";
+			}
+			catch (...)
+			{
+				std::cerr << "Could not export csv file \n";
+			}
 		}
 		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
 		{
@@ -212,7 +220,7 @@ int main()
 		{
 			Usage();
 		}
-	} while (strcmp(cmd, "exit"));	
+	} while (strcmp(cmd, "exit"));
 }
 
 
@@ -237,6 +245,7 @@ void Usage()
 	std::cout << "\t raw-dump \t\t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export-raw [filename] \t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "System preferences" << std::endl;
@@ -254,13 +263,13 @@ void RawPrintCallback(std::vector<SmartScan::Point3>& data)
 {
 	if (data.size() > s3.GetScan()->NUsedSensors() && data.size() % s3.GetScan()->NUsedSensors() == 0)
 	{
-		std::cout<<"\r                                                          \rsz:"<< data.size()<< "\t";
+		std::cout << "\r                                                          \rsz:" << data.size() << "\t";
 		for (int i = s3.GetScan()->NUsedSensors(); i > 0; i--)
 		{
-			std::cout << "\t"<< std::setprecision(5) << data.end()[-i].x << "\t" << data.end()[-i].y << "\t" << data.end()[-i].z << "\t";
+			std::cout << "\t" << std::setprecision(5) << data.end()[-i].x << "\t" << data.end()[-i].y << "\t" << data.end()[-i].z << "\t";
 		}
 	}
-	
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

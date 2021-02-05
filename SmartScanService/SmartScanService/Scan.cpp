@@ -193,7 +193,7 @@ void Scan::DataAcquisition()
 
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
-
+//TODO: fix processing the remaining data after acquisition stops when filtering has fallen behind
 void Scan::DataFiltering()
 {
 	//start the data aquisition:
