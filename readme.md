@@ -1,6 +1,6 @@
 # SmartScan Software Repository
 
-** A release CLI application and library version is available to download. **
+**A release CLI application and library version is available to download.**
 
 ## Folder Structure:
 1. Root
