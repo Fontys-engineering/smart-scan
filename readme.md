@@ -4,6 +4,7 @@ This repository contains the source code for the Semester 7 Fontys project "Smar
 **This project is no longer in active development.**
 
 **A release CLI application and library version is available to download.**
+**A Rhino plug-in implementation using the smart scan service can be found at https://github.com/eduardcazacu/smart-scan-rhino**
 
 ## Folder Structure:
 1. Root
