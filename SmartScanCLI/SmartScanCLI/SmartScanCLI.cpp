@@ -5,7 +5,6 @@
 //include all the libraries and sub-classes:
 #include "SmartScanCLI.h"
 #include "Exceptions.h"
-#include "Filtering.h"
 
 using namespace SmartScan;
 
