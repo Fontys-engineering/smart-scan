@@ -124,8 +124,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../SmartScanService\SmartScanService\NDI;../../SmartScanService\SmartScanService\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>../../SmartScanService\SmartScanService\NDI\ATC3DG64.lib;../../SmartScanService\x64\Debug\SmartScanService.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../SmartScanService\SmartScanService\NDI;../../SmartScanService\SmartScanService/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>../../SmartScanService\SmartScanService\NDI\ATC3DG64.lib;../../SmartScanService\x64/Debug/SmartScanService.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

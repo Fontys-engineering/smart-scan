@@ -28,7 +28,18 @@ void SmartScanService::NewScan(const std::vector<int> sensorIds)
 	NewScan(FindNewScanId(), sensorIds);
 }
 
+
 void SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds)
+{
+	NewScan(scanId, sensorIds, sensorIds[0]);
+}
+
+void SmartScan::SmartScanService::NewScan(const std::vector<int> sensorIds, const int refSensorId, const double sampleRate)
+{
+	NewScan(FindNewScanId(), sensorIds, refSensorId, sampleRate);
+}
+
+void SmartScan::SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds, const int refSensorId, const double sampleRate)
 {
 	//check if id is unique:
 	if (IdExists(scanId))
@@ -36,13 +47,7 @@ void SmartScanService::NewScan(int scanId, const std::vector<int> sensorIds)
 		throw ex_smartScan("Scan object ID must be unique", __func__, __FILE__);
 	}
 	//create new scan obj
-	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl));
-
-	//use the specified sensors (if specified)
-	if (sensorIds.size() > 0)
-	{
-		this->scans.back()->SetUsedSensors(sensorIds);
-	}
+	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl, sampleRate, sensorIds, refSensorId));
 }
 
 
@@ -101,7 +106,10 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		{
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
+		//set the resolution:
+		scans.back()->SetFilteringPrecision(mFilteringPrecision);
 		scans.back()->Run();
+
 	}
 	catch (ex_scan e)
 	{
@@ -165,6 +173,43 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 	}
 }
 
+void SmartScan::SmartScanService::CalibrateSingleRefPoint()
+{
+	if (scans.size() == 0)
+	{
+		throw ex_smartScan("No existing scan object found", __func__, __FILE__);
+	}
+
+	//only use thumb and index finger:
+	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
+
+	scans.back()->SetUsedSensors(sensorsUsed);
+
+	scans.back()->Run(true);
+
+	ReferencePoint newRef;
+
+	//wait for values:
+	while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
+	{
+	}
+
+
+	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
+	//add the referenceSensorPos:
+	newRef.refSensorPos = scans.back()->mRefBuff.back();
+
+	newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2) - newRef.refSensorPos.x;
+	newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
+	newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2) - newRef.refSensorPos.z;
+
+	scans.back()->AddReference(newRef);
+
+	scans.back()->Stop(true);
+	//reset used sensors:
+	scans.back()->SetUsedSensors();
+}
+
 void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)
 {
 	if (scans.size() < 0)
@@ -196,6 +241,11 @@ void SmartScanService::DumpScan() const
 void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 {
 	scans.back()->SetUsedSensors(sensorIds);
+}
+
+void SmartScan::SmartScanService::SetFilteringPrecision(const double precision)
+{
+	mFilteringPrecision = precision;
 }
 
 const std::shared_ptr<Scan> SmartScanService::GetScan() const
@@ -274,18 +324,20 @@ void SmartScanService::CalibrateReferencePoints()
 {
 	int refCount;
 
+
+
 	//find how many calibration points are desired:
 	std::cout << "[CALIBRATION] " << "Before starting the scan, reference points must be calibrated. Use the thumb and index finger to point out the knee, ankle and foot ecnter \n";
 	std::cout << "[CALIBRATION] " << "Enter the number of desired reference points  (by default 3, as mentioned above): ";
 	std::cin >> refCount;
+	std::cin.get();
+
 
 	if (!refCount)
 	{
 		throw ex_smartScan("No reference point.", __func__, __FILE__);
 	}
 
-	std::cout << "[CALIBRATION] " << "Position your fingers on the first reference point and press any key to start." << std::endl;
-	std::cin.get();
 
 	//reset the Scan's reference points if some already exist:
 	if (scans.back()->GetReferences().size() > 0)
@@ -294,7 +346,12 @@ void SmartScanService::CalibrateReferencePoints()
 	}
 	//only use thumb and index finger:
 	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
+
+
+
 	scans.back()->SetUsedSensors(sensorsUsed);
+
+
 
 	//start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
@@ -303,84 +360,71 @@ void SmartScanService::CalibrateReferencePoints()
 	//do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
 	{
-		std::cout << "[CALIBRATION] " << "Calibration started..." << std::endl;
-		bool refSet = false;
-
-		auto startTime = std::chrono::steady_clock::now();
-		//store the preious thumb and index finger position;
-		std::vector<Point3> prevFrame(sensorsUsed.size());
-		std::vector<Point3> currentFrame(sensorsUsed.size());
-		//wait for a 5 second stable reading (within a margin of error)
-
-		unsigned long recordId = 0;
-		while (!refSet)
-		{
-			std::cout << "\r";
-			for (unsigned int fingerIndex = 0; fingerIndex < prevFrame.size(); fingerIndex++)
-			{
-				if (scans.back()->mInBuff.size() > recordId)
-				{
-					currentFrame[fingerIndex] = scans.back()->mInBuff[recordId];
-					++recordId;
-
-					if (abs(currentFrame[fingerIndex].x - prevFrame[fingerIndex].x) > tError ||
-						abs(currentFrame[fingerIndex].y - prevFrame[fingerIndex].y) > tError ||
-						abs(currentFrame[fingerIndex].z - prevFrame[fingerIndex].z) > tError)
-					{
-						startTime = std::chrono::steady_clock::now();
-					}
-
-					std::cout << std::setprecision(5) << currentFrame[fingerIndex].x << "\t" << currentFrame[fingerIndex].y << "\t" << currentFrame[fingerIndex].z << "\t";
-				}
-
-			}
-
-			auto endTime = std::chrono::steady_clock::now();
-			//check if 5 seconds have passed:
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() > refSetTime)
-			{
-				//ref found
-				refSet = true;;
-			}
-
-			prevFrame = currentFrame;
-		}
-		//if stable point, add it to the scan:
+		//store the latest values:
 		ReferencePoint newRef;
-		newRef.index = i;
-		//find the midpoint:
-		if (prevFrame.size() < 2)
-		{
-			throw ex_scan("calibration records not correct", __func__, __FILE__);
-		}
-		newRef.pos.x = ((prevFrame[0].x + prevFrame[1].x) / 2);
-		newRef.pos.y = ((prevFrame[0].y + prevFrame[1].y) / 2);
-		newRef.pos.z = ((prevFrame[0].z + prevFrame[1].z) / 2);
 
+		//wait for values:
+		while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
+		{
+		}
+
+		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to capture it" << std::endl;
+		std::cin.get();
+
+		std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
 		//add the referenceSensorPos:
 		newRef.refSensorPos = scans.back()->mRefBuff.back();
 
+		newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2) - newRef.refSensorPos.x;
+		newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
+		newRef.pos.z = ((firstFingerIterator[0].z + firstFingerIterator[1].z) / 2) - newRef.refSensorPos.z;
+
+		// Reorientate the reference points to the 0-0-0 angles where all points are oriented to
+		const double azimuth = newRef.refSensorPos.r.z;
+		const double elevation = newRef.refSensorPos.r.y;
+		const double roll = newRef.refSensorPos.r.x;
+		// Declare new variables for new points
+		double x_new = 0;
+		double y_new = 0;
+		double z_new = 0;
+		const double pi = 3.14159265;
+
+		// Use the azimuth to calculate the rotation around the z-axis
+		const double azimuth_distance = sqrt(pow(newRef.pos.x, 2) + pow(newRef.pos.y, 2));
+		const double a = (atan2(newRef.pos.y, newRef.pos.x) * 180 / pi) - azimuth;
+		x_new = azimuth_distance * cos(a * pi / 180);
+		y_new = azimuth_distance * sin(a * pi / 180);
+
+		// Use the elevation to calculate the rotation around the y-axis
+		const double elevation_distance = sqrt(pow(x_new, 2) + pow(newRef.pos.z, 2));
+		const double b = (atan2(newRef.pos.z, x_new) * 180 / pi) + elevation;
+		x_new = elevation_distance * cos(b * pi / 180);
+		z_new = elevation_distance * sin(b * pi / 180);
+
+		// Use the roll difference to calculate the rotation around the x-axis
+		const double roll_distance = sqrt(pow(y_new, 2) + pow(z_new, 2));
+		const double c = (atan2(z_new, y_new) * 180 / pi) - roll;
+		y_new = roll_distance * cos(c * pi / 180);
+		z_new = roll_distance * sin(c * pi / 180);
+
+		newRef.pos.x = x_new;
+		newRef.pos.y = y_new;
+		newRef.pos.z = z_new;
+
+		newRef.index = i;
+
+
 		scans.back()->AddReference(newRef);
 		std::cout << "[CALIBRATION] " << "Reference point at (" << newRef.pos.x << "," << newRef.pos.y << "," << newRef.pos.z << ") with index " << newRef.index << " set" << std::endl;
-		if (i < refCount)
-		{
-			prevFrame.clear();
-			currentFrame.clear();
-
-			if (i < refCount-1)
-			{
-				std::cout << "[CALIBRATION] " << "Press any key to move to the next one" << std::endl;
-				std::cin.get();
-			}
-		}
 	}
+
+
 
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
 	scans.back()->Stop(true);
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
 }
-
 const int SmartScanService::FindNewScanId() const
 {
 	int newId = 0;

@@ -49,6 +49,12 @@ namespace SmartScan
 		/// the reference calibration routine.
 		/// </summary>
 		void CalibrateReferencePoints();
+
+		/// <summary>
+		/// When called, it sets a single reference point between the thub and index finger
+		/// No CMDL interaction required
+		/// </summary>
+		void CalibrateSingleRefPoint();
 		/// <summary>
 		/// Set the reference points for the latest scan object:
 		/// </summary>
@@ -59,6 +65,11 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
 		void NewScan(const std::vector<int> sensorIds = {});
+
+		void NewScan(const std::vector<int> sensorIds, const int refSensorId, const double sampleRate = 50);
+
+		void NewScan(const int scanIdconst, std::vector<int> sensorIds, const int refSensorId, const double sampleRate = 50);
+		
 		/// <summary>
 		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
 		/// </summary>
@@ -101,6 +112,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void SetUsedSensors(const std::vector<int> sensorIds);
+
+		void SetFilteringPrecision(const double precision);
 
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.
@@ -176,8 +189,10 @@ namespace SmartScan
 		int mThumbSensorId = 0;
 		int mIndexSensorId = 1;
 		const double refSetTime = 5000;		//time in milliseconds after which the point is considered a reference.
-		const double tError = 10;			//tolerated translation error in mm
-		const double rError = 10;			//tolerated rotation error in mm
+		const double tError = 20;			//tolerated translation error in mm
+		const double rError = 20;			//tolerated rotation error in mm
+
+		double mFilteringPrecision = 4;
 
 		/// <summary>
 		/// Looks at the scans and returns the first unused id;

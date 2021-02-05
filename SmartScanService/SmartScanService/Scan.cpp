@@ -4,9 +4,21 @@
 
 using namespace SmartScan;
 
-Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }
+Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}
 {
-	this->pTSCtrl = pTSCtrl;
+}
+
+SmartScan::Scan::Scan(
+	const int id, TrakStarController* pTSCtrl, 
+	const double sampleRate, 
+	const std::vector<int> usedSensors, 
+	const int refSensorId) : 
+		mId{ id }, 
+		pTSCtrl{ pTSCtrl }, 
+		mRefSensorId{ refSensorId },
+		sampleRate {sampleRate},
+		mUsedSensors {usedSensors}
+{
 }
 
 Scan::~Scan()
@@ -51,7 +63,7 @@ void Scan::Run(bool acqusitionOnly)
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetResolution(4, 4);
+			mF.SetPrecision(mFilteringPrecision, mFilteringPrecision);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -119,7 +131,6 @@ void Scan::DataAcquisition()
 {
 	//start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
-	Point3 newSample;
 
 	while (!mStopDataAcquisition)
 	{
@@ -129,31 +140,29 @@ void Scan::DataAcquisition()
 		{
 			//sample:
 			//std::chrono::duration<double> totalTime = scanStartTime - startTime;
-
 			for (int i = 0; i < pTSCtrl->GetNSensors(); i++)
 			{
 				try
 				{
+					if (i == mRefSensorId)
+					{
+						mRefBuff.push_back(pTSCtrl->GetRecord(i));
+					}
+
 					//only sample the sensors we are interested in:
 					if (mUsedSensors.size() == 0)
 					{
-						newSample = pTSCtrl->GetRecord(i);
-						mInBuff.push_back(newSample);
+						mInBuff.push_back(pTSCtrl->GetRecord(i));
 					}
 					else
 					{
-						for (auto id : mUsedSensors)
+						for (int id = 0; id<mUsedSensors.size();id++)
 						{
 							if (i == id)
 							{
-								newSample = pTSCtrl->GetRecord(i);
-								mInBuff.push_back(newSample);
+								mInBuff.push_back(pTSCtrl->GetRecord(i));
 							}
 						}
-					}
-					if (i == mRefSensorId)
-					{
-						mRefBuff.push_back(newSample);
 					}
 				}
 				catch (...)
@@ -181,8 +190,10 @@ void Scan::DataAcquisition()
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
-}
 
+	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
+}
+//TODO: fix processing the remaining data after acquisition stops when filtering has fallen behind
 void Scan::DataFiltering()
 {
 	//start the data aquisition:
@@ -190,6 +201,9 @@ void Scan::DataFiltering()
 
 	while (!mStopFiltering)
 	{
+		auto startTime = std::chrono::steady_clock::now();
+		
+
 		//check if there is new data available:
 		const int inSize = mInBuff.size();
 		const int outSize = mOutBuff.size();
@@ -214,10 +228,17 @@ void Scan::DataFiltering()
 			{
 				//done with the frame, filter it:
 				//for example, only keep a third (middle):
-				//auto refCopy = mRefBuff;
+				while(mRefBuff.size() % (frameSize / NUsedSensors()))
+				{
+					
+				}
+				std::vector<Point3>::const_iterator refBufStartIt =  mRefBuff.cbegin() + (lastFilteredSample - frameSize)/NUsedSensors();
+				int refBufOffset = (lastFilteredSample- frameSize) / NUsedSensors() + frameSize / NUsedSensors();
+				std::vector<Point3>::const_iterator refBufEndIt = mRefBuff.cbegin() + refBufOffset;
+				//make a copy of the ref vector that coresponds to the current frame:
+				std::vector<Point3> refCopy(refBufStartIt, refBufEndIt);
 				//auto mOutCopy = mOutBuff;
-				mF.Filter(mOutBuff);
-				mRefBuff.clear();
+				mF.Filter(mOutBuff, refCopy);
 				//when filtering is done, execute the callback:
 				if(mNewDataCallback)
 					mNewDataCallback(mOutBuff);
@@ -229,9 +250,22 @@ void Scan::DataFiltering()
 				throw "nasty";
 			}
 		}
+
+		std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - startTime;
+		if (elapsed_seconds.count() > 1/sampleRate * frameSize)
+		{
+			std::cerr << "[SCAN] " << "Filtering "<< elapsed_seconds.count() - (1 / sampleRate * frameSize)<< "s slower than real-time! " << std::endl;
+		}
 	}
 
-	std::cout << "[SCAN] " << "Data filtering completed \n";
+	//handle the leftover stuff:
+	if (lastFilteredSample < mInBuff.size() - 1)
+	{
+		//send the rest to be filtered
+	}
+
+	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
+	std::cout << "[SCAN] " << "Data filtering completed in " << totalScanTime.count() << " seconds" << std::endl;
 	mStopFiltering = false;
 }
 
@@ -277,13 +311,42 @@ void Scan::SetUsedSensors(const std::vector<int> usedSensors)
 		}
 	}
 	mUsedSensors = usedSensors;
-}  
+}
+const std::vector<int> SmartScan::Scan::GetUsedSensors() const
+{
+	return this->mUsedSensors;
+}
 void Scan::SetUsedSensors()
 {
 	mUsedSensors.clear();
 }
 
+void SmartScan::Scan::SetReferenceSensorId(const int sensorId)
+{
+	mRefSensorId = sensorId;
+}
+
+const int SmartScan::Scan::GetReferenceSensorId()
+{
+	return mRefSensorId;
+}
+
 const int SmartScan::Scan::NUsedSensors() const
 {
 	return mUsedSensors.size();
+}
+
+void SmartScan::Scan::SetFilteringPrecision(const double precision)
+{
+	if (precision < 0)
+	{
+		throw ex_scan("Filtering precision must be positive", __func__, __FILE__);
+	}
+	mFilteringPrecision = precision;
+	mF.SetPrecision(precision,precision);
+}
+
+const double SmartScan::Scan::GetFilteringPrecision()
+{
+	return mFilteringPrecision;
 }
