@@ -1,11 +1,13 @@
 # SmartScan Software Repository
 
+** A release CLI application and library version is available to download. **
+
 ## Folder Structure:
 1. Root
     1. SmartScanCLI - Command Line User Interface implementation of the library
     2. SmartScanService - The SmartScan library 
 
-## Getting started:
+## Getting started with development:
 * Download a git client (i.e. [Github Desktop](https://desktop.github.com/) )
 * Clone this repository to a desired location
 * Open the .sln file from SmartScanCLI with **Visual Studio 2019**
