@@ -1,4 +1,7 @@
 # SmartScan Software Repository
+This repository contains the source code for the Semester 7 Fontys project "SmartScan".
+
+**This project is no longer in active development.**
 
 **A release CLI application and library version is available to download.**
 
