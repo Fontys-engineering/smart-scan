@@ -48,3 +48,11 @@ This repository contains the source code for the Semester 7 Fontys project "Smar
 2. Make sure there is a SmartScanService.lib already compiled, otherwise build SmartScanService first
 3. Build for x64/Debug
 4. Run the generated .exe (make sure you have ATC3DG64.DLL in the same folder)
+
+# System architecture
+
+## Measurement pipeline
+![Image of pipeline](readme_img/pipeline.png?raw=true)
+
+## UML
+![Image of architecture](readme_img/uml.png?raw=true)
