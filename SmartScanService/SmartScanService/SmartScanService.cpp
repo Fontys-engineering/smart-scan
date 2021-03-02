@@ -425,6 +425,19 @@ void SmartScanService::CalibrateReferencePoints()
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
 }
+void SmartScanService::GetSensorData(const std::vector<int> usedSensors, const unsigned int refSensorId)
+{
+
+	std::cout << "[INFO] " << "Number of sensors: " << usedSensors.size() << std::endl;
+	for (int i = 0; i < usedSensors.size(); i++)
+	{
+		std::cout << "[INFO] " << "Sensor IDs: " << usedSensors.at(i) << std::endl;
+	}
+	std::cout << "[INFO] " << "Reference sensor ID: " << refSensorId << std::endl;
+
+	std::cout << "[INFO] " << "Serial numbers: " << std::endl;
+
+}
 const int SmartScanService::FindNewScanId() const
 {
 	int newId = 0;
