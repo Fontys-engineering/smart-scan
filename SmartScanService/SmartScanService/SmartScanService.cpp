@@ -427,17 +427,27 @@ void SmartScanService::CalibrateReferencePoints()
 }
 void SmartScanService::GetSensorData(const std::vector<int> usedSensors, const unsigned int refSensorId)
 {
+    if (!mockMode) {
+        SYSTEM_CONFIGURATION sysConfig;
+        SENSOR_CONFIGURATION sensorConfig;
+        GetBIRDSystemConfiguration(&sysConfig);
 
-	std::cout << "[INFO] " << "Number of sensors: " << usedSensors.size() << std::endl;
-	for (int i = 0; i < usedSensors.size(); i++)
-	{
-		std::cout << "[INFO] " << "Sensor IDs: " << usedSensors.at(i) << std::endl;
-	}
-	std::cout << "[INFO] " << "Reference sensor ID: " << refSensorId << std::endl;
-
-	std::cout << "[INFO] " << "Serial numbers: " << std::endl;
-
+	    std::cout << "[SENSOR] " << "Number of sensors: " << sysConfig.numberSensors << std::endl;
+	    for (int i = 0; i < sys_config.numberSensors; i++)
+	    {
+            GetSensorConfiguration(&sensorConfig);
+                if (!sensorConfig.attached) {
+                    std::cout << "[SENSOR] " << "Sensor IDs: " << i << " not attached" std::endl;
+                }
+                else {
+                    std::cout << "[SENSOR] " << "Sensor IDs: " << i << " attached with serial number: " << sensorConfig.serialNumber << std::endl;
+                }
+	    }
+	    std::cout << "[INFO] " << "Reference sensor ID: " << refSensorId << std::endl;
+	    std::cout << "[INFO] " << "Serial numbers: " << std::endl;
+    }
 }
+
 const int SmartScanService::FindNewScanId() const
 {
 	int newId = 0;
