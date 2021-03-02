@@ -22,7 +22,7 @@ namespace SmartScan
 	class SmartScanService
 	{
 	public:
-
+		void GetSensorData(const std::vector<int> usedSensors, const unsigned int refSensorId);
 		/// <summary>
 		/// Cosntructor. Creates a SmartScanService object that handles all the functionality. 
 		///	When debugging and the TrakSTAR device is unnavailable, set "useMockData" to "true". Otherwise,
@@ -205,6 +205,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="scanId"> - the id we are checking for</param>
 		/// <returns> - true if a scan with the same id exists</returns>
-		const bool IdExists(const int scanId) const;
+		const bool IdExists(const int scanId) const;\
+		std::vector<int> usedSensors;
+		unsigned int refSensorId;
 	};
 }
