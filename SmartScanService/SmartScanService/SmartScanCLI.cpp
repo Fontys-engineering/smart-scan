@@ -132,6 +132,10 @@ int main()
 		{
 			s3.CalibrateReferencePoints();
 		}
+		else if (!strcmp(cmd, "sensors"))
+		{
+			s3.GetSensorData(usedSensors, refSensorId);
+		}
 		else if (!strcmp(cmd, "dump"))
 		{
 			s3.DumpScan();
@@ -239,6 +243,7 @@ void Usage()
 	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete the last scan" << std::endl;
 	std::cout << "\t start [id] \t\t\t Start the measurement or create a new one. Leave id blank to use the \n \t\t\t\t\t last scan" << std::endl;
 	std::cout << "\t find-ref \t\t\t Start the routine for calibrating the reference points for the latest scan" << std::endl;
+	std::cout << "\t sensors \t\t\t Get sensor data from trakSTAR device" << std::endl; 
 	std::cout << "\t stop [id]\t\t\t Stop the latest (running) measurement" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
