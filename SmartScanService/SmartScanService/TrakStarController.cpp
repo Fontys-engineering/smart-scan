@@ -86,23 +86,23 @@ void TrakStarController::Config()
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//
 	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
 	// contains the following:
-	printf("Number Boards          = %d\n", ATC3DG.m_config.numberBoards);
-	printf("Number Sensors         = %d\n", ATC3DG.m_config.numberSensors);
-	printf("Number Transmitters    = %d\n\n", ATC3DG.m_config.numberTransmitters);
-
-	printf("System AGC mode	       = %d\n", ATC3DG.m_config.agcMode);
-	printf("Maximum Range          = %6.2f\n", ATC3DG.m_config.maximumRange);
-	printf("Measurement Rate       = %10.6f\n", ATC3DG.m_config.measurementRate);
-	printf("Metric Mode            = %d\n", ATC3DG.m_config.metric);
-	printf("Line Frequency         = %6.2f\n", ATC3DG.m_config.powerLineFrequency);
-	printf("Transmitter ID Running = %d\n", ATC3DG.m_config.transmitterIDRunning);
-
+	std::cout << "_____________________________________________________Configuration_____________________________________________________" << std::endl;
+    std::cout << "\tNumber Boards \t\t\t = " << ATC3DG.m_config.numberBoards << std::endl;
+	std::cout << "\tNumber Boards \t\t\t = " << ATC3DG.m_config.numberBoards << std::endl;
+	std::cout << "\tNumber Sensors \t\t\t = " << ATC3DG.m_config.numberSensors << std::endl;
+	std::cout << "\tNumber Transmitters \t\t = " << ATC3DG.m_config.numberTransmitters << std::endl;
+    std::cout << std::endl;
+	std::cout << "\tSystem AGC mode	\t\t = " << ATC3DG.m_config.agcMode << std::endl;
+	std::cout << "\tMaximum Range \t\t\t = " << ATC3DG.m_config.maximumRange << std::endl;
+	std::cout << "\tMeasurement Rate \t\t = " << ATC3DG.m_config.measurementRate << std::endl;
+	std::cout << "\tMetric Mode \t\t\t = " << ATC3DG.m_config.metric << std::endl;
+	std::cout << "\tLine Frequency \t\t\t = " << ATC3DG.m_config.powerLineFrequency << std::endl;
+	std::cout << "\tTransmitter ID Running \t\t = " << ATC3DG.m_config.transmitterIDRunning << std::endl;
+    std::cout << std::endl;
+    PrintSensorInfo();
+	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
 void TrakStarController::AttachSensor()
@@ -126,6 +126,15 @@ void TrakStarController::AttachSensor()
 	}
 }
 
+void TrakStarController::PrintSensorInfo() {
+    for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+    {
+        std::cout << "Port " << pSensor[i].m_config.channelNumber << "has ";
+        if (pSensor[i].m_config.attached) std::cout << "sensor attached with serial number " << pSensor[i].m_config.serialNumber;
+        else std::cout << "no sensor attached";
+        std::cout << std::endl;
+    }
+}
 
 int TrakStarController::GetNSensors()
 {

@@ -425,27 +425,10 @@ void SmartScanService::CalibrateReferencePoints()
 	//reset used sensors:
 	scans.back()->SetUsedSensors();
 }
-void SmartScanService::GetSensorData(const std::vector<int> usedSensors, const unsigned int refSensorId)
+void SmartScanService::GetSensorInformation()
 {
     if (!mUseMockData) {
-        SYSTEM_CONFIGURATION sysConfig;
-        SENSOR_CONFIGURATION sensorConfig;
-        GetBIRDSystemConfiguration(&sysConfig);
-
-	    std::cout << "[SENSOR] " << "Number of sensors: " << sysConfig.numberSensors << std::endl;
-	    for (int i = 0; i < sysConfig.numberSensors; i++)
-	    {
-            GetSensorConfiguration(i,&sensorConfig);
-                if (!sensorConfig.attached) {
-                    std::cout << "[SENSOR] " << "Sensor IDs: " << i << " not attached" << std::endl;
-
-                }
-                else {
-                    std::cout << "[SENSOR] " << "Sensor IDs: " << i << " attached with serial number: " << sensorConfig.serialNumber << std::endl;
-                }
-	    }
-	    std::cout << "[INFO] " << "Reference sensor ID: " << refSensorId << std::endl;
-	    
+        tSCtrl->PrintSensorInfo();
     }
 }
 

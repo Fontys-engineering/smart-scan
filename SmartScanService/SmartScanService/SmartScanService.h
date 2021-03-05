@@ -4,9 +4,8 @@
 //
 //Applications using SmartScan software should use this class and not the other classes directly.
 
-
-#include "Point3.h";
-#include "ReferencePoint.h";
+#include "Point3.h"
+#include "ReferencePoint.h"
 #include "Scan.h"
 #include "ScanDb.h"
 #include "TrakStarController.h"
@@ -22,7 +21,6 @@ namespace SmartScan
 	class SmartScanService
 	{
 	public:
-		void GetSensorData(const std::vector<int> usedSensors, const unsigned int refSensorId);
 		/// <summary>
 		/// Cosntructor. Creates a SmartScanService object that handles all the functionality. 
 		///	When debugging and the TrakSTAR device is unnavailable, set "useMockData" to "true". Otherwise,
@@ -112,6 +110,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void SetUsedSensors(const std::vector<int> sensorIds);
+
+		void GetSensorInformation();
 
 		void SetFilteringPrecision(const double precision);
 

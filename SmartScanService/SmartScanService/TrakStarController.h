@@ -52,12 +52,14 @@ namespace SmartScan
 		/// Attache the sensors to the system. Call this before making a measurement.
 		/// </summary>
 		void AttachSensor();
-
+    
 		/// <summary>
 		/// Returns the number of sensors in the current config
 		/// </summary>
 		/// <returns> - number of sensors available</returns>
 		int GetNSensors();
+
+        void PrintSensorInfo();
 
 		/// <summary>
 		/// Get the latest record for a specific sensor

@@ -23,8 +23,6 @@ int main()
 		//register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
 		//s3.RegisterNewDataCallback(TestUICallback);
 		std::cout << "SmartScan>" << "TrakSTAR device initialisation done. \n";
-
-
 	}
 	catch (ex_trakStar& e)
 	{
@@ -86,6 +84,9 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
+            //Get input
+            //std::cout << "Refsensor id: " << std::endl;
+            
 			s3.NewScan(usedSensors, refSensorId, sampleRate);
 			std::cout << "New scan created" << std::endl;
 		}
@@ -128,13 +129,13 @@ int main()
 				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->isRunning() ? "running" : "stopped") << std::endl;
 			}
 		}
+		else if (!strcmp(cmd, "list-sensors"))
+		{
+			s3.GetSensorInformation();
+		}
 		else if (!strcmp(cmd, "find-ref"))
 		{
 			s3.CalibrateReferencePoints();
-		}
-		else if (!strcmp(cmd, "sensors"))
-		{
-			s3.GetSensorData(usedSensors, refSensorId);
 		}
 		else if (!strcmp(cmd, "dump"))
 		{
@@ -236,22 +237,22 @@ void Usage()
 {
 	std::cout << std::endl;
 	std::cout << std::endl;
-	std::cout << "_____________________________________________________________HELP______________________________________________________" << std::endl;
+	std::cout << "__________________________________________________________HELP_________________________________________________________" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Measurement control" << std::endl;
 	std::cout << "\t new [id] \t\t\t Create a new measurement" << std::endl;
 	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete the last scan" << std::endl;
 	std::cout << "\t start [id] \t\t\t Start the measurement or create a new one. Leave id blank to use the \n \t\t\t\t\t last scan" << std::endl;
 	std::cout << "\t find-ref \t\t\t Start the routine for calibrating the reference points for the latest scan" << std::endl;
-	std::cout << "\t sensors \t\t\t Get sensor data from trakSTAR device" << std::endl; 
 	std::cout << "\t stop [id]\t\t\t Stop the latest (running) measurement" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
+	std::cout << "\t list-sensors \t\t\t Get sensor information from trakSTAR device" << std::endl; 
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
-	std::cout << "\t raw-dump \t\t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
+	std::cout << "\t raw-dump \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t export-raw [filename] \t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export-raw [filename] \t\t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,z) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "System preferences" << std::endl;
 	//std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;
@@ -260,8 +261,6 @@ void Usage()
 	std::cout << "\t help \t\t\t\t print this screen again" << std::endl;
 	std::cout << "\t exit \t\t\t\t cleanly exit the application" << std::endl;
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
-
-
 }
 
 void RawPrintCallback(std::vector<SmartScan::Point3>& data)
