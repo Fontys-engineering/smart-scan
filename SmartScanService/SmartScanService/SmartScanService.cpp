@@ -108,20 +108,23 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		// Set the resolution:
 		scans.back()->SetFilteringPrecision(mFilteringPrecision);
 		scans.back()->Run();
-
 	}
+
 	catch (ex_scan e)
 	{
 		throw e;
 	}
+
 	catch (ex_trakStar e)
 	{
 		throw e;
 	}
+
 	catch (ex_smartScan e)
 	{
 		throw e;
 	}
+
 	catch (...)
 	{
 		throw "Cannot start scan";
@@ -138,6 +141,7 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 			this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
 		}
 	}
+
 	// Use the specified sensors (if specified)
 	if (sensorIds.size() > 0)
 	{
@@ -154,18 +158,22 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 		}
 		scans.back()->Run(false);
 	}
+
 	catch (ex_scan e)
 	{
 		throw e;
 	}
+
 	catch (ex_trakStar e)
 	{
 		throw e;
 	}
+
 	catch (std::exception e)
 	{
 		throw e;
 	}
+
 	catch (...)
 	{
 		throw "Cannot start scan";

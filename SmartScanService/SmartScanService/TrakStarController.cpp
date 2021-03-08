@@ -105,7 +105,7 @@ void TrakStarController::Config()
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void TrakStarController::AttachTransmitter()
+void TrakStarController::AttachSensor()
 {
 	if (mMock)
 	{

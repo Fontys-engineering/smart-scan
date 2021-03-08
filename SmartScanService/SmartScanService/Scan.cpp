@@ -131,40 +131,28 @@ void Scan::DataAcquisition()
 	{
 		auto startTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
-		if (elapsed_seconds.count() >= 1 / sampleRate)
-		{
-			// Sample:
-			//std::chrono::duration<double> totalTime = scanStartTime - startTime;
-			for (int i = 0; i < pTSCtrl->GetNSensors(); i++)
-			{
-				try
-				{
-					if (i == mRefSensorId)
-					{
-						mRefBuff.push_back(pTSCtrl->GetRecord(i));
-					}
 
-					//only sample the sensors we are interested in:
-					if (mUsedSensors.size() == 0)
-					{
-						mInBuff.push_back(pTSCtrl->GetRecord(i));
-					}
-					else
-					{
-						for (int id = 0; id<mUsedSensors.size();id++)
-						{
-							if (i == id)
-							{
-								mInBuff.push_back(pTSCtrl->GetRecord(i));
-							}
-						}
-					}
-				}
-				catch (...)
-				{
-					throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
-				}
-			}
+		if (elapsed_seconds.count() >= 1 / sampleRate) {
+            try
+            {
+                mRefBuff.push_back(pTSCtrl->GetRecord(mRefSensorId));
+            }
+            catch(...)
+            {
+                throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
+            }
+
+            try
+            {
+                for(int i = 0; i < mUsedSensors.size(); i++) {
+                    mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors.at(i)));
+                }
+            }
+            catch(...)
+            {
+                throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
+            }
+
 			// Raw data callback
 			if (mRawDataCallback)
 				mRawDataCallback(mInBuff);
@@ -177,9 +165,8 @@ void Scan::DataAcquisition()
 			}
 			// Save current time
 			lastSampleTime = std::chrono::steady_clock::now();
-		}
-	}
-
+        } 
+    }
 	std::cout<< "[SCAN] " << "Data acquisition completed \n";
 	mStopDataAcquisition = false;
 

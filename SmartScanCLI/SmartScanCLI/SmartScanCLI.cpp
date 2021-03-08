@@ -8,11 +8,10 @@
 
 using namespace SmartScan;
 
-#include <iomanip>;
+#include <iomanip>
 
 int main()
 {
-
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
 	//initialise the service:
