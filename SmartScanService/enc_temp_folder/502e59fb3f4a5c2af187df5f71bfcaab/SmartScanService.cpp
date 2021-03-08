@@ -86,10 +86,10 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 	}
 
 	// Use the specified sensors (if specified)
-	//if (sensorIds.size() > 0)
-	///{
-		//this->scans.back()->SetUsedSensors(sensorIds);
-	///}
+	if (sensorIds.size() > 0)
+	{
+		this->scans.back()->SetUsedSensors(sensorIds);
+	}
 
 	// Check if reference points have been set;
 	if (!scans.back()->GetReferences().size())
@@ -139,10 +139,10 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 	}
 
 	// Use the specified sensors (if specified)
-	//if (sensorIds.size() > 0)
-	//{
-		//this->scans.back()->SetUsedSensors(sensorIds);
-	//}
+	if (sensorIds.size() > 0)
+	{
+		this->scans.back()->SetUsedSensors(sensorIds);
+	}
 
 	// Start the scan:
 	try
@@ -180,10 +180,9 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 	}
 
 	// Only use thumb and index finger:
-	//std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
-	
+	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
 
-	//scans.back()->SetUsedSensors(sensorsUsed);
+	scans.back()->SetUsedSensors(sensorsUsed);
 
 	scans.back()->Run(true);
 
@@ -194,7 +193,7 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 	{
 	}
 
-	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - scans.back()->NUsedSensors();
+	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
 	// Add the referenceSensorPos:
 	newRef.refSensorPos = scans.back()->mRefBuff.back();
 
@@ -206,7 +205,7 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 
 	scans.back()->Stop(true);
 	// Reset used sensors:
-	//scans.back()->SetUsedSensors();
+	scans.back()->SetUsedSensors();
 }
 
 void SmartScanService::CalibrateReferencePoints()
@@ -230,9 +229,9 @@ void SmartScanService::CalibrateReferencePoints()
 		scans.back()->ResetReferences();
 	}
 	// Only use thumb and index finger:
-	//std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
+	std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
 
-	//scans.back()->SetUsedSensors(sensorsUsed);
+	scans.back()->SetUsedSensors(sensorsUsed);
 
 	// Start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
@@ -252,7 +251,7 @@ void SmartScanService::CalibrateReferencePoints()
 		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to capture it" << std::endl;
 		std::cin.get();
 
-		std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - scans.back()->NUsedSensors();
+		std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - sensorsUsed.size();
 		// Add the referenceSensorPos:
 		newRef.refSensorPos = scans.back()->mRefBuff.back();
 
@@ -301,7 +300,7 @@ void SmartScanService::CalibrateReferencePoints()
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
 	scans.back()->Stop(true);
 	// Reset used sensors:
-	//scans.back()->SetUsedSensors();
+	scans.back()->SetUsedSensors();
 }
 
 void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)
@@ -334,7 +333,7 @@ void SmartScanService::DumpScan() const
 
 void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 {
-	//scans.back()->SetUsedSensors(sensorIds);
+	scans.back()->SetUsedSensors(sensorIds);
 }
 
 void SmartScan::SmartScanService::SetFilteringPrecision(const double precision)

@@ -105,7 +105,7 @@ void TrakStarController::Config()
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void TrakStarController::AttachSensor()
+void TrakStarController::AttachTransmitter()
 {
 	if (mMock)
 	{
@@ -123,6 +123,22 @@ void TrakStarController::AttachSensor()
 			break;
 		}
 	}
+}
+
+int TrakStarController::GetSensoridFromSerial(int serialNumber)
+{
+    int sensorID = -1;
+
+    for(int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+    {
+        if(pSensor[i].m_config.serialNumber == serialNumber)
+        {
+            sensorID = pSensor[i].m_config.channelNumber;
+            break;  
+        }
+    }
+
+    return sensorID;
 }
 
 int TrakStarController::GetNSensors()
@@ -170,7 +186,6 @@ Point3 TrakStarController::GetRecord(int sensorID)
 			ErrorHandler(errorCode);
 		}
 	}
-
 
 	// Get the status of the last data record.
 	// Only report the data if everything is okay.
