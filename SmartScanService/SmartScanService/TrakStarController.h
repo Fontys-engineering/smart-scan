@@ -51,17 +51,20 @@ namespace SmartScan
 		void Config();
 
 		/// <summary>
-		/// Attache the sensors to the system. Call this before making a measurement.
+		/// Attach the transmitter to the system. Call this before making a measurement.
 		/// </summary>
-		void AttachSensor();
+		void AttachTransmitter();
     
+        /// <summary>
+        /// Try and find the device channel from a specific serial number
+        /// </summary>
+        int GetSensoridFromSerial(int serialNumber);
+
 		/// <summary>
 		/// Returns the number of sensors in the current config
 		/// </summary>
 		/// <returns> - number of sensors available</returns>
 		int GetNSensors();
-
-        void PrintSensorInfo();
 
 		/// <summary>
 		/// Get the latest record for a specific sensor

@@ -95,10 +95,7 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-            // Get input
-            //std::cout << "Refsensor id: " << std::endl;
-            
-			s3.NewScan(usedSensors, refSensorId, sampleRate);
+			s3.NewScan(usedSensors, sampleRate);
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))
