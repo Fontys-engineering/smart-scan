@@ -1,10 +1,8 @@
 #pragma once
 
-//system libraries:
 #include <iostream>
 #include <vector>
 
-//custom libraries:
 #include "SmartScanService.h"
 #include "Point3.h"
 
@@ -16,9 +14,12 @@ const unsigned int refSensorId = 2;
 const double sampleRate = 50;
 const double filteringPrecision = 4;
 
-//create a new SmartScanService object with mock data:
+// Create a new SmartScanService object with mock data:
 SmartScan::SmartScanService s3(mockMode);
 
+/// <summary>
+/// Display the help screen
+/// </summary>
 void Usage();
 
 void RawPrintCallback(std::vector<SmartScan::Point3>& data);

@@ -2,21 +2,43 @@
 
 using namespace SmartScan;
 
-// Filtering helper methods:
-
 SmartScan::Filtering::Filtering()
 {
 
 }
 
-SmartScan::Filtering::Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }{}
+SmartScan::Filtering::Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }
+{
+
+}
 
 void SmartScan::Filtering::Filter(std::vector<Point3>& data)
 {
     FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
 }
 
-// RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
+void SmartScan::Filtering::Filter(std::vector<Point3>& data, std::vector<Point3>& referenceData)
+{
+    RotationOrientation(data, referenceData);
+    FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
+}
+
+void SmartScan::Filtering::SetReferencePoints(std::vector<ReferencePoint> referencePoints)
+{
+    this->referencePoints = referencePoints;
+}
+
+void SmartScan::Filtering::SetPrecision(double phi_range, double theta_range)
+{
+    this->phi_range = phi_range;
+    this->theta_range = theta_range;
+}
+
+void SmartScan::Filtering::SetFrameSize(const unsigned int& framesize)
+{
+    this->mFramesize = framesize;
+}
+
 // At this point, the input 'data' only consists of x-y-z values and azimuth, elevation and roll values
 // The output 'data' consists of new x-y-z values with the according azimuth, elevation and roll values.
 void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::vector<Point3>& referenceData)
@@ -82,7 +104,6 @@ void SmartScan::Filtering::RotationOrientation(std::vector<Point3>& data, std::v
 
             // Replace the data with the new values
             data[(i * nOfSensors) + j] = Point3(x_new, y_new, z_new, roll_ref, elevation_ref, azimuth_ref, 0, 0, 0);
-            
         }
     }
 }
@@ -156,50 +177,31 @@ void SmartScan::Filtering::Outlier(std::vector<Point3>& data, double phi_range, 
     }
 }
 
-
-void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
+void SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range)
 {
-    std::vector<std::vector<Point3>> vectorSet;
-    std::vector<std::vector<Point3>> vectorSetSort;
-    std::vector<Point3> f_data;
-    Filtering f;
-    vectorSet = CalculateCoordinates(referencePoints, data);
-    vectorSetSort = SortArrays(data, vectorSet, referencePoints);
-    
-    for (int i = 0; i < referencePoints.size(); i++)
+    int index = 0;
+
+    while (index <= data.size())
     {
-        GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
-        //Outlier(vectorSetSort[i], phi_range, theta_range);
-        for (auto j = 0; j < vectorSetSort[i].size(); j++)
+        if (index < data.size())
         {
-            f_data.push_back(vectorSetSort[i][j]);
+            if (TestPoint(data, phi_range, theta_range, index) == false)
+            {
+                data.erase(data.begin() + index);
+                index--;
+            }
         }
+        index++;
     }
-    data = f_data;
 }
 
-
-void SmartScan::Filtering::Filter(std::vector<Point3>& data, std::vector<Point3>& referenceData)
+double SmartScan::Filtering::findMean(double a[], int n)
 {
-    RotationOrientation(data, referenceData);
-    FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
-}
+    int sum = 0;
+    for (int i = 0; i < n; i++)
+        sum += a[i];
 
-void SmartScan::Filtering::SetReferencePoints(std::vector<ReferencePoint> referencePoints)
-{
-    this->referencePoints = referencePoints;
-
-}
-
-void SmartScan::Filtering::SetPrecision(double phi_range, double theta_range)
-{
-    this->phi_range = phi_range;
-    this->theta_range = theta_range;
-}
-
-void SmartScan::Filtering::SetFrameSize(const unsigned int& framesize)
-{
-    this->mFramesize = framesize;
+    return (double)sum / (double)n;
 }
 
 std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
@@ -250,33 +252,6 @@ bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range
 	return result;
 }
 
-void SmartScan::Filtering::GradientSmoothing(std::vector<Point3>& data, double phi_range, double theta_range)
-{
-    int index = 0;
-
-    while (index <= data.size())
-    {
-        if (index < data.size())
-        {
-            if (TestPoint(data, phi_range, theta_range, index) == false)
-            {
-                data.erase(data.begin() + index);
-                index--;
-            }
-        }
-        index++;
-    }
-}
-
-double SmartScan::Filtering::findMean(double a[], int n)
-{
-    int sum = 0;
-    for (int i = 0; i < n; i++)
-        sum += a[i];
-
-    return (double)sum / (double)n;
-}
-
 std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data)
 {
     // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
@@ -309,5 +284,25 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Po
     }
 
     return vectorSet;
+}
 
+void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
+{
+    std::vector<std::vector<Point3>> vectorSet;
+    std::vector<std::vector<Point3>> vectorSetSort;
+    std::vector<Point3> f_data;
+    Filtering f;
+    vectorSet = CalculateCoordinates(referencePoints, data);
+    vectorSetSort = SortArrays(data, vectorSet, referencePoints);
+    
+    for (int i = 0; i < referencePoints.size(); i++)
+    {
+        GradientSmoothing(vectorSetSort[i], phi_range, theta_range);
+        //Outlier(vectorSetSort[i], phi_range, theta_range);
+        for (auto j = 0; j < vectorSetSort[i].size(); j++)
+        {
+            f_data.push_back(vectorSetSort[i][j]);
+        }
+    }
+    data = f_data;
 }

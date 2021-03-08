@@ -1,10 +1,5 @@
 #pragma once
 
-#include "Point3.h"
-#include "ReferencePoint.h"
-#include "Filtering.h"
-#include "TrakStarController.h"
-
 #include <vector>
 #include <deque>
 #include <iostream>
@@ -12,37 +7,36 @@
 #include <chrono>
 #include <functional>
 
+#include "Point3.h"
+#include "ReferencePoint.h"
+#include "Filtering.h"
+#include "TrakStarController.h"
+
 namespace SmartScan
 {
 	class Scan
 	{
 	public:
-		const int mId;
-		/// <summary>
-		/// raw data vector
-		/// </summary>
-		std::vector<Point3> mInBuff;
-		/// <summary>
-		/// Filtered data vector
-		/// </summary>
-		std::vector<Point3> mOutBuff;
-		/// <summary>
-		/// reference sensor data vector
-		/// </summary>
-		std::vector<Point3> mRefBuff;
+		const int mId;                                  // Scan identifier.
+
+		std::vector<Point3> mInBuff;                    // Raw data vector.
+		std::vector<Point3> mOutBuff;                   // Filtered data vector.
+		std::vector<Point3> mRefBuff;                   // Reference sensor data vector.
 
 		Scan(const int id, TrakStarController* pTSCtrl);
 		Scan(const int id, TrakStarController* pTSCtrl, const double sampleRate, const std::vector<int> usedSensors, const int refSensorId);
-
 		~Scan();
 
 		void Run(bool acqusitionOnly = false);
+
 		void Stop(bool clearData = false);
+
 		/// <summary>
 		/// Register a new callback function to be called whenever new filtered data is available
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
 		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
+
 		/// <summary>
 		/// Register a new callback function to be called whenever new raw data is available
 		/// </summary>
@@ -54,6 +48,7 @@ namespace SmartScan
 		/// </summary>
 		/// <returns> - status (true if the scan is running)</returns>
 		const bool isRunning() const;
+
 		//double GetCompletion() const;
 		//bool Complete() const;
 		//void PostProcess();
@@ -63,17 +58,19 @@ namespace SmartScan
 		/// </summary>
 		void DumpData() const;
 
-#pragma region configuration
-
 		void SetSampleRate(const double sampleRate);
+
 		const double GetSampleRate() const;
 		
-		void SetUsedSensors(const std::vector<int> usedSensors);
-		const std::vector<int> GetUsedSensors() const;
 		void SetUsedSensors();
+		void SetUsedSensors(const std::vector<int> usedSensors);
+
+		const std::vector<int> GetUsedSensors() const;
 
 		void SetReferenceSensorId(const int sensorId);
+
 		const int GetReferenceSensorId();
+
 		/// <summary>
 		/// return the number of sensors used for the measurement. Excluding the reference sensor(s)
 		/// </summary>
@@ -81,11 +78,8 @@ namespace SmartScan
 		const int NUsedSensors() const;
 
 		void SetFilteringPrecision(const double precision);
+
 		const double GetFilteringPrecision();
-
-#pragma endregion configuration
-
-#pragma region reference_points
 
 		/// <summary>
 		/// Routine for finding the reference points required for the filtering algorithm
@@ -102,61 +96,39 @@ namespace SmartScan
 		/// Delete all existing reference points
 		/// </summary>
 		void ResetReferences();
-
-#pragma endregion reference points:
-
 	private:
-#pragma region scan_properties
-		double sampleRate = 50;	//in hz
+		bool mRunning = false;                          // Indicates if scan is running.
+		bool mStopDataAcquisition = false;              // Stops data acquisition thread when true.
+		bool mStopFiltering = false;                    // Stops filtering thread when true.
 
-#pragma endregion scan properties:
+		std::vector<int> mUsedSensors;	                // The sensors ids that we want a reading from.
+		int mRefSensorId;                               // Reference sensor id.
+		double sampleRate = 50;	                        // Sample rate of the data acquisition in Hz.
+		double mFilteringPrecision = 30;                // Filter precision angle from reference point.
 
 		std::vector<ReferencePoint> mReferencePoints;
 
-		//track star controller obj:
-		TrakStarController *pTSCtrl;
+		TrakStarController *pTSCtrl;                    // Pointer to Track star controller obj
 
-#pragma region data_acquisition
-		//status:
-		bool mRunning = false;
+		Filtering mF;                                   // Filtering object.
+		const unsigned int frameSize = 100;             // ?
+		unsigned int frameCounter = 0;                  // ?
+		unsigned long lastFilteredSample = 0;
 
-		//data acquisition thread:
 		std::unique_ptr<std::thread> pAcquisitionThread;
+		std::unique_ptr<std::thread> pFilteringThread;
+
+		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point scanStartTime = std::chrono::steady_clock::now();
+
+		std::function<void(std::vector<Point3>&)> mNewDataCallback;     // ?New data callback
+		std::function<void(std::vector<Point3>&)> mRawDataCallback;     // Needed for printing values directly to console 
 
 		/// <summary>
 		/// Polls the TrakstarController for new data, stores it and filters it.
 		/// </summary>
 		void DataAcquisition();
-		bool mStopDataAcquisition = false;
-
-		std::vector<int> mUsedSensors;	//the sensors ids that we want a reading from.
-		int mRefSensorId;
-
-		//filtering thread:
-		std::unique_ptr<std::thread> pFilteringThread;
 
 		void DataFiltering();
-		bool mStopFiltering = false;
-
-		const unsigned int frameSize = 100;
-		unsigned int frameCounter = 0;
-		unsigned long lastFilteredSample = 0;
-
-		double mFilteringPrecision = 30;
-
-		//timing:
-		std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
-		std::chrono::steady_clock::time_point scanStartTime = std::chrono::steady_clock::now();
-
-
-		//new data callback
-		std::function<void(std::vector<Point3>&)> mNewDataCallback;
-		//raw data callback
-		std::function<void(std::vector<Point3>&)> mRawDataCallback;
-
-#pragma endregion data aquisition:
-
-		//filtering object:
-		Filtering mF;
 	};
 }

@@ -1,6 +1,4 @@
 #pragma once
-//This class describes the main data format used throughout the SmartScan software.
-//It helps contain one TrakSTAR measurement data point (position, location) in one object.
 
 namespace SmartScan
 {
@@ -22,6 +20,8 @@ namespace SmartScan
         Spherical3(double r, double phi, double theta);
     };
 
+    // This class describes the main data format used throughout the SmartScan software.
+    // It helps contain one TrakSTAR measurement data point (position, location) in one object.
     class Point3
     {
     public:

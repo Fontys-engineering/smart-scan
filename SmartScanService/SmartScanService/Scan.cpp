@@ -6,19 +6,14 @@ using namespace SmartScan;
 
 Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}
 {
+
 }
 
-SmartScan::Scan::Scan(
-	const int id, TrakStarController* pTSCtrl, 
-	const double sampleRate, 
-	const std::vector<int> usedSensors, 
-	const int refSensorId) : 
-		mId{ id }, 
-		pTSCtrl{ pTSCtrl }, 
-		mRefSensorId{ refSensorId },
-		sampleRate {sampleRate},
-		mUsedSensors {usedSensors}
+SmartScan::Scan::Scan( const int id, TrakStarController* pTSCtrl, const double sampleRate,
+    const std::vector<int> usedSensors, const int refSensorId) :
+    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate {sampleRate}, mUsedSensors {usedSensors}
 {
+
 }
 
 Scan::~Scan()
@@ -28,23 +23,23 @@ Scan::~Scan()
 
 void Scan::Run(bool acqusitionOnly)
 {
-	//check if reference points have been defined:
+	// Check if reference points have been defined:
 	mStopDataAcquisition = mStopFiltering = false;
 
-	//check wether trak star controller has been initialised 
+	// Check wether trak star controller has been initialised 
 	if (!pTSCtrl)
 	{
 		throw ex_trakStar("No track star controller defined", __func__, __FILE__);
 	}
 
-	//check if this scan is already running:
+	// Check if this scan is already running:
 	if (this->mRunning)
 	{
 		std::cout << "[SCAN] " << "Scan already in progress" << std::endl;
 		return;
 	}
 
-	//start the thread:
+	// Start the thread:
 	std::cout << "[SCAN] " << "Starting scan with id " << mId << std::endl;
 	try
 	{
@@ -54,7 +49,7 @@ void Scan::Run(bool acqusitionOnly)
 	{
 		throw ex_scan("unnable to start thread", __func__, __FILE__);
 	}
-	//let it gooooo, let it gooo
+	// Let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
 	if (!acqusitionOnly)
@@ -71,7 +66,7 @@ void Scan::Run(bool acqusitionOnly)
 			throw ex_scan("Unable to set Filtering References and Resolution", __func__, __FILE__);
 		}
 
-		//start the filtering thread:
+		// Start the filtering thread:
 		try
 		{
 			this->pFilteringThread = std::make_unique<std::thread>(&Scan::DataFiltering, this);
@@ -81,7 +76,7 @@ void Scan::Run(bool acqusitionOnly)
 			throw ex_scan("unnable to start filtering thread", __func__, __FILE__);
 		}
 
-		//let it gooooo, let it gooo
+		// Let it gooooo, let it gooo
 		this->pFilteringThread->detach();
 	}
 	mRunning = true;
@@ -89,7 +84,7 @@ void Scan::Run(bool acqusitionOnly)
 
 void Scan::Stop(bool clearData)
 {
-	//check if this scan is already running:
+	// Check if this scan is already running:
 	if (!this->mRunning)
 	{
 		std::cout << "[SCAN] " << "Scan not running." << std::endl;
@@ -99,7 +94,7 @@ void Scan::Stop(bool clearData)
 	mStopDataAcquisition = true;
 	mStopFiltering = true;
 
-	//wait a bit for the other threads to finish:
+	// Wait a bit for the other threads to finish:
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	if (clearData)
@@ -129,7 +124,7 @@ const double Scan::GetSampleRate() const
 
 void Scan::DataAcquisition()
 {
-	//start the data aquisition:
+	// Start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
 
 	while (!mStopDataAcquisition)
@@ -138,7 +133,7 @@ void Scan::DataAcquisition()
 		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
 		if (elapsed_seconds.count() >= 1 / sampleRate)
 		{
-			//sample:
+			// Sample:
 			//std::chrono::duration<double> totalTime = scanStartTime - startTime;
 			for (int i = 0; i < pTSCtrl->GetNSensors(); i++)
 			{
@@ -170,17 +165,17 @@ void Scan::DataAcquisition()
 					throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
 				}
 			}
-			//raw data callback
+			// Raw data callback
 			if (mRawDataCallback)
 				mRawDataCallback(mInBuff);
 
-			//make sure we are not slower than the required sample rate:
+			// Make sure we are not slower than the required sample rate:
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
 			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
-			//save current time
+			// Save current time
 			lastSampleTime = std::chrono::steady_clock::now();
 		}
 	}
@@ -193,24 +188,24 @@ void Scan::DataAcquisition()
 
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
-//TODO: fix processing the remaining data after acquisition stops when filtering has fallen behind
+
+// TODO: fix processing the remaining data after acquisition stops when filtering has fallen behind
 void Scan::DataFiltering()
 {
-	//start the data aquisition:
+	// Start the data aquisition:
 	std::cout << "[SCAN] " << "Running data filtering \n";
 
 	while (!mStopFiltering)
 	{
 		auto startTime = std::chrono::steady_clock::now();
-		
 
-		//check if there is new data available:
+		// Check if there is new data available:
 		const int inSize = mInBuff.size();
 		const int outSize = mOutBuff.size();
 
 		if (inSize > (lastFilteredSample) && frameCounter < frameSize)
 		{
-			//add the new data to the output buffer:
+			// Add the new data to the output buffer:
 			try
 			{
 				mOutBuff.push_back(mInBuff.begin()[lastFilteredSample]);
@@ -226,8 +221,8 @@ void Scan::DataFiltering()
 		else if (frameCounter >= frameSize){
 			try
 			{
-				//done with the frame, filter it:
-				//for example, only keep a third (middle):
+				// Done with the frame, filter it:
+				// For example, only keep a third (middle):
 				while(mRefBuff.size() % (frameSize / NUsedSensors()))
 				{
 					
@@ -235,11 +230,11 @@ void Scan::DataFiltering()
 				std::vector<Point3>::const_iterator refBufStartIt =  mRefBuff.cbegin() + (lastFilteredSample - frameSize)/NUsedSensors();
 				int refBufOffset = (lastFilteredSample- frameSize) / NUsedSensors() + frameSize / NUsedSensors();
 				std::vector<Point3>::const_iterator refBufEndIt = mRefBuff.cbegin() + refBufOffset;
-				//make a copy of the ref vector that coresponds to the current frame:
+				// Make a copy of the ref vector that coresponds to the current frame:
 				std::vector<Point3> refCopy(refBufStartIt, refBufEndIt);
 				//auto mOutCopy = mOutBuff;
 				mF.Filter(mOutBuff, refCopy);
-				//when filtering is done, execute the callback:
+				// When filtering is done, execute the callback:
 				if(mNewDataCallback)
 					mNewDataCallback(mOutBuff);
 
@@ -258,10 +253,10 @@ void Scan::DataFiltering()
 		}
 	}
 
-	//handle the leftover stuff:
+	// Handle the leftover stuff:
 	if (lastFilteredSample < mInBuff.size() - 1)
 	{
-		//send the rest to be filtered
+		// Send the rest to be filtered
 	}
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
@@ -271,7 +266,7 @@ void Scan::DataFiltering()
 
 void Scan::DumpData() const
 {
-	for (auto& record : mInBuff) // access by reference to avoid copying
+	for (auto& record : mInBuff)    // Access by reference to avoid copying
 	{
 		std::cout << std::setprecision(16) << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\n";
 	}

@@ -1,13 +1,11 @@
 #pragma once
-//this class handles the communication with the TrakSTAR hardware
-//functionality such as correct configuration, starting, stopping the scan and
-//getting new data is handled here.
 
-#include "NDI/ATC3DG.h"				//TrakSTAR driver
 #include <time.h>
-#include "Point3.h"
 #include <string>
 #include <fstream>
+
+#include "Point3.h"
+#include "NDI/ATC3DG.h"
 
 namespace SmartScan
 {
@@ -29,7 +27,9 @@ namespace SmartScan
 		TRANSMITTER_CONFIGURATION	m_config;
 	};
 
-
+    // This class handles the communication with the TrakSTAR hardware
+    // Functionality such as correct configuration, starting, stopping the scan and
+    // Getting new data is handled here.
 	class TrakStarController
 	{
 	public:
@@ -44,10 +44,12 @@ namespace SmartScan
 		/// Initialie the system. Call this before making a measurement
 		/// </summary>
 		void Init();
+
 		/// <summary>
 		/// Configure the sensor system. Call this after init and before making a measurement.
 		/// </summary>
 		void Config();
+
 		/// <summary>
 		/// Attache the sensors to the system. Call this before making a measurement.
 		/// </summary>
@@ -77,7 +79,6 @@ namespace SmartScan
 		/// Turn off the referenece.
 		/// </summary>
 		void StopTransmit();
-
 	private:
 		bool mMock;
 
@@ -105,7 +106,10 @@ namespace SmartScan
 		int				numberBytes;
 
 		clock_t			goal;
-		clock_t			wait = 10;	// 10 ms delay
+		clock_t			wait = 10;	                    // 10 ms delay
+
+		/// Keep track of the last mock record so that the movement is realistic.
+		Point3 mPrevMockRecord;
 
 		void ErrorHandler(int error);
 
@@ -116,10 +120,9 @@ namespace SmartScan
 		/// </summary>
 		/// <returns></returns>
 		Point3 GetMockRecord();
-		//keep track of the last mock record so that the movement is realistic.
-		Point3 mPrevMockRecord;
+
 		/// <summary>
-		/// Goes through the specified file and returns consecutive samples as Point3
+		/// Goes through the specified file and returns consecutive samples as Point3.
 		/// </summary>
 		/// <returns></returns>
 		Point3 GetMockRecordFromFile(int sensorId = 0);
