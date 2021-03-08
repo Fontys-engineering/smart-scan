@@ -62,12 +62,12 @@ namespace SmartScan
 
 		const double GetSampleRate() const;
 		
-		void SetUsedSensors();
-		void SetUsedSensors(const std::vector<int> usedSensors);
+		//void SetUsedSensors();
+		//void SetUsedSensors(const std::vector<int> usedSensors);
 
 		const std::vector<int> GetUsedSensors() const;
 
-		void SetReferenceSensorId(const int sensorId);
+		//void SetReferenceSensorId(const int sensorId);
 
 		const int GetReferenceSensorId();
 
@@ -101,8 +101,8 @@ namespace SmartScan
 		bool mStopDataAcquisition = false;              // Stops data acquisition thread when true.
 		bool mStopFiltering = false;                    // Stops filtering thread when true.
 
-		std::vector<int> mUsedSensors;	                // The sensors ids that we want a reading from.
-		int mRefSensorId;                               // Reference sensor id.
+		const std::vector<int> mUsedSensors;	        // The sensors ids that we want a reading from.
+		const int mRefSensorId;                         // Reference sensor id.
 		double sampleRate = 50;	                        // Sample rate of the data acquisition in Hz.
 		double mFilteringPrecision = 30;                // Filter precision angle from reference point.
 

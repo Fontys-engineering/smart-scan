@@ -125,7 +125,7 @@ const double Scan::GetSampleRate() const
 void Scan::DataAcquisition()
 {
 	// Start the data aquisition:
-	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << ((mUsedSensors.size() > 0) ? mUsedSensors.size() : pTSCtrl->GetNSensors()) << " sensors \n";
+	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mUsedSensors.size() << " sensors \n";
 
 	while (!mStopDataAcquisition)
 	{
@@ -283,30 +283,30 @@ void Scan::ResetReferences()
 	mReferencePoints.clear();
 }
 
-void Scan::SetUsedSensors(const std::vector<int> usedSensors)
-{
-	for (auto id : usedSensors)
-	{
-		if (id >= pTSCtrl->GetNSensors())
-		{
-			throw ex_scan("Cannot set used sensors list. Sensor ID out of range.", __func__, __FILE__);
-		}
-	}
-	mUsedSensors = usedSensors;
-}
+//void Scan::SetUsedSensors(const std::vector<int> usedSensors)
+//{
+	//for (auto id : usedSensors)
+	//{
+		//if (id >= pTSCtrl->GetNSensors())
+		//{
+			//throw ex_scan("Cannot set used sensors list. Sensor ID out of range.", __func__, __FILE__);
+		//}
+	//}
+	//mUsedSensors = usedSensors;
+//}
 const std::vector<int> SmartScan::Scan::GetUsedSensors() const
 {
 	return this->mUsedSensors;
 }
-void Scan::SetUsedSensors()
-{
-	mUsedSensors.clear();
-}
+//void Scan::SetUsedSensors()
+//{
+	//mUsedSensors.clear();
+//}
 
-void SmartScan::Scan::SetReferenceSensorId(const int sensorId)
-{
-	mRefSensorId = sensorId;
-}
+//void SmartScan::Scan::SetReferenceSensorId(const int sensorId)
+//{
+	//mRefSensorId = sensorId;
+//}
 
 const int SmartScan::Scan::GetReferenceSensorId()
 {

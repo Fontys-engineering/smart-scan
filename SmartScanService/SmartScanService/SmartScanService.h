@@ -160,8 +160,8 @@ namespace SmartScan
 		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
 	private:
 		bool mUseMockData;
-		std::vector<int> usedSensors;
-		unsigned int refSensorId;
+		//std::vector<int> usedSensors;
+		//unsigned int refSensorId;
 		double mFilteringPrecision = 4;
 
 		std::vector<std::shared_ptr<Scan>> scans;       // This vector stores the current scan objects. 
