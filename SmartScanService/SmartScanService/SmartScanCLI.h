@@ -8,10 +8,9 @@
 
 const bool mockMode = true;
 
-const std::vector<int> usedSensors = {0,1};
-const unsigned int refSensorId = 2;
+const std::vector<int> usedSensors = {1879, 1877, 1876};
 
-const double sampleRate = 80;
+const double sampleRate = 50;
 const double filteringPrecision = 4;
 
 // Create a new SmartScanService object with mock data:

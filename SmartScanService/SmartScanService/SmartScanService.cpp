@@ -24,30 +24,56 @@ void SmartScanService::Init()
 	tSCtrl->AttachTransmitter();
 }
 
-void SmartScanService::NewScan(const std::vector<int> sensorIds, const double sampleRate)
+void SmartScanService::NewScan(const std::vector<int> sensorSerials, const double sampleRate, const double filteringPrecision)
 {
-    std::cout << 1 << std::endl;
-	NewScan(FindNewScanId(), sensorIds, sampleRate);
+	NewScan(FindNewScanId(), sensorSerials, sampleRate, filteringPrecision);
 }
 
-void SmartScanService::NewScan(const int scanId, const std::vector<int> sensorIds, const double sampleRate)
+void SmartScanService::NewScan(const int scanId, const std::vector<int> sensorSerials, const double sampleRate, const double filteringPrecision)
 {
-    std::cout << 2 << std::endl;
-	NewScan(scanId, sensorIds, sensorIds[0], sampleRate);
+    std::vector<int> sensorIds;
+    int refSensorId;
+
+    if (!mUseMockData)
+    {
+        std::vector<int> sensorIds;
+        refSensorId = tSCtrl->GetSensoridFromSerial(sensorSerials[0]);
+
+        if(refSensorId < 0)
+        {
+            std::cout << "Could not find reference sensor serial number" << std::endl;
+            return;
+        }
+
+        for(int i = 1; i < sensorSerials.size(); i++)
+        {
+            sensorIds.push_back(tSCtrl->GetSensoridFromSerial(sensorSerials[i]));
+            if(sensorIds[i] < 0)
+            {
+                std::cout << "Could not find sensor serial number" << std::endl;
+                return;
+            }
+        }
+    }
+    else 
+    {
+        sensorIds.emplace_back(0);
+        sensorIds.emplace_back(1);
+        refSensorId = 2;
+    }
+
+	NewScan(scanId, sensorIds, refSensorId, sampleRate, filteringPrecision);
 }
 
-void SmartScan::SmartScanService::NewScan(const int scanId, const std::vector<int> sensorIds, const int refSensorId, const double sampleRate)
+void SmartScan::SmartScanService::NewScan(const int scanId, const std::vector<int> sensorIds, const int refSensorId, const double sampleRate, const double filteringPrecision)
 {
-    std::cout << 3 << std::endl;
-    std::cout << "samplerate " << sampleRate << std::endl;
-
 	// Check if id is unique:
 	if (IdExists(scanId))
 	{
 		throw ex_smartScan("Scan object ID must be unique", __func__, __FILE__);
 	}
 	// Create new scan obj
-	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl, sampleRate, sensorIds, refSensorId));
+	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl, sampleRate, sensorIds, refSensorId, filteringPrecision));
 }
 
 void SmartScanService::DeleteScan()
@@ -80,10 +106,10 @@ void SmartScanService::DeleteScan(int id)
 void SmartScanService::StartScan(const std::vector<int> sensorIds)
 {
 	// Create new scan obj if none exists or the existing one is already running:
-	if (!scans.size() || scans.back()->isRunning())
-	{
-		this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
-	}
+	//if (!scans.size() || scans.back()->isRunning())
+	//{
+	//	this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
+	//}
 
 	// Use the specified sensors (if specified)
 	//if (sensorIds.size() > 0)
@@ -106,7 +132,7 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
 		// Set the resolution:
-		scans.back()->SetFilteringPrecision(mFilteringPrecision);
+		//scans.back()->SetFilteringPrecision(mFilteringPrecision);
 		scans.back()->Run();
 	}
 	catch (ex_scan e)
@@ -132,10 +158,10 @@ void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
 	if (!IdExists(scanId))
 	{
 		// Create new scan obj with that id:
-		if (!scans.size() || scans.back()->isRunning())
-		{
-			this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
-		}
+		//if (!scans.size() || scans.back()->isRunning())
+		//{
+		//	this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
+		//}
 	}
 
 	// Use the specified sensors (if specified)

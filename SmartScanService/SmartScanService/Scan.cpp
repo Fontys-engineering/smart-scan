@@ -4,14 +4,14 @@
 
 using namespace SmartScan;
 
-Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}
-{
-
-}
+//Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}, m
+//{
+//
+//}
 
 SmartScan::Scan::Scan( const int id, TrakStarController* pTSCtrl, const double sampleRate,
-    const std::vector<int> usedSensors, const int refSensorId) :
-    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate {sampleRate}, mUsedSensors {usedSensors}
+    const std::vector<int> usedSensors, const int refSensorId, const double filteringPrecision) :
+    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate {sampleRate}, mUsedSensors {usedSensors}, mFilteringPrecision {filteringPrecision}
 {
 
 }
@@ -112,10 +112,10 @@ const bool Scan::isRunning() const
 	return mRunning;
 }
 
-void Scan::SetSampleRate(const double sampleRate)
-{
-	this->sampleRate = sampleRate;
-}
+//void Scan::SetSampleRate(const double sampleRate)
+//{
+//	this->sampleRate = sampleRate;
+//}
 const double Scan::GetSampleRate() const
 {
 	return this->sampleRate;
@@ -318,15 +318,15 @@ const int SmartScan::Scan::NUsedSensors() const
 	return mUsedSensors.size();
 }
 
-void SmartScan::Scan::SetFilteringPrecision(const double precision)
-{
-	if (precision < 0)
-	{
-		throw ex_scan("Filtering precision must be positive", __func__, __FILE__);
-	}
-	mFilteringPrecision = precision;
-	mF.SetPrecision(precision,precision);
-}
+//void SmartScan::Scan::SetFilteringPrecision(const double precision)
+//{
+//	if (precision < 0)
+//	{
+//		throw ex_scan("Filtering precision must be positive", __func__, __FILE__);
+//	}
+//	mFilteringPrecision = precision;
+//	mF.SetPrecision(precision,precision);
+//}
 
 const double SmartScan::Scan::GetFilteringPrecision()
 {

@@ -40,14 +40,14 @@ namespace SmartScan
 		/// Creates an empty new scan.
 		/// </summary>
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
-		void NewScan(const std::vector<int> sensorIds, const double sampleRate);
+		void NewScan(const std::vector<int> sensorIds, const double sampleRate, const double filteringPrecision);
 		/// <summary>
 		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
 		/// </summary>
 		/// <param name="scanId"> - unique scan id</param>
 		/// <param name="sensorIds"> - [optional] which sensors are used for the scan</param>
-		void NewScan(const int scanId, const std::vector<int> sensorIds, const double sampleRate);
-		void NewScan(const int scanIdconst, std::vector<int> sensorIds, const int refSensorId, const double sampleRate);
+		void NewScan(const int scanId, const std::vector<int> sensorIds, const double sampleRate, const double filteringPrecision);
+		void NewScan(const int scanIdconst, std::vector<int> sensorIds, const int refSensorId, const double sampleRate, const double filteringPrecision);
 
 		/// <summary>
 		/// Deletes the latest scan.

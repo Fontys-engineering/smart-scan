@@ -95,7 +95,7 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(usedSensors, sampleRate);
+			s3.NewScan(usedSensors, sampleRate, filteringPrecision);
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))
@@ -157,7 +157,7 @@ int main()
 				try
 				{
 					// Slow it down a bit first:
-					s3.GetScan()->SetSampleRate(10);
+					//s3.GetScan()->SetSampleRate(10);
 					s3.RegisterRawDataCallback(RawPrintCallback);
 				}
 				catch (ex_trakStar e)

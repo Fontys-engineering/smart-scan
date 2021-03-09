@@ -23,8 +23,8 @@ namespace SmartScan
 		std::vector<Point3> mOutBuff;                   // Filtered data vector.
 		std::vector<Point3> mRefBuff;                   // Reference sensor data vector.
 
-		Scan(const int id, TrakStarController* pTSCtrl);
-		Scan(const int id, TrakStarController* pTSCtrl, const double sampleRate, const std::vector<int> usedSensors, const int refSensorId);
+		//Scan(const int id, TrakStarController* pTSCtrl);
+		Scan(const int id, TrakStarController* pTSCtrl, const double sampleRate, const std::vector<int> usedSensors, const int refSensorId, const double filteringPrecision);
 		~Scan();
 
 		void Run(bool acqusitionOnly = false);
@@ -103,8 +103,8 @@ namespace SmartScan
 
 		const std::vector<int> mUsedSensors;	        // The sensors ids that we want a reading from.
 		const int mRefSensorId;                         // Reference sensor id.
-		double sampleRate = 50;	                        // Sample rate of the data acquisition in Hz.
-		double mFilteringPrecision = 30;                // Filter precision angle from reference point.
+		const double sampleRate;	                    // Sample rate of the data acquisition in Hz.
+		const double mFilteringPrecision;               // Filter precision angle from reference point.
 
 		std::vector<ReferencePoint> mReferencePoints;
 
