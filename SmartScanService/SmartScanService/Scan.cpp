@@ -11,7 +11,7 @@ using namespace SmartScan;
 
 SmartScan::Scan::Scan( const int id, TrakStarController* pTSCtrl, const double sampleRate,
     const std::vector<int> usedSensors, const int refSensorId, const double filteringPrecision) :
-    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate {sampleRate}, mUsedSensors {usedSensors}, mFilteringPrecision {filteringPrecision}
+    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate{ sampleRate }, mUsedSensors{ usedSensors }, mFilteringPrecision{ filteringPrecision }
 {
 
 }
@@ -145,7 +145,7 @@ void Scan::DataAcquisition()
             try
             {
                 for(int i = 0; i < mUsedSensors.size(); i++) {
-                    mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors.at(i)));
+                    mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));
                 }
             }
             catch(...)

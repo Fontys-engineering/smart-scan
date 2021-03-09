@@ -157,7 +157,7 @@ int TrakStarController::GetNSensors()
 		throw "Sensor config unnavailable.";
 	}
 }
-
+/* Measurements: 235*/
 Point3 TrakStarController::GetRecord(int sensorID)
 {
 	// When in mock mode, return a random value on a sphere.
@@ -166,7 +166,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		//return GetMockRecord();
 		return GetMockRecordFromFile(sensorID);
 	}
-	++sensorID;
+    
 	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
 	{
 		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);

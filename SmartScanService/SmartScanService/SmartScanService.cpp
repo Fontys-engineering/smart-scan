@@ -36,7 +36,6 @@ void SmartScanService::NewScan(const int scanId, const std::vector<int> sensorSe
 
     if (!mUseMockData)
     {
-        std::vector<int> sensorIds;
         refSensorId = tSCtrl->GetSensoridFromSerial(sensorSerials[0]);
 
         if(refSensorId < 0)
@@ -48,7 +47,7 @@ void SmartScanService::NewScan(const int scanId, const std::vector<int> sensorSe
         for(int i = 1; i < sensorSerials.size(); i++)
         {
             sensorIds.push_back(tSCtrl->GetSensoridFromSerial(sensorSerials[i]));
-            if(sensorIds[i] < 0)
+            if(sensorIds[i-1] < 0)
             {
                 std::cout << "Could not find sensor serial number" << std::endl;
                 return;
