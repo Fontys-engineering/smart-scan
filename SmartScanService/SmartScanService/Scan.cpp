@@ -131,7 +131,7 @@ void Scan::DataAcquisition()
 	{
 		auto startTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
-
+		sampleTime = std::chrono::steady_clock::now();
 		if (elapsed_seconds.count() >= 1 / sampleRate) {
             try
             {
@@ -144,8 +144,12 @@ void Scan::DataAcquisition()
 
             try
             {
-                for(int i = 0; i < mUsedSensors.size(); i++) {
-                    mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));
+                for(int i = 0; i < mUsedSensors.size(); i++) 
+				{
+					mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));
+					std::chrono::duration<double> elapsedSampleTime = std::chrono::steady_clock::now() - sampleTime;
+					//timeSample += elapsedSampleTime.count();
+					//std::cout << timeSample << std::endl;
                 }
             }
             catch(...)
@@ -172,6 +176,14 @@ void Scan::DataAcquisition()
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
+	//for (int i = 0; i < mInBuff.size(); i++)
+	//{
+	//	std::chrono::duration<double> elapsedSampleTime = std::chrono::steady_clock::now() - sampleTime;
+	//	timeSample = elapsedSampleTime.count()
+	//	std::cout << elapsedSampleTime.count() << std::endl;
+	//}
+	//timeSample = totalScanTime.count() / mInBuff.size();
+	//std::cout << "[SCAN] " << timeSample << "seconds per sample" << std::endl;
 
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
