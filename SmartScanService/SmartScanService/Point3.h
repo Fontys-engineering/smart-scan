@@ -25,7 +25,7 @@ namespace SmartScan
     class Point3
     {
     public:
-        double x, y, z;
+        double x, y, z, time;
         Rotation3 r;
         Spherical3 s;
 

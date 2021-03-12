@@ -1,6 +1,8 @@
 #include "Scan.h"
 #include "Exceptions.h"
 #include <iomanip>
+#include <ctime>
+#include <cstdio>
 
 using namespace SmartScan;
 
@@ -52,7 +54,7 @@ void Scan::Run(bool acqusitionOnly)
 	// Let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
-	if (!acqusitionOnly)
+	if (false)
 	{
 		// Set up Filtering object
 		try
@@ -126,13 +128,18 @@ void Scan::DataAcquisition()
 {
 	// Start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mUsedSensors.size() << " sensors \n";
-
+	double time = 0;
+	double timeSample = 0;
 	while (!mStopDataAcquisition)
 	{
 		auto startTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
-		sampleTime = std::chrono::steady_clock::now();
+		//std::chrono::duration<double> elapsedSampleTime = startTime - sampleTime;
+		//std::cout << elapsedSampleTime.count() << std::endl;
+		
+
 		if (elapsed_seconds.count() >= 1 / sampleRate) {
+			//std::cout << elapsed_seconds.count() << std::endl;
             try
             {
                 mRefBuff.push_back(pTSCtrl->GetRecord(mRefSensorId));
@@ -144,19 +151,25 @@ void Scan::DataAcquisition()
 
             try
             {
-                for(int i = 0; i < mUsedSensors.size(); i++) 
+				std::chrono::duration<double> elapsedSampleTime = startTime - sampleTime;
+                for(int long i = 0; i < mUsedSensors.size(); i++) 
 				{
-					mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));
-					std::chrono::duration<double> elapsedSampleTime = std::chrono::steady_clock::now() - sampleTime;
-					//timeSample += elapsedSampleTime.count();
-					//std::cout << timeSample << std::endl;
-                }
+					//mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));			
+					sampleTime = std::chrono::steady_clock::now();
+					Point3 tmp = pTSCtrl->GetRecord(mUsedSensors[i]);
+					timeSample = elapsedSampleTime.count();
+					time += timeSample;
+					tmp.time = time;
+					mInBuff.push_back(tmp);
+					//std::cout << time << std::endl;
+                }	
+				
+			
             }
             catch(...)
             {
                 throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
             }
-
 			// Raw data callback
 			if (mRawDataCallback)
 				mRawDataCallback(mInBuff);
@@ -170,21 +183,13 @@ void Scan::DataAcquisition()
 			// Save current time
 			lastSampleTime = std::chrono::steady_clock::now();
         } 
+		
     }
+	
 	std::cout<< "[SCAN] " << "Data acquisition completed \n";
 	mStopDataAcquisition = false;
-
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
-	//for (int i = 0; i < mInBuff.size(); i++)
-	//{
-	//	std::chrono::duration<double> elapsedSampleTime = std::chrono::steady_clock::now() - sampleTime;
-	//	timeSample = elapsedSampleTime.count()
-	//	std::cout << elapsedSampleTime.count() << std::endl;
-	//}
-	//timeSample = totalScanTime.count() / mInBuff.size();
-	//std::cout << "[SCAN] " << timeSample << "seconds per sample" << std::endl;
-
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
 

@@ -122,7 +122,7 @@ namespace SmartScan
 		std::chrono::steady_clock::time_point scanStartTime = std::chrono::steady_clock::now();
 		//time bug
 		std::chrono::steady_clock::time_point sampleTime = std::chrono::steady_clock::now();
-		double timeSample;
+		
 
 		std::function<void(std::vector<Point3>&)> mNewDataCallback;     // ?New data callback
 		std::function<void(std::vector<Point3>&)> mRawDataCallback;     // Needed for printing values directly to console 
