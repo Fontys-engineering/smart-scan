@@ -12,7 +12,7 @@ SmartScan::ScanConfig config = {
     true,                   // acquisitionOnly
     false,                  // useReferenceSensor
     0,                      // referenceSensorId
-    {1879, 1877, 1876},     // usedSensorIds
+    {1879, 1877},           // usedSensorIds
     50,                     // sampleRate
     4                       // filteringPrecision
 };
