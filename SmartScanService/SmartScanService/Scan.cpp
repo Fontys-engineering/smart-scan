@@ -4,14 +4,13 @@
 
 using namespace SmartScan;
 
-//Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{-1}, m
-//{
-//
-//}
+Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }
+{
 
-SmartScan::Scan::Scan( const int id, TrakStarController* pTSCtrl, const double sampleRate,
-    const std::vector<int> usedSensors, const int refSensorId, const double filteringPrecision) :
-    mId{ id }, pTSCtrl{ pTSCtrl }, mRefSensorId{ refSensorId }, sampleRate{ sampleRate }, mUsedSensors{ usedSensors }, mFilteringPrecision{ filteringPrecision }
+}
+
+Scan::Scan(const int id, TrakStarController* pTSCtrl, const ScanConfig config) 
+    : mId{ id }, pTSCtrl{ pTSCtrl }, mConfig{ config }
 {
 
 }
@@ -21,7 +20,7 @@ Scan::~Scan()
 	this->Stop(true);
 }
 
-void Scan::Run(bool acqusitionOnly)
+void Scan::Run(bool acquisitionOnly)
 {
 	// Check if reference points have been defined:
 	mStopDataAcquisition = mStopFiltering = false;
@@ -52,13 +51,13 @@ void Scan::Run(bool acqusitionOnly)
 	// Let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
-	if (!acqusitionOnly)
+	if (!mConfig.acquisitionOnly && !acquisitionOnly)
 	{
 		// Set up Filtering object
 		try
 		{
 			mF.SetReferencePoints(mReferencePoints);
-			mF.SetPrecision(mFilteringPrecision, mFilteringPrecision);
+			mF.SetPrecision(mConfig.filteringPrecision, mConfig.filteringPrecision);
 			mF.SetFrameSize(frameSize);
 		}
 		catch (...)
@@ -84,7 +83,7 @@ void Scan::Run(bool acqusitionOnly)
 
 void Scan::Stop(bool clearData)
 {
-	// Check if this scan is already running:
+	// Check if this scan is already running.
 	if (!this->mRunning)
 	{
 		std::cout << "[SCAN] " << "Scan not running." << std::endl;
@@ -94,10 +93,10 @@ void Scan::Stop(bool clearData)
 	mStopDataAcquisition = true;
 	mStopFiltering = true;
 
-	// Wait a bit for the other threads to finish:
+	// Wait a bit for the other threads to finish.
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-	if (clearData)
+    if (clearData)
 	{
 		mInBuff.clear();
 		mOutBuff.clear();
@@ -107,45 +106,45 @@ void Scan::Stop(bool clearData)
 	mRunning = false;
 }
 
-const bool Scan::isRunning() const
+const bool Scan::IsRunning() const
 {
 	return mRunning;
 }
 
-//void Scan::SetSampleRate(const double sampleRate)
-//{
-//	this->sampleRate = sampleRate;
-//}
 const double Scan::GetSampleRate() const
 {
-	return this->sampleRate;
+	return mConfig.sampleRate;
 }
-
 
 void Scan::DataAcquisition()
 {
 	// Start the data aquisition:
-	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mUsedSensors.size() << " sensors \n";
+	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mConfig.usedSensorIds.size() << " sensors \n";
 
 	while (!mStopDataAcquisition)
 	{
 		auto startTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
 
-		if (elapsed_seconds.count() >= 1 / sampleRate) {
-            try
+		if (elapsed_seconds.count() >= 1 / mConfig.sampleRate) 
+        {
+            if (!mConfig.acquisitionOnly)
             {
-                mRefBuff.push_back(pTSCtrl->GetRecord(mRefSensorId));
-            }
-            catch(...)
-            {
-                throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
+                try
+                {
+                    mRefBuff.push_back(pTSCtrl->GetRecord(mConfig.referenceSensorId));
+                }
+                catch(...)
+                {
+                    throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
+                }
             }
 
             try
             {
-                for(int i = 0; i < mUsedSensors.size(); i++) {
-                    mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));
+                for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
+                {
+                    mInBuff.push_back(pTSCtrl->GetRecord(mConfig.usedSensorIds[i]));
                 }
             }
             catch(...)
@@ -154,12 +153,11 @@ void Scan::DataAcquisition()
             }
 
 			// Raw data callback
-			if (mRawDataCallback)
-				mRawDataCallback(mInBuff);
+			//if (mRawDataCallback) mRawDataCallback(mInBuff);
 
 			// Make sure we are not slower than the required sample rate:
 			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
-			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
+			if (elapsed_seconds.count() > (1 / (mConfig.sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
@@ -171,7 +169,7 @@ void Scan::DataAcquisition()
 	mStopDataAcquisition = false;
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
-	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
+	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << mConfig.sampleRate << " Hz sample rate\n";
 
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
@@ -234,16 +232,16 @@ void Scan::DataFiltering()
 		}
 
 		std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - startTime;
-		if (elapsed_seconds.count() > 1/sampleRate * frameSize)
+		if (elapsed_seconds.count() > 1/mConfig.sampleRate * frameSize)
 		{
-			std::cerr << "[SCAN] " << "Filtering "<< elapsed_seconds.count() - (1 / sampleRate * frameSize)<< "s slower than real-time! " << std::endl;
+			std::cerr << "[SCAN] " << "Filtering "<< elapsed_seconds.count() - (1 /mConfig.sampleRate * frameSize)<< "s slower than real-time! " << std::endl;
 		}
 	}
 
 	// Handle the leftover stuff:
 	if (lastFilteredSample < mInBuff.size() - 1)
 	{
-		// Send the rest to be filtered
+		// Send the rest to be filtered.
 	}
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
@@ -283,52 +281,27 @@ void Scan::ResetReferences()
 	mReferencePoints.clear();
 }
 
-//void Scan::SetUsedSensors(const std::vector<int> usedSensors)
-//{
-	//for (auto id : usedSensors)
-	//{
-		//if (id >= pTSCtrl->GetNSensors())
-		//{
-			//throw ex_scan("Cannot set used sensors list. Sensor ID out of range.", __func__, __FILE__);
-		//}
-	//}
-	//mUsedSensors = usedSensors;
-//}
 const std::vector<int> SmartScan::Scan::GetUsedSensors() const
 {
-	return this->mUsedSensors;
+	return this->mConfig.usedSensorIds;
 }
-//void Scan::SetUsedSensors()
-//{
-	//mUsedSensors.clear();
-//}
-
-//void SmartScan::Scan::SetReferenceSensorId(const int sensorId)
-//{
-	//mRefSensorId = sensorId;
-//}
 
 const int SmartScan::Scan::GetReferenceSensorId()
 {
-	return mRefSensorId;
+	return mConfig.useReferenceSensor;
 }
 
 const int SmartScan::Scan::NUsedSensors() const
 {
-	return mUsedSensors.size();
+	return mConfig.usedSensorIds.size();
 }
-
-//void SmartScan::Scan::SetFilteringPrecision(const double precision)
-//{
-//	if (precision < 0)
-//	{
-//		throw ex_scan("Filtering precision must be positive", __func__, __FILE__);
-//	}
-//	mFilteringPrecision = precision;
-//	mF.SetPrecision(precision,precision);
-//}
 
 const double SmartScan::Scan::GetFilteringPrecision()
 {
-	return mFilteringPrecision;
+	return mConfig.filteringPrecision;
+}
+
+const bool SmartScan::Scan::IsAcquisitionOnly() const
+{
+    return mConfig.acquisitionOnly;
 }

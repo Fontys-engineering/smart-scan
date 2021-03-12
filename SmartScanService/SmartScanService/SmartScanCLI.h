@@ -8,10 +8,14 @@
 
 const bool mockMode = true;
 
-const std::vector<int> usedSensors = {1879, 1877, 1876};
-
-const double sampleRate = 50;
-const double filteringPrecision = 4;
+SmartScan::ScanConfig config = {
+    true,                   // acquisitionOnly
+    false,                  // useReferenceSensor
+    0,                      // referenceSensorId
+    {1879, 1877, 1876},     // usedSensorIds
+    50,                     // sampleRate
+    4                       // filteringPrecision
+};
 
 // Create a new SmartScanService object with mock data:
 SmartScan::SmartScanService s3(mockMode);

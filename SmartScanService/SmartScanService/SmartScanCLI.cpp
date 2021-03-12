@@ -70,10 +70,8 @@ int main()
 			}
 			try
 			{
-				// Set the scan precision:
-				s3.SetFilteringPrecision(filteringPrecision);
 				// Start a scan using only the known good sensors:
-				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
+				(scanId == -1) ? s3.StartScan() : s3.StartScan(scanId);
 
 			}
 			catch (ex_trakStar e)
@@ -95,7 +93,7 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(usedSensors, sampleRate, filteringPrecision);
+			s3.NewScan(&config);
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))
@@ -134,7 +132,7 @@ int main()
 			std::cout << "Scan ID \t Status" << std::endl;
 			for (int s = 0; s < s3.GetScansList().size(); s++)
 			{
-				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->isRunning() ? "running" : "stopped") << std::endl;
+				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->IsRunning() ? "running" : "stopped") << std::endl;
 			}
 		}
 		else if (!strcmp(cmd, "find-ref"))

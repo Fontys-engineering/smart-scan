@@ -24,55 +24,41 @@ void SmartScanService::Init()
 	tSCtrl->AttachTransmitter();
 }
 
-void SmartScanService::NewScan(const std::vector<int> sensorSerials, const double sampleRate, const double filteringPrecision)
+void SmartScanService::NewScan()
 {
-	NewScan(FindNewScanId(), sensorSerials, sampleRate, filteringPrecision);
+	this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl));
 }
 
-void SmartScanService::NewScan(const int scanId, const std::vector<int> sensorSerials, const double sampleRate, const double filteringPrecision)
+void SmartScanService::NewScan(SmartScan::ScanConfig* config, bool useSerials)
 {
-    std::vector<int> sensorIds;
-    int refSensorId;
-
-    if (!mUseMockData)
+    if (mUseMockData)
     {
-        refSensorId = tSCtrl->GetSensoridFromSerial(sensorSerials[0]);
-
-        if(refSensorId < 0)
+        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl));
+    }
+    else
+    {
+        if (useSerials)
         {
-            std::cout << "Could not find reference sensor serial number" << std::endl;
-            return;
-        }
+            config->referenceSensorId = tSCtrl->GetSensoridFromSerial(config->referenceSensorId);
 
-        for(int i = 1; i < sensorSerials.size(); i++)
-        {
-            sensorIds.push_back(tSCtrl->GetSensoridFromSerial(sensorSerials[i]));
-            if(sensorIds[i-1] < 0)
+            if(config->referenceSensorId < 0)
             {
-                std::cout << "Could not find sensor serial number" << std::endl;
+                std::cout << "Could not find reference sensor serial number" << std::endl;
                 return;
             }
+
+            for(int i = 1; i < config->usedSensorIds.size(); i++)
+            {
+                config->usedSensorIds[i] = tSCtrl->GetSensoridFromSerial(config->usedSensorIds[i]);
+                if(config->usedSensorIds[i] < 0)
+                {
+                    std::cout << "Could not find sensor serial number" << std::endl;
+                    return;
+                }
+            }
         }
+        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl, *config));
     }
-    else 
-    {
-        sensorIds.emplace_back(0);
-        sensorIds.emplace_back(1);
-        refSensorId = 2;
-    }
-
-	NewScan(scanId, sensorIds, refSensorId, sampleRate, filteringPrecision);
-}
-
-void SmartScan::SmartScanService::NewScan(const int scanId, const std::vector<int> sensorIds, const int refSensorId, const double sampleRate, const double filteringPrecision)
-{
-	// Check if id is unique:
-	if (IdExists(scanId))
-	{
-		throw ex_smartScan("Scan object ID must be unique", __func__, __FILE__);
-	}
-	// Create new scan obj
-	this->scans.emplace_back(std::make_shared<Scan>(scanId, tSCtrl, sampleRate, sensorIds, refSensorId, filteringPrecision));
 }
 
 void SmartScanService::DeleteScan()
@@ -102,22 +88,16 @@ void SmartScanService::DeleteScan(int id)
 		throw ex_smartScan("Scan id not found", __func__, __FILE__);
 	}
 }
-void SmartScanService::StartScan(const std::vector<int> sensorIds)
-{
-	// Create new scan obj if none exists or the existing one is already running:
-	//if (!scans.size() || scans.back()->isRunning())
-	//{
-	//	this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
-	//}
 
-	// Use the specified sensors (if specified)
-	//if (sensorIds.size() > 0)
-	///{
-		//this->scans.back()->SetUsedSensors(sensorIds);
-	///}
+void SmartScanService::StartScan()
+{
+    if (this->scans.size() == 0)
+    {
+        throw ex_smartScan("scan vector is empty", __func__, __FILE__);
+    }
 
 	// Check if reference points have been set;
-	if (!scans.back()->GetReferences().size())
+	if (!this->scans.back()->IsAcquisitionOnly() && !scans.back()->GetReferences().size())
 	{
 		throw ex_smartScan("cannot start scan without reference points set.", __func__, __FILE__);
 	}
@@ -130,8 +110,7 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 		{
 			this->scans.back()->RegisterNewDataCallback(mUICallback);
 		}
-		// Set the resolution:
-		//scans.back()->SetFilteringPrecision(mFilteringPrecision);
+
 		scans.back()->Run();
 	}
 	catch (ex_scan e)
@@ -152,22 +131,12 @@ void SmartScanService::StartScan(const std::vector<int> sensorIds)
 	}
 }
 
-void SmartScanService::StartScan(int scanId, const std::vector<int> sensorIds)
+void SmartScanService::StartScan(int scanId)
 {
 	if (!IdExists(scanId))
 	{
-		// Create new scan obj with that id:
-		//if (!scans.size() || scans.back()->isRunning())
-		//{
-		//	this->scans.emplace_back(std::make_shared<Scan>(0, tSCtrl));
-		//}
+        throw ex_smartScan("scan id does not exist", __func__, __FILE__);
 	}
-
-	// Use the specified sensors (if specified)
-	//if (sensorIds.size() > 0)
-	//{
-		//this->scans.back()->SetUsedSensors(sensorIds);
-	//}
 
 	// Start the scan:
 	try
@@ -204,12 +173,6 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 		throw ex_smartScan("No existing scan object found", __func__, __FILE__);
 	}
 
-	// Only use thumb and index finger:
-	//std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
-	
-
-	//scans.back()->SetUsedSensors(sensorsUsed);
-
 	scans.back()->Run(true);
 
 	ReferencePoint newRef;
@@ -230,8 +193,6 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 	scans.back()->AddReference(newRef);
 
 	scans.back()->Stop(true);
-	// Reset used sensors:
-	//scans.back()->SetUsedSensors();
 }
 
 void SmartScanService::CalibrateReferencePoints()
@@ -254,10 +215,6 @@ void SmartScanService::CalibrateReferencePoints()
 	{
 		scans.back()->ResetReferences();
 	}
-	// Only use thumb and index finger:
-	//std::vector<int> sensorsUsed = { mThumbSensorId,mIndexSensorId };
-
-	//scans.back()->SetUsedSensors(sensorsUsed);
 
 	// Start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
@@ -325,8 +282,6 @@ void SmartScanService::CalibrateReferencePoints()
 
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
 	scans.back()->Stop(true);
-	// Reset used sensors:
-	//scans.back()->SetUsedSensors();
 }
 
 void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)

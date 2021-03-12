@@ -167,7 +167,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		return GetMockRecordFromFile(sensorID);
 	}
     
-	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
+	if (sensorID > ATC3DG.m_config.numberSensors || sensorID < 0)
 	{
 		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);
 	}
