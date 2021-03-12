@@ -39,21 +39,22 @@ void SmartScanService::NewScan(SmartScan::ScanConfig* config, bool useSerials)
     {
         if (useSerials)
         {
-            config->referenceSensorId = tSCtrl->GetSensoridFromSerial(config->referenceSensorId);
-
-            if(config->referenceSensorId < 0)
+            if (config->useReferenceSensor)
             {
-                std::cout << "Could not find reference sensor serial number" << std::endl;
-                return;
+                config->referenceSensorId = tSCtrl->GetSensoridFromSerial(config->referenceSensorId);
+    
+                if(config->referenceSensorId < 0)
+                {
+                    throw ex_smartScan("Could not find reference sensor serial number", __func__, __FILE__);
+                }
             }
-
             for(int i = 1; i < config->usedSensorIds.size(); i++)
             {
                 config->usedSensorIds[i] = tSCtrl->GetSensoridFromSerial(config->usedSensorIds[i]);
+
                 if(config->usedSensorIds[i] < 0)
                 {
-                    std::cout << "Could not find sensor serial number" << std::endl;
-                    return;
+                    throw ex_smartScan("Could not find used sensor serial number", __func__, __FILE__);
                 }
             }
         }

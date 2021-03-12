@@ -93,7 +93,13 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(&config);
+            try {
+                s3.NewScan(&config);
+            }
+            catch (ex_smartScan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))

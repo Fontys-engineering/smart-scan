@@ -129,6 +129,11 @@ int TrakStarController::GetSensoridFromSerial(int serialNumber)
 {
     int sensorID = -1;
 
+    if (serialNumber <= 0)
+    {
+        return sensorID;
+    }
+
     for(int i = 0; i < ATC3DG.m_config.numberSensors; i++)
     {
         if(pSensor[i].m_config.serialNumber == serialNumber)
