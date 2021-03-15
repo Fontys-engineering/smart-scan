@@ -21,7 +21,7 @@ namespace SmartScan
     };
 
     // This class describes the main data format used throughout the SmartScan software.
-    // It helps contain one TrakSTAR measurement data point (position, location) in one object.
+    // It helps contain one TrakSTAR measurement data point (position, location and time) in one object.
     class Point3
     {
     public:

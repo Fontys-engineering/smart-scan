@@ -128,16 +128,18 @@ void Scan::DataAcquisition()
 {
 	// Start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mUsedSensors.size() << " sensors \n";
+	// Store time on a variable time which increases the sensor sample time
 	double time = 0;
-	
-	std::chrono::time_point<std::chrono::steady_clock> endTime;
+	auto startSampling = std::chrono::steady_clock::now();
+	std::chrono::time_point<std::chrono::steady_clock> endSampleTime;
 
 	while (!mStopDataAcquisition)
 	{
-		auto startTime = std::chrono::steady_clock::now();
-		std::chrono::duration<double> elapsed_seconds = startTime - endTime;
+		// Store time and calculate the elapsed time since last sample
+		auto startSampleTime = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
 
-		if (elapsed_seconds.count() >= 1 / sampleRate) {
+		if (elapsedTime.count() >= 1 / sampleRate) {
 			//std::cout << elapsed_seconds.count() << std::endl;
             try
             {
@@ -149,21 +151,20 @@ void Scan::DataAcquisition()
             }
 
             try
-            {
-				//std::chrono::duration<double> elapsedSampleTime = startTime - sampleTime;
+            {	
                 for(int long i = 0; i < mUsedSensors.size(); i++) 
 				{
-					//mInBuff.push_back(pTSCtrl->GetRecord(mUsedSensors[i]));			
+					// Make Point3 obj to get the position info of the trackStar device
 					Point3 tmp = pTSCtrl->GetRecord(mUsedSensors[i]);
-					endTime = std::chrono::steady_clock::now();
-					std::chrono::duration<double> elapsed_seconds1 = endTime - startTime;
-					time += elapsed_seconds1.count();
+					// Store current time and calculate duration of the samples
+					endSampleTime = std::chrono::steady_clock::now();
+					std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
+					// Add sample time to overal time and store in mInBuff
+					time += sampleTimeSensor.count();
 					tmp.time = time;
 					mInBuff.push_back(tmp);
-					std::cout << tmp.time << std::endl;
+					//std::cout << tmp.time << std::endl;
                 }	
-				
-			
             }
             catch(...)
             {
@@ -174,8 +175,8 @@ void Scan::DataAcquisition()
 				mRawDataCallback(mInBuff);
 
 			// Make sure we are not slower than the required sample rate:
-			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
-			if (elapsed_seconds.count() > (1 / (sampleRate/3)))
+			elapsedTime = std::chrono::steady_clock::now() - startSampleTime;
+			if (elapsedTime.count() > (1 / (sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
@@ -185,7 +186,7 @@ void Scan::DataAcquisition()
 	
 	std::cout<< "[SCAN] " << "Data acquisition completed \n";
 	mStopDataAcquisition = false;
-	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - endTime;
+	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - startSampling;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << sampleRate << " Hz sample rate\n";
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
