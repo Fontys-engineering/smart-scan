@@ -805,7 +805,7 @@ typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD
 	double	e;
 	double	r;
 	double	time;
-	USHORT	quality;		
+	USHORT	quality;	
 } DOUBLE_POSITION_ANGLES_TIME_Q_RECORD;
 
 typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD

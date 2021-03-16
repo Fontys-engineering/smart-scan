@@ -1,30 +1,39 @@
 
 // SmartScanService.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//This provides an interface for the SmartScanServices.
+// This provides an interface for the SmartScanServices.
 
-//include all the libraries and sub-classes:
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
+
+// Tips for Getting Started: 
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+
 #include "SmartScanCLI.h"
 #include "Exceptions.h"
 #include "Filtering.h"
 
 using namespace SmartScan;
 
-#include <iomanip>;
+#include <iomanip>
 
 int main()
 {
-	
 	std::cout << std::endl << "\t\t\t\t\t Smart Scan Command Line Interface Application" << std::endl << std::endl;
 
-	//initialise the service:
+	// Initialise the service:
 	try {
 		std::cout << "SmartScan>" << (mockMode ? "TrackSTAR device in MOCK DATA MODE" : "Initialising the TrakSTAR device. This can take up to a minute.") << std::endl;
 		s3.Init();
-		//register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
+
+		// Register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
 		//s3.RegisterNewDataCallback(TestUICallback);
+
 		std::cout << "SmartScan>" << "TrakSTAR device initialisation done. \n";
-
-
 	}
 	catch (ex_trakStar& e)
 	{
@@ -39,10 +48,10 @@ int main()
 		std::cerr << "Unknown exception. Could not initialise Smart Scan Service" << std::endl;
 		return -1;
 	}
-	//print the help screen:
+	// Print the help screen:
 	Usage();
 
-	//single point calibration example (For Mohamed):
+	// Single point calibration example (For Mohamed):
 	//s3.NewScan(usedSensors,refSensorId);
 	//s3.CalibrateSingleRefPoint();
 
@@ -55,16 +64,14 @@ int main()
 			int scanId = -1;
 			if (strlen(cmd) > 6)
 			{
-				//get the id from the comand:
+				// Get the id from the comand:
 				std::string sCmd = cmd;
 				scanId = atoi(sCmd.substr(6).c_str());
 			}
 			try
 			{
-				//set the scan precision:
-				s3.SetFilteringPrecision(filteringPrecision);
-				//start a scan using only the known good sensors:
-				(scanId == -1) ? s3.StartScan(usedSensors) : s3.StartScan(scanId, usedSensors);
+				// Start a scan using only the known good sensors:
+				(scanId == -1) ? s3.StartScan() : s3.StartScan(scanId);
 
 			}
 			catch (ex_trakStar e)
@@ -86,7 +93,13 @@ int main()
 		}
 		else if (!strcmp(cmd, "new"))
 		{
-			s3.NewScan(usedSensors, refSensorId, sampleRate);
+            try {
+                s3.NewScan(config);
+            }
+            catch (ex_smartScan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
 			std::cout << "New scan created" << std::endl;
 		}
 		else if (!strcmp(cmd, "delete"))
@@ -103,7 +116,7 @@ int main()
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "delete ", 7))
 		{
-			//get the id from the comand:
+			// Get the id from the comand:
 			std::string sCmd = cmd;
 			int id = atoi(sCmd.substr(7).c_str());
 
@@ -125,7 +138,7 @@ int main()
 			std::cout << "Scan ID \t Status" << std::endl;
 			for (int s = 0; s < s3.GetScansList().size(); s++)
 			{
-				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->isRunning() ? "running" : "stopped") << std::endl;
+				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->IsRunning() ? "running" : "stopped") << std::endl;
 			}
 		}
 		else if (!strcmp(cmd, "find-ref"))
@@ -138,17 +151,17 @@ int main()
 		}
 		else if (!strcmp(cmd, "raw-dump"))
 		{
-			//make sure:
+			// Make sure:
 			std::cout << "This command will start printing the raw values of the latest started scan to console as they come in with no option to stop. Do you want to proceed? (y/n)" << std::endl;
 			char c;
 			std::cin >> c;
 			if (c == 'y' || c == 'Y')
 			{
-				//register the callback:
+				// Register the callback:
 				try
 				{
-					//slow it down a bit first:
-					s3.GetScan()->SetSampleRate(10);
+					// Slow it down a bit first:
+					//s3.GetScan()->SetSampleRate(10);
 					s3.RegisterRawDataCallback(RawPrintCallback);
 				}
 				catch (ex_trakStar e)
@@ -176,7 +189,7 @@ int main()
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7))
 		{
-			//cut the filepath out:
+			// Cut the filepath out:
 			std::string filepath = cmd;
 			std::cout << "exporting to " << filepath.substr(7) << std::endl;
 			try {
@@ -190,7 +203,7 @@ int main()
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export-raw ", 11))
 		{
-		//cut the filepath out:
+		// Cut the filepath out:
 		std::string filepath = cmd;
 		std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
 		try {
@@ -204,7 +217,7 @@ int main()
 		}
 		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
 		{
-			//cut the filepath out:
+			// Cut the filepath out:
 			std::string filepath = cmd;
 			std::cout << "exporting to " << filepath.substr(12) << std::endl;
 			try {
@@ -223,16 +236,11 @@ int main()
 	} while (strcmp(cmd, "exit"));	
 }
 
-
-
-/// <summary>
-/// Display the help screen
-/// </summary>
 void Usage()
 {
 	std::cout << std::endl;
 	std::cout << std::endl;
-	std::cout << "_____________________________________________________________HELP______________________________________________________" << std::endl;
+	std::cout << "__________________________________________________________HELP_________________________________________________________" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Measurement control" << std::endl;
 	std::cout << "\t new [id] \t\t\t Create a new measurement" << std::endl;
@@ -242,11 +250,11 @@ void Usage()
 	std::cout << "\t stop [id]\t\t\t Stop the latest (running) measurement" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
-	std::cout << "\t raw-dump \t\t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
+	std::cout << "\t raw-dump \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t export-raw [filename] \t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,x) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export-raw [filename] \t\t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,z) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "System preferences" << std::endl;
 	//std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;
@@ -255,8 +263,6 @@ void Usage()
 	std::cout << "\t help \t\t\t\t print this screen again" << std::endl;
 	std::cout << "\t exit \t\t\t\t cleanly exit the application" << std::endl;
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
-
-
 }
 
 void RawPrintCallback(std::vector<SmartScan::Point3>& data)
@@ -271,14 +277,3 @@ void RawPrintCallback(std::vector<SmartScan::Point3>& data)
 	}
 	
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

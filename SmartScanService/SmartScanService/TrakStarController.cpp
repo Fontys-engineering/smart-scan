@@ -1,30 +1,28 @@
-#include "TrakStarController.h"
-
 #include <iostream>
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
+#include <stdlib.h>
+#include <time.h>
+
 #include "Exceptions.h"
+#include "TrakStarController.h"
 
 using namespace SmartScan;
 
-//constructor
 TrakStarController::TrakStarController(bool mock) : mMock{ mock }
 {
 	if (mock)
 	{
-		/* initialize random seed: */
+		// Initialize random seed.
 		srand(time(NULL));
 	}
 }
-//init func
+
 void TrakStarController::Init()
 {
-	//when in Mock mode do nothing:
 	if (mMock)
 	{
 		return;
 	}
-	//printf("Initializing ATC3DG system...\n");
+
 	errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
 	{
@@ -35,16 +33,14 @@ void TrakStarController::Init()
 
 void TrakStarController::Config()
 {
-	//when in mock mode do nothing:
 	if (mMock)
 	{
 		return;
 	}
-	//system
+
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
-	//sensor
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
 	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
@@ -52,7 +48,6 @@ void TrakStarController::Config()
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
-	//transmitter
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
 	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
@@ -66,11 +61,9 @@ void TrakStarController::Config()
 	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
 	SET_SYSTEM_PARAMETER(METRIC, true);
 
-	//system
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
-	//sensor
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
 	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
@@ -78,7 +71,6 @@ void TrakStarController::Config()
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
-	//transmitter
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
 	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
@@ -86,28 +78,35 @@ void TrakStarController::Config()
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////
-	//
 	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
 	// contains the following:
-	printf("Number Boards          = %d\n", ATC3DG.m_config.numberBoards);
-	printf("Number Sensors         = %d\n", ATC3DG.m_config.numberSensors);
-	printf("Number Transmitters    = %d\n\n", ATC3DG.m_config.numberTransmitters);
+	std::cout << "_____________________________________________________Configuration_____________________________________________________" << std::endl;
+    std::cout << "\tNumber Boards \t\t\t = " << ATC3DG.m_config.numberBoards << std::endl;
+	std::cout << "\tNumber Boards \t\t\t = " << ATC3DG.m_config.numberBoards << std::endl;
+	std::cout << "\tNumber Sensors \t\t\t = " << ATC3DG.m_config.numberSensors << std::endl;
+	std::cout << "\tNumber Transmitters \t\t = " << ATC3DG.m_config.numberTransmitters << std::endl;
+    std::cout << std::endl;
+	std::cout << "\tSystem AGC mode	\t\t = " << ATC3DG.m_config.agcMode << std::endl;
+	std::cout << "\tMaximum Range \t\t\t = " << ATC3DG.m_config.maximumRange << std::endl;
+	std::cout << "\tMeasurement Rate \t\t = " << ATC3DG.m_config.measurementRate << std::endl;
+	std::cout << "\tMetric Mode \t\t\t = " << ATC3DG.m_config.metric << std::endl;
+	std::cout << "\tLine Frequency \t\t\t = " << ATC3DG.m_config.powerLineFrequency << std::endl;
+	std::cout << "\tTransmitter ID Running \t\t = " << ATC3DG.m_config.transmitterIDRunning << std::endl;
+    std::cout << std::endl;
 
-	printf("System AGC mode	       = %d\n", ATC3DG.m_config.agcMode);
-	printf("Maximum Range          = %6.2f\n", ATC3DG.m_config.maximumRange);
-	printf("Measurement Rate       = %10.6f\n", ATC3DG.m_config.measurementRate);
-	printf("Metric Mode            = %d\n", ATC3DG.m_config.metric);
-	printf("Line Frequency         = %6.2f\n", ATC3DG.m_config.powerLineFrequency);
-	printf("Transmitter ID Running = %d\n", ATC3DG.m_config.transmitterIDRunning);
+    for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+    {
+        std::cout << "Port " << pSensor[i].m_config.channelNumber << "has ";
+        if (pSensor[i].m_config.attached) std::cout << "sensor attached with serial number " << pSensor[i].m_config.serialNumber;
+        else std::cout << "no sensor attached";
+        std::cout << std::endl;
+    }
 
+	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void TrakStarController::AttachSensor()
+void TrakStarController::AttachTransmitter()
 {
-	//when in mock mode do nothing:
 	if (mMock)
 	{
 		return;
@@ -118,7 +117,7 @@ void TrakStarController::AttachSensor()
 		{
 			// Transmitter selection is a system function.
 			// Using the SELECT_TRANSMITTER parameter we send the id of the
-			// transmitter that we want to run with the SetSystemParameter() call
+			// transmitter that we want to run with the SetSystemParameter() call.
 			errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 			if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 			break;
@@ -126,10 +125,29 @@ void TrakStarController::AttachSensor()
 	}
 }
 
+int TrakStarController::GetSensoridFromSerial(int serialNumber)
+{
+    int sensorID = -1;
+
+    if (serialNumber <= 0)
+    {
+        return sensorID;
+    }
+
+    for(int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+    {
+        if(pSensor[i].m_config.serialNumber == serialNumber)
+        {
+            sensorID = pSensor[i].m_config.channelNumber;
+            break;  
+        }
+    }
+
+    return sensorID;
+}
 
 int TrakStarController::GetNSensors()
 {
-	//when in mock mode use 4 sensors
 	if (mMock)
 	{
 		return 4;
@@ -144,24 +162,24 @@ int TrakStarController::GetNSensors()
 		throw "Sensor config unnavailable.";
 	}
 }
-
+/* Measurements: 235*/
 Point3 TrakStarController::GetRecord(int sensorID)
 {
-	//when in mock mode, return a random value on a sphere:
+	// When in mock mode, return a random value on a sphere.
 	if (mMock)
 	{
 		//return GetMockRecord();
 		return GetMockRecordFromFile(sensorID);
 	}
-	++sensorID;
-	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
+    
+	if (sensorID > ATC3DG.m_config.numberSensors || sensorID < 0)
 	{
 		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);
 	}
 
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
 
-	// sensor attached so get record
+	// Sensor attached so get record.
 	try
 	{
 		errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
@@ -174,9 +192,8 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		}
 	}
 
-
-	// get the status of the last data record
-	// only report the data if everything is okay
+	// Get the status of the last data record.
+	// Only report the data if everything is okay.
 	unsigned int status = GetSensorStatus(sensorID);
 
 	if (status == VALID_STATUS)
@@ -191,9 +208,9 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	return Point3();
 }
 
+//This function is not used
 void TrakStarController::ReadSensor()
 {
-	//when in mock mode do nothing:
 	if (mMock)
 	{
 		return;
@@ -244,13 +261,10 @@ void TrakStarController::ReadSensor()
 			}
 		}
 	}
-
-
 }
 
 void TrakStarController::StopTransmit()
 {
-	//when in mock mode do nothing:
 	if (mMock)
 	{
 		return;
@@ -273,12 +287,12 @@ Point3 TrakStarController::GetMockRecord()
 
 	if (mPrevMockRecord.x == 0 && mPrevMockRecord.y == 0 && mPrevMockRecord.z == 0)
 	{
-		//first mock value:
+		// First mock value.
 		mPrevMockRecord = Point3(radius, 0, 0);
 		return mPrevMockRecord;
 	}
 	else {
-		//add some random noise to the previous mockRecord;
+		// Add some random noise to the previous mockRecord.
 		mPrevMockRecord = Point3(mPrevMockRecord.x + ((rand() % randomMax) - randomMax / 2), mPrevMockRecord.y + ((rand() % randomMax) - randomMax / 2), mPrevMockRecord.z + ((rand() % randomMax) - randomMax / 2));
 		return mPrevMockRecord;
 	}
@@ -286,7 +300,7 @@ Point3 TrakStarController::GetMockRecord()
 
 Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 {
-	//open the file if not already open:
+	// Open the file if not already open.
 	if (!s0MockDataFile.is_open())
 	{
 		s0MockDataFile.open(s0MockDataFilePath, std::ifstream::in);
@@ -300,23 +314,23 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 		s2MockDataFile.open(s2MockDataFilePath, std::ifstream::in);
 	}
 
-	//get the next line from the file
+	// Get the next line from the file.
 	Point3 newPoint;
 	char line[512];
 	if (sensorId == 0 && !s0MockDataFile.getline(line, 512))
 	{
-		//no more lines to read
-		//close the file
+		// No more lines to read.
+		// Close the file.
 		s0MockDataFile.close();
-		//try again:
+		// Try again.
 		return GetMockRecordFromFile(sensorId);
 	}
 	else if (sensorId == 1 && !s1MockDataFile.getline(line, 512))
 	{
-		//no more lines to read
-		//close the file
+		// No more lines to read.
+		// Close the file.
 		s1MockDataFile.close();
-		//try again:
+		// Try again.
 		return GetMockRecordFromFile(sensorId);
 	}
 	else if (sensorId == 2 && !s2MockDataFile.getline(line, 512))
