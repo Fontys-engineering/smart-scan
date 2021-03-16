@@ -1,6 +1,8 @@
 #include "Scan.h"
 #include "Exceptions.h"
 #include <iomanip>
+#include <ctime>
+#include <cstdio>
 
 using namespace SmartScan;
 
@@ -122,10 +124,16 @@ void Scan::DataAcquisition()
 	// Start the data aquisition:
 	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mConfig.usedSensorIds.size() << " sensors \n";
 
+	// Store time on a variable time which increases the sensor sample time
+	double time = 0;
+	auto startSampling = std::chrono::steady_clock::now();
+	std::chrono::time_point<std::chrono::steady_clock> endSampleTime;
+
 	while (!mStopDataAcquisition)
 	{
-		auto startTime = std::chrono::steady_clock::now();
-		std::chrono::duration<double> elapsed_seconds = startTime - lastSampleTime;
+		// Store time and calculate the elapsed time since last sample
+		auto startSampleTime = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
 
 		if (elapsed_seconds.count() >= 1 / mConfig.sampleRate) 
         {
@@ -145,33 +153,40 @@ void Scan::DataAcquisition()
             {
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
-                    mInBuff.push_back(pTSCtrl->GetRecord(mConfig.usedSensorIds[i]));
+                    // Make Point3 obj to get the position info of the trackStar device
+					          Point3 tmp = pTSCtrl->GetRecord(mUsedSensors[i]);
+					          // Store current time and calculate duration of the samples
+					          endSampleTime = std::chrono::steady_clock::now();
+					          std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
+					          // Add sample time to overal time and store in mInBuff
+					          tmp.time = time += sampleTimeSensor.count();
+					          mInBuff.push_back(tmp);
+					          //std::cout << tmp.time << std::endl;
                 }
             }
             catch(...)
             {
                 throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
             }
-
+      
 			// Raw data callback
 			//if (mRawDataCallback) mRawDataCallback(mInBuff);
 
 			// Make sure we are not slower than the required sample rate:
-			elapsed_seconds = std::chrono::steady_clock::now() - startTime;
+			elapsedTime = std::chrono::steady_clock::now() - startSampleTime;
 			if (elapsed_seconds.count() > (1 / (mConfig.sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
-			// Save current time
-			lastSampleTime = std::chrono::steady_clock::now();
         } 
+		
     }
+	
 	std::cout<< "[SCAN] " << "Data acquisition completed \n";
 	mStopDataAcquisition = false;
 
-	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
+	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - startSampling;
 	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << mConfig.sampleRate << " Hz sample rate\n";
-
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
 
@@ -245,8 +260,8 @@ void Scan::DataFiltering()
 		// Send the rest to be filtered.
 	}
 
-	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
-	std::cout << "[SCAN] " << "Data filtering completed in " << totalScanTime.count() << " seconds" << std::endl;
+	//std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - scanStartTime;
+	//std::cout << "[SCAN] " << "Data filtering completed in " << totalScanTime.count() << " seconds" << std::endl;
 	mStopFiltering = false;
 }
 
