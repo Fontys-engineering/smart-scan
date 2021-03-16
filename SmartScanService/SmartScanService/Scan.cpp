@@ -154,14 +154,14 @@ void Scan::DataAcquisition()
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
                     // Make Point3 obj to get the position info of the trackStar device
-					          Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);
-					          // Store current time and calculate duration of the samples
-					          endSampleTime = std::chrono::steady_clock::now();
-					          std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
-					          // Add sample time to overal time and store in mInBuff
-					          tmp.time = time += sampleTimeSensor.count();
-					          mInBuff.push_back(tmp);
-					          //std::cout << tmp.time << std::endl;
+				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);
+				    // Store current time and calculate duration of the samples
+				    endSampleTime = std::chrono::steady_clock::now();
+				    std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
+				    // Add sample time to overal time and store in mInBuff
+				    tmp.time = time += sampleTimeSensor.count();
+				    mInBuff.push_back(tmp);
+				    //std::cout << tmp.time << std::endl;
                 }
             }
             catch(...)
