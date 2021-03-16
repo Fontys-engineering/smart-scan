@@ -129,6 +129,11 @@ int TrakStarController::GetSensoridFromSerial(int serialNumber)
 {
     int sensorID = -1;
 
+    if (serialNumber <= 0)
+    {
+        return sensorID;
+    }
+
     for(int i = 0; i < ATC3DG.m_config.numberSensors; i++)
     {
         if(pSensor[i].m_config.serialNumber == serialNumber)
@@ -167,7 +172,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		return GetMockRecordFromFile(sensorID);
 	}
     
-	if (sensorID > ATC3DG.m_config.numberSensors || sensorID <= 0)
+	if (sensorID > ATC3DG.m_config.numberSensors || sensorID < 0)
 	{
 		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);
 	}

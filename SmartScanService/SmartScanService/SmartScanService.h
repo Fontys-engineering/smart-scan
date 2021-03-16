@@ -37,17 +37,17 @@ namespace SmartScan
 		void Init();
 
 		/// <summary>
-		/// Creates an empty new scan.
+		/// Creates a new scan with the default scan configuration settings.
 		/// </summary>
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
-		void NewScan(const std::vector<int> sensorIds, const double sampleRate, const double filteringPrecision);
+		void NewScan();
 		/// <summary>
-		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
+		/// Creates a new scan with a specific configuration. Depending on the flag it may also support sensor serial numbers
+        /// instead of port numbers.
 		/// </summary>
-		/// <param name="scanId"> - unique scan id</param>
-		/// <param name="sensorIds"> - [optional] which sensors are used for the scan</param>
-		void NewScan(const int scanId, const std::vector<int> sensorIds, const double sampleRate, const double filteringPrecision);
-		void NewScan(const int scanIdconst, std::vector<int> sensorIds, const int refSensorId, const double sampleRate, const double filteringPrecision);
+		/// <param name="config"> - Scan configuration.</param>
+		/// <param name="useSerials"> - Try and find the right port numbers using the sensor serial numbers.</param>
+		void NewScan(ScanConfig config, bool useSerials = true);
 
 		/// <summary>
 		/// Deletes the latest scan.
@@ -62,14 +62,12 @@ namespace SmartScan
 		/// <summary>
 		/// Start the latest scan using only the specified sensors. If no scan exists, it will create a new one.
 		/// </summary>
-		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
-		void StartScan(const std::vector<int> sensorIds = {});
+		void StartScan();
 		/// <summary>
 		/// Start the scan with the specified ID.
 		/// </summary>
 		/// <param name="scanId"> - id of the scan to start</param>
-		/// <param name="sensorIds"> - [optional] which sensors will be used for the scan</param>
-		void StartScan(int scanId, const std::vector<int> sensorIds = {});
+		void StartScan(int scanId);
 
 		/// <summary>
 		/// Routine for calibrating the position of the sensors relative to the fingertips
