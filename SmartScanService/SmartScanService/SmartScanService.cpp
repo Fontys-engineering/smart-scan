@@ -29,36 +29,41 @@ void SmartScanService::NewScan()
 	this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl));
 }
 
-void SmartScanService::NewScan(SmartScan::ScanConfig* config, bool useSerials)
+void SmartScanService::NewScan(const SmartScan::ScanConfig config, bool useSerials)
 {
+    // Create a local copy of the configuration
+    SmartScan::ScanConfig localConfig = config;
+
+    // Use default config when mock data is enabled
     if (mUseMockData)
     {
         this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl));
     }
     else
     {
+        // Replace sensor serial numbers with port numbers
         if (useSerials)
         {
-            if (config->useReferenceSensor)
+            if (localConfig.useReferenceSensor)
             {
-                config->referenceSensorId = tSCtrl->GetSensoridFromSerial(config->referenceSensorId);
+                localConfig.referenceSensorId = tSCtrl->GetSensoridFromSerial(localConfig.referenceSensorId);
 
-                if(config->referenceSensorId < 0)
+                if(localConfig.referenceSensorId < 0)
                 {
                     throw ex_smartScan("Could not find reference sensor serial number", __func__, __FILE__);
                 }
             }
-            for(int i = 0; i < config->usedSensorIds.size(); i++)
+            for(int i = 0; i < localConfig.usedSensorIds.size(); i++)
             {
-                config->usedSensorIds[i] = tSCtrl->GetSensoridFromSerial(config->usedSensorIds[i]);
+                localConfig.usedSensorIds[i] = tSCtrl->GetSensoridFromSerial(localConfig.usedSensorIds[i]);
 
-                if(config->usedSensorIds[i] < 0)
+                if(localConfig.usedSensorIds[i] < 0)
                 {
                     throw ex_smartScan("Could not find used sensor serial number", __func__, __FILE__);
                 }
             }
         }
-        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl, *config));
+        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl, localConfig));
     }
 }
 
@@ -136,7 +141,7 @@ void SmartScanService::StartScan(int scanId)
 {
 	if (!IdExists(scanId))
 	{
-        throw ex_smartScan("scan id does not exist", __func__, __FILE__);
+        throw ex_smartScan("Scan id does not exist", __func__, __FILE__);
 	}
 
 	// Start the scan:

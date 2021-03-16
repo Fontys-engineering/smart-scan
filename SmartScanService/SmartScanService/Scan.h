@@ -20,7 +20,7 @@ namespace SmartScan
 		bool useReferenceSensor = false;                // Use a reference sensor to eliminate object movement during measurements.
 
 		int referenceSensorId = 0;                      // Channel number of the reference sensor (when used).
-		std::vector<int> usedSensorIds = { 1, 2 };        // Channel numbers of the non-reference sensors.
+		std::vector<int> usedSensorIds = { 1, 2 };      // Channel numbers of the non-reference sensors.
 
 		double sampleRate = 50;                         // Set the data-acquisition rate.
 		double filteringPrecision = 4;                  // Set the filtering angle width from reference point(s).

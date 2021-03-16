@@ -37,16 +37,17 @@ namespace SmartScan
 		void Init();
 
 		/// <summary>
-		/// Creates an empty new scan.
+		/// Creates a new scan with the default scan configuration settings.
 		/// </summary>
 		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
 		void NewScan();
 		/// <summary>
-		/// Creates a new scan with a specific ID (unique). Throws an error if the id is already used
+		/// Creates a new scan with a specific configuration. Depending on the flag it may also support sensor serial numbers
+        /// instead of port numbers.
 		/// </summary>
-		/// <param name="scanId"> - unique scan id</param>
-		/// <param name="sensorIds"> - [optional] which sensors are used for the scan</param>
-		void NewScan(ScanConfig* config, bool useSerials = true);
+		/// <param name="config"> - Scan configuration.</param>
+		/// <param name="useSerials"> - Try and find the right port numbers using the sensor serial numbers.</param>
+		void NewScan(ScanConfig config, bool useSerials = true);
 
 		/// <summary>
 		/// Deletes the latest scan.

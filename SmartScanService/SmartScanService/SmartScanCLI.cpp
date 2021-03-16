@@ -94,7 +94,7 @@ int main()
 		else if (!strcmp(cmd, "new"))
 		{
             try {
-                s3.NewScan(&config);
+                s3.NewScan(config);
             }
             catch (ex_smartScan e)
 			{

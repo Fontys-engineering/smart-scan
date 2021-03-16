@@ -51,6 +51,7 @@ void Scan::Run(bool acquisitionOnly)
 	// Let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
+    // Do not start a filtering thread when dataAcquisition only is the scan config or when calculating reference points.
 	if (!mConfig.acquisitionOnly && !acquisitionOnly)
 	{
 		// Set up Filtering object
