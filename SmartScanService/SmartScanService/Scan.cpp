@@ -135,7 +135,7 @@ void Scan::DataAcquisition()
 		auto startSampleTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
 
-		if (elapsed_seconds.count() >= 1 / mConfig.sampleRate) 
+		if (elapsedTime.count() >= 1 / mConfig.sampleRate) 
         {
             if (!mConfig.acquisitionOnly)
             {
@@ -154,7 +154,7 @@ void Scan::DataAcquisition()
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
                     // Make Point3 obj to get the position info of the trackStar device
-					          Point3 tmp = pTSCtrl->GetRecord(mUsedSensors[i]);
+					          Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);
 					          // Store current time and calculate duration of the samples
 					          endSampleTime = std::chrono::steady_clock::now();
 					          std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
@@ -174,7 +174,7 @@ void Scan::DataAcquisition()
 
 			// Make sure we are not slower than the required sample rate:
 			elapsedTime = std::chrono::steady_clock::now() - startSampleTime;
-			if (elapsed_seconds.count() > (1 / (mConfig.sampleRate/3)))
+			if (elapsedTime.count() > (1 / (mConfig.sampleRate/3)))
 			{
 				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
 			}
