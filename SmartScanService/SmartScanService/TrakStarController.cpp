@@ -58,7 +58,7 @@ void TrakStarController::Config()
 	SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER, 0);
 	SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY, 50.0);
 	SET_SYSTEM_PARAMETER(MEASUREMENT_RATE, 50);
-	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
+	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 36.0);
 	SET_SYSTEM_PARAMETER(METRIC, true);
 
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
@@ -195,17 +195,21 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	// Get the status of the last data record.
 	// Only report the data if everything is okay.
 	unsigned int status = GetSensorStatus(sensorID);
-
-	if (status == VALID_STATUS)
+	static int lastDeviceStatus;
+	try
 	{
-		return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
+		DeviceStatusHandler(status);
 	}
-	else
+	catch (ex_trakStar e)
 	{
-		throw ex_trakStar("No valid sensor record found", __func__, __FILE__);
+		if (status != lastDeviceStatus)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+		lastDeviceStatus = status;
+		return Point3();
 	}
-
-	return Point3();
+	return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
 }
 
 //This function is not used
@@ -385,6 +389,54 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 	}
 
 	return newPoint;
+}
+void TrakStarController::DeviceStatusHandler(int deviceStatus)
+{
+	switch (deviceStatus & ~GLOBAL_ERROR)
+	{
+	case NOT_ATTACHED:
+		throw ex_trakStar("[WARNING] No physical device attached to this device channel", __func__, __FILE__);
+		break;
+	case SATURATED:
+		throw ex_trakStar("[WARNING] Sensor currently staturated", __func__, __FILE__);
+		break;
+	case BAD_EEPROM:
+		throw ex_trakStar("[WARNING] PCB or attached device has a corrupt or unresponsive EEprom", __func__, __FILE__);
+		break;
+	case HARDWARE:
+		throw ex_trakStar("[WARNING] Unspecified hardware fault condition is preventing normal operation of this device channel, board or the system", __func__, __FILE__);
+		break;
+	case NON_EXISTENT:
+		throw ex_trakStar("[WARNING] The device ID used to obtain this status word is invalid. This device channel or board does not exist in the system", __func__, __FILE__);
+		break;
+	case UNINITIALIZED:
+		throw ex_trakStar("[WARNING] The system has not been initialized yet. The system must be initialized at least once before any other commands can be used", __func__, __FILE__);
+		break;
+	case NO_TRANSMITTER_RUNNING:
+		throw ex_trakStar("[WARNING] An attempt was made to call Smart Scan when no transmitter was running", __func__, __FILE__);
+		break;
+	case BAD_12V:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case CPU_TIMEOUT:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case INVALID_DEVICE:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case NO_TRANSMITTER_ATTACHED:
+		throw ex_trakStar("[WARNING] A transmitter is not attached to the tracking system", __func__, __FILE__);
+		break;
+	case OUT_OF_MOTIONBOX:
+		throw ex_trakStar("[WARNING] The sensor has exceeded the maximum range an the position has been clamped to the maximum range", __func__, __FILE__);
+		break;
+	case ALGORITHM_INITIALIZING:
+		throw ex_trakStar("[WARNING] The sensor has not acquired enough raw magnetic data to compute an accurate P&0 solution", __func__, __FILE__);
+		break;
+	default:
+		break;
+	}
+	
 }
 
 

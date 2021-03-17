@@ -114,6 +114,8 @@ namespace SmartScan
 		/// Keep track of the last mock record so that the movement is realistic.
 		Point3 mPrevMockRecord;
 
+		void DeviceStatusHandler(int deviceStatus);
+
 		void ErrorHandler(int error);
 
 		const std::string GetErrorString(int error);
