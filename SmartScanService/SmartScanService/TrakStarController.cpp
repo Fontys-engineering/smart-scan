@@ -78,6 +78,17 @@ void TrakStarController::Config()
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
+	// Device status handler for transmitter device
+	unsigned int TransmitterStatus = GetTransmitterStatus(0);
+	try
+	{
+		DeviceStatusHandler(TransmitterStatus);
+	}
+	catch (ex_trakStar e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+
 	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
 	// contains the following:
 	std::cout << "_____________________________________________________Configuration_____________________________________________________" << std::endl;
@@ -192,8 +203,8 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		}
 	}
 
-	// Get the status of the last data record.
 	// Only report the data if everything is okay.
+	// Device status handler for sensors 
 	unsigned int status = GetSensorStatus(sensorID);
 	static int lastDeviceStatus;
 	try
