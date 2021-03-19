@@ -23,7 +23,7 @@ void TrakStarController::Init()
 		return;
 	}
 
-	errorCode = InitializeBIRDSystem();
+	int errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
 	{
 		//ErrorHandler(errorCode);
@@ -38,18 +38,18 @@ void TrakStarController::Config()
 		return;
 	}
 
-	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
+	int errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
@@ -65,14 +65,14 @@ void TrakStarController::Config()
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
@@ -122,14 +122,14 @@ void TrakStarController::AttachTransmitter()
 	{
 		return;
 	}
-	for (id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
+	for (int id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
 	{
 		if ((pXmtr + id)->m_config.attached)
 		{
 			// Transmitter selection is a system function.
 			// Using the SELECT_TRANSMITTER parameter we send the id of the
 			// transmitter that we want to run with the SetSystemParameter() call.
-			errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+			int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 			if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 			break;
 		}
@@ -191,16 +191,20 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
 
 	// Sensor attached so get record.
+	int errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+	static int lastErrorCode;
 	try
 	{
-		errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+		ErrorHandler(errorCode);
 	}
-	catch (...)
+	catch (ex_trakStar e)
 	{
-		if (errorCode != BIRD_ERROR_SUCCESS)
+		if (errorCode != lastErrorCode)
 		{
-			ErrorHandler(errorCode);
+			std::cerr << e.what() << std::endl;
 		}
+		lastErrorCode = errorCode;
+		return Point3();
 	}
 
 	// Only report the data if everything is okay.
@@ -224,7 +228,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 }
 
 //This function is not used
-void TrakStarController::ReadSensor()
+/*void TrakStarController::ReadSensor()
 {
 	if (mMock)
 	{
@@ -252,7 +256,7 @@ void TrakStarController::ReadSensor()
 		for (sensorID = 0; sensorID < ATC3DG.m_config.numberSensors; sensorID++)
 		{
 			// sensor attached so get record
-			errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+			int errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
 			if (errorCode != BIRD_ERROR_SUCCESS) { ErrorHandler(errorCode); }
 
 			// get the status of the last data record
@@ -277,6 +281,7 @@ void TrakStarController::ReadSensor()
 		}
 	}
 }
+*/
 
 void TrakStarController::StopTransmit()
 {
@@ -284,8 +289,8 @@ void TrakStarController::StopTransmit()
 	{
 		return;
 	}
-	id = -1;
-	errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+	int id = -1;
+	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	delete[] pSensor;
@@ -462,8 +467,8 @@ void TrakStarController::ErrorHandler(int error)
 		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
 		numberBytes = strlen(buffer);
 
-		printf("%s", buffer);
-		//throw ex_trakStar(buffer, __func__, __FILE__);
+		//printf("%s", buffer);
+		throw ex_trakStar(buffer, __func__, __FILE__);
 	}
 }
 
