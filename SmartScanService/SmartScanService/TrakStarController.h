@@ -100,19 +100,10 @@ namespace SmartScan
 		CSensor*		pSensor;
 		CXmtr*			pXmtr;
 
-		int				errorCode;
-		int				i;
-		int				sensorID;
-		short			id;
-		int				records = 100;
-		char			output[256];
-		int				numberBytes;
-
-		clock_t			goal;
-		clock_t			wait = 10;	                    // 10 ms delay
-
 		/// Keep track of the last mock record so that the movement is realistic.
 		Point3 mPrevMockRecord;
+
+		void DeviceStatusHandler(int deviceStatus);
 
 		void ErrorHandler(int error);
 

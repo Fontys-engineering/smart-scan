@@ -23,7 +23,7 @@ void TrakStarController::Init()
 		return;
 	}
 
-	errorCode = InitializeBIRDSystem();
+	int errorCode = InitializeBIRDSystem();
 	if (errorCode != BIRD_ERROR_SUCCESS)
 	{
 		//ErrorHandler(errorCode);
@@ -38,18 +38,18 @@ void TrakStarController::Config()
 		return;
 	}
 
-	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
+	int errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
@@ -58,24 +58,35 @@ void TrakStarController::Config()
 	SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER, 0);
 	SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY, 50.0);
 	SET_SYSTEM_PARAMETER(MEASUREMENT_RATE, 50);
-	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 72.0);
+	SET_SYSTEM_PARAMETER(MAXIMUM_RANGE, 36.0);
 	SET_SYSTEM_PARAMETER(METRIC, true);
 
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-	for (i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
 	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-	for (i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
+	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
 	{
 		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+	}
+
+	// Device status handler for transmitter device
+	unsigned int TransmitterStatus = GetTransmitterStatus(0);
+	try
+	{
+		DeviceStatusHandler(TransmitterStatus);
+	}
+	catch (ex_trakStar e)
+	{
+		std::cerr << e.what() << std::endl;
 	}
 
 	// The SYSTEM_CONFIGURATION structure filled out by the initialization proc
@@ -111,14 +122,14 @@ void TrakStarController::AttachTransmitter()
 	{
 		return;
 	}
-	for (id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
+	for (int id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
 	{
 		if ((pXmtr + id)->m_config.attached)
 		{
 			// Transmitter selection is a system function.
 			// Using the SELECT_TRANSMITTER parameter we send the id of the
 			// transmitter that we want to run with the SetSystemParameter() call.
-			errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+			int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 			if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 			break;
 		}
@@ -180,36 +191,44 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
 
 	// Sensor attached so get record.
+	int errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+	static int lastErrorCode;
 	try
 	{
-		errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+		ErrorHandler(errorCode);
 	}
-	catch (...)
+	catch (ex_trakStar e)
 	{
-		if (errorCode != BIRD_ERROR_SUCCESS)
+		if (errorCode != lastErrorCode)
 		{
-			ErrorHandler(errorCode);
+			std::cerr << e.what() << std::endl;
 		}
+		lastErrorCode = errorCode;
+		return Point3();
 	}
 
-	// Get the status of the last data record.
 	// Only report the data if everything is okay.
+	// Device status handler for sensors 
 	unsigned int status = GetSensorStatus(sensorID);
-
-	if (status == VALID_STATUS)
+	static int lastDeviceStatus;
+	try
 	{
-		return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
+		DeviceStatusHandler(status);
 	}
-	else
+	catch (ex_trakStar e)
 	{
-		throw ex_trakStar("No valid sensor record found", __func__, __FILE__);
+		if (status != lastDeviceStatus)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+		lastDeviceStatus = status;
+		return Point3();
 	}
-
-	return Point3();
+	return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
 }
 
 //This function is not used
-void TrakStarController::ReadSensor()
+/*void TrakStarController::ReadSensor()
 {
 	if (mMock)
 	{
@@ -237,7 +256,7 @@ void TrakStarController::ReadSensor()
 		for (sensorID = 0; sensorID < ATC3DG.m_config.numberSensors; sensorID++)
 		{
 			// sensor attached so get record
-			errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
+			int errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
 			if (errorCode != BIRD_ERROR_SUCCESS) { ErrorHandler(errorCode); }
 
 			// get the status of the last data record
@@ -262,6 +281,7 @@ void TrakStarController::ReadSensor()
 		}
 	}
 }
+*/
 
 void TrakStarController::StopTransmit()
 {
@@ -269,8 +289,8 @@ void TrakStarController::StopTransmit()
 	{
 		return;
 	}
-	id = -1;
-	errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+	int id = -1;
+	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 
 	delete[] pSensor;
@@ -386,6 +406,54 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 
 	return newPoint;
 }
+void TrakStarController::DeviceStatusHandler(int deviceStatus)
+{
+	switch (deviceStatus & ~GLOBAL_ERROR)
+	{
+	case NOT_ATTACHED:
+		throw ex_trakStar("[WARNING] No physical device attached to this device channel", __func__, __FILE__);
+		break;
+	case SATURATED:
+		throw ex_trakStar("[WARNING] Sensor currently staturated", __func__, __FILE__);
+		break;
+	case BAD_EEPROM:
+		throw ex_trakStar("[WARNING] PCB or attached device has a corrupt or unresponsive EEprom", __func__, __FILE__);
+		break;
+	case HARDWARE:
+		throw ex_trakStar("[WARNING] Unspecified hardware fault condition is preventing normal operation of this device channel, board or the system", __func__, __FILE__);
+		break;
+	case NON_EXISTENT:
+		throw ex_trakStar("[WARNING] The device ID used to obtain this status word is invalid. This device channel or board does not exist in the system", __func__, __FILE__);
+		break;
+	case UNINITIALIZED:
+		throw ex_trakStar("[WARNING] The system has not been initialized yet. The system must be initialized at least once before any other commands can be used", __func__, __FILE__);
+		break;
+	case NO_TRANSMITTER_RUNNING:
+		throw ex_trakStar("[WARNING] An attempt was made to call Smart Scan when no transmitter was running", __func__, __FILE__);
+		break;
+	case BAD_12V:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case CPU_TIMEOUT:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case INVALID_DEVICE:
+		throw ex_trakStar("[WARNING] N/A for the 3DG systems", __func__, __FILE__);
+		break;
+	case NO_TRANSMITTER_ATTACHED:
+		throw ex_trakStar("[WARNING] A transmitter is not attached to the tracking system", __func__, __FILE__);
+		break;
+	case OUT_OF_MOTIONBOX:
+		throw ex_trakStar("[WARNING] The sensor has exceeded the maximum range an the position has been clamped to the maximum range", __func__, __FILE__);
+		break;
+	case ALGORITHM_INITIALIZING:
+		throw ex_trakStar("[WARNING] The sensor has not acquired enough raw magnetic data to compute an accurate P&0 solution", __func__, __FILE__);
+		break;
+	default:
+		break;
+	}
+	
+}
 
 
 void TrakStarController::ErrorHandler(int error)
@@ -399,8 +467,8 @@ void TrakStarController::ErrorHandler(int error)
 		error = GetErrorText(error, pBuffer, sizeof(buffer), SIMPLE_MESSAGE);
 		numberBytes = strlen(buffer);
 
-		printf("%s", buffer);
-		//throw ex_trakStar(buffer, __func__, __FILE__);
+		//printf("%s", buffer);
+		throw ex_trakStar(buffer, __func__, __FILE__);
 	}
 }
 
