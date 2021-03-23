@@ -159,8 +159,9 @@ void Scan::DataAcquisition()
 				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);	    
 				    // Add sample time to overal time and store in mInBuff
 					tmp.time = time;
+					tmp.z = tmp.z * -1;
 				    mInBuff.push_back(tmp);
-				    std::cout << tmp.time << std::endl;
+				    //std::cout << tmp.time << std::endl;
                 }
             }
             catch(...)
