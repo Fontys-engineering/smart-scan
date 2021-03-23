@@ -127,7 +127,8 @@ void Scan::DataAcquisition()
 	// Store time on a variable time which increases the sensor sample time
 	double time = 0;
 	auto startSampling = std::chrono::steady_clock::now();
-	std::chrono::time_point<std::chrono::steady_clock> endSampleTime;
+
+	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
 
 	while (!mStopDataAcquisition)
 	{
@@ -151,17 +152,15 @@ void Scan::DataAcquisition()
 
             try
             {
+				time += elapsedTime.count();
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
                     // Make Point3 obj to get the position info of the trackStar device
-				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);
-				    // Store current time and calculate duration of the samples
-				    endSampleTime = std::chrono::steady_clock::now();
-				    std::chrono::duration<double> sampleTimeSensor = endSampleTime - startSampleTime;
+				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);	    
 				    // Add sample time to overal time and store in mInBuff
-				    tmp.time = time += sampleTimeSensor.count();
+					tmp.time = time;
 				    mInBuff.push_back(tmp);
-				    //std::cout << tmp.time << std::endl;
+				    std::cout << tmp.time << std::endl;
                 }
             }
             catch(...)
@@ -169,8 +168,8 @@ void Scan::DataAcquisition()
                 throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
             }
       
-			// Raw data callback
-			//if (mRawDataCallback) mRawDataCallback(mInBuff);
+			// Store current time and calculate duration of the samples
+			endSampleTime = std::chrono::steady_clock::now();
 
 			// Make sure we are not slower than the required sample rate:
 			elapsedTime = std::chrono::steady_clock::now() - startSampleTime;
