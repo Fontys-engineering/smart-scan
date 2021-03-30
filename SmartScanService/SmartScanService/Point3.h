@@ -20,6 +20,14 @@ namespace SmartScan
         Spherical3(double r, double phi, double theta);
     };
 
+    enum BUTTON_STATE_NUMBER
+    {
+        INVALID_STATE,
+        NOISE_STATE,
+        REFERENCE_SCAN_STATE,
+        MANIPULATE_STATE,  
+    };
+
     // This class describes the main data format used throughout the SmartScan software.
     // It helps contain one TrakSTAR measurement data point (position, location and time) in one object.
     class Point3
