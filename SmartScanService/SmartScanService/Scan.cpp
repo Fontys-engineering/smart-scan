@@ -132,6 +132,7 @@ void Scan::DataAcquisition()
 
 	while (!mStopDataAcquisition)
 	{
+		button_obj.UpdateButtonState(1);
 		// Store time and calculate the elapsed time since last sample
 		auto startSampleTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;

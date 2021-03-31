@@ -20,12 +20,12 @@ namespace SmartScan
         Spherical3(double r, double phi, double theta);
     };
 
-    enum BUTTON_STATE_NUMBER
+    enum class button_state
     {
-        INVALID_STATE,
-        NOISE_STATE,
-        REFERENCE_SCAN_STATE,
-        MANIPULATE_STATE,  
+        INVALID,
+        BAD,
+        REFERENCE,
+        MANIPULATE,  
     };
 
     // This class describes the main data format used throughout the SmartScan software.
@@ -36,6 +36,8 @@ namespace SmartScan
         double x, y, z, time;
         Rotation3 r;
         Spherical3 s;
+
+        BUTTON_STATE_NUMBER buttonState;
 
         Point3();
         Point3(double x, double y, double z);

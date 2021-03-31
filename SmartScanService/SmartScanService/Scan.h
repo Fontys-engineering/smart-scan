@@ -11,7 +11,7 @@
 #include "ReferencePoint.h"
 #include "Filtering.h"
 #include "TrakStarController.h"
-
+#include "Trigger.h"
 namespace SmartScan
 {
 	struct ScanConfig
@@ -125,6 +125,8 @@ namespace SmartScan
 
 		const ScanConfig mConfig;                       // Scan configuration struct
 		TrakStarController* pTSCtrl;                    // Pointer to Track star controller obj
+
+		Trigger button_obj;								
 
 		std::vector<ReferencePoint> mReferencePoints;
 
