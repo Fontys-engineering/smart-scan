@@ -359,11 +359,11 @@ void SmartScanService::ExportCSV(const std::string filename, const bool raw)
 	}
 	if (raw)
 	{
-		csvExport.ExportPoint3(scans.back()->mInBuff, filename);
+		csvExport.ExportPoint3(scans.back()->mInBuff, filename, scans.back()->NUsedSensors());
 	}
 	else
 	{
-		csvExport.ExportPoint3(scans.back()->mOutBuff, filename);
+		csvExport.ExportPoint3(scans.back()->mOutBuff, filename, scans.back()->NUsedSensors());
 	}
 }
 
