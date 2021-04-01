@@ -216,7 +216,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		lastDeviceStatus = status;
 		return Point3();
 	}
-	return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
+	return Point3(record.x, record.y, record.z, record.r, record.e, record.a, record.quality, record.button);
 }
 
 //This function is not used
@@ -395,7 +395,7 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 			break;
 		}
 	}
-
+	newPoint.button = 1;
 	return newPoint;
 }
 void TrakStarController::DeviceStatusHandler(int deviceStatus)

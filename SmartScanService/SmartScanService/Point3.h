@@ -34,10 +34,12 @@ namespace SmartScan
     {
     public:
         double x, y, z, time;
+        unsigned short quality;
+        unsigned short button;
         Rotation3 r;
         Spherical3 s;
 
-        BUTTON_STATE_NUMBER buttonState;
+        button_state buttonState;
 
         Point3();
         Point3(double x, double y, double z);
@@ -46,5 +48,6 @@ namespace SmartScan
         Point3(double x, double y, double z, Rotation3 r, Spherical3 s);
         Point3(double x, double y, double z, double rx, double ry, double rz);
         Point3(double x, double y, double z, double rx, double ry, double rz, double sr, double sphi, double stheta);
+        Point3(double x, double y, double z, double rx, double ry, double rz, unsigned short q, unsigned short button);
     };
 }

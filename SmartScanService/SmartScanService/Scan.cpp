@@ -132,11 +132,9 @@ void Scan::DataAcquisition()
 
 	while (!mStopDataAcquisition)
 	{
-		button_obj.UpdateButtonState(1);
 		// Store time and calculate the elapsed time since last sample
 		auto startSampleTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
-
 		if (elapsedTime.count() >= 1 / mConfig.sampleRate) 
         {
             if (!mConfig.acquisitionOnly)
@@ -157,7 +155,10 @@ void Scan::DataAcquisition()
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
                     // Make Point3 obj to get the position info of the trackStar device
-				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);	    
+				    Point3 tmp = pTSCtrl->GetRecord(mConfig.usedSensorIds[i]);	 
+					button_obj.UpdateButtonState(tmp.button); 
+					tmp.buttonState = button_obj.GetButtonState();
+					//std::cout << (int)tmp.buttonState << std::endl;
 				    // Add sample time to overal time and store in mInBuff
 					tmp.time = time;
 					tmp.z = tmp.z * -1;
