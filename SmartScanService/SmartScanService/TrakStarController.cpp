@@ -180,7 +180,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	if (mMock)
 	{
 		//return GetMockRecord();
-		return GetMockRecordFromFile(sensorID);
+		return GetMockRecordFromFile(sensorID-1);
 	}
     
 	if (sensorID > ATC3DG.m_config.numberSensors || sensorID < 0)
