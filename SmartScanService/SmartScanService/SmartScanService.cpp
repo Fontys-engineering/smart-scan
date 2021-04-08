@@ -71,7 +71,7 @@ void SmartScanService::DeleteScan()
 {
 	if (scans.size() > 0)
 	{
-		this->scans.erase(scans.end() - 1);
+		this->scans.clear();
 	}
 	else {
 		throw ex_smartScan("No scans left to delete", __func__, __FILE__);
@@ -111,13 +111,15 @@ void SmartScanService::StartScan()
 	// Start the scan:
 	try
 	{
-		// If UI callback is available, register it with this new Scan:
-		if (mUICallback)
+		for (int i = 0; i < scans.size(); i++)
 		{
-			this->scans.back()->RegisterNewDataCallback(mUICallback);
+			// If UI callback is available, register it with this new Scan:
+			if (mUICallback)
+			{
+				this->scans.at(i)->RegisterNewDataCallback(mUICallback);
+			}
+			scans.at(i)->Run();
 		}
-
-		scans.back()->Run();
 	}
 	catch (ex_scan e)
 	{
@@ -150,9 +152,9 @@ void SmartScanService::StartScan(int scanId)
 		// If UI callback is available, register it with this new Scan:
 		if (mUICallback)
 		{
-			this->scans.back()->RegisterNewDataCallback(mUICallback);
+			this->scans.at(scanId)->RegisterNewDataCallback(mUICallback);
 		}
-		scans.back()->Run(false);
+		scans.at(scanId)->Run(false);
 	}
 	catch (ex_scan e)
 	{
@@ -310,7 +312,36 @@ void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> refe
 
 void SmartScanService::StopScan()
 {
-	scans.back()->Stop();
+	if (this->scans.size() == 0)
+	{
+		throw ex_smartScan("scan vector is empty", __func__, __FILE__);
+	}
+	try
+	{
+		for (int i = 0; i < scans.size(); i++)
+		{
+			if (scans.at(i)->IsRunning())
+			{
+				scans.at(i)->Stop();
+			}
+		}
+	}
+	catch (ex_scan e)
+	{
+		throw e;
+	}
+	catch (ex_trakStar e)
+	{
+		throw e;
+	}
+	catch (ex_smartScan e)
+	{
+		throw e;
+	}
+	catch (...)
+	{
+		throw "Cannot stop scan";
+	}
 }
 
 void SmartScanService::DumpScan() const

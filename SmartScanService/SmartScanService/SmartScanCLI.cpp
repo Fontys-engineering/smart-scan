@@ -59,7 +59,19 @@ int main()
 	do {
 		std::cout << std::endl << "SmartScan>";
 		std::cin.getline(cmd, 128);
-		if (!strcmp(cmd, "start") || strlen(cmd) > 6 && !strncmp(cmd, "start ", 6))
+		if (!strcmp(cmd, "start"))
+		{
+			try 
+			{
+				s3.StartScan();
+				std::cout << "All scans have started!" << std::endl;
+			}
+			catch (ex_smartScan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+		}
+		else if (strlen(cmd) > 6 && !strncmp(cmd, "start ", 6))
 		{
 			int scanId = -1;
 			if (strlen(cmd) > 6)
@@ -104,14 +116,20 @@ int main()
 		}
 		else if (!strcmp(cmd, "delete"))
 		{
-
-			try {
-				s3.DeleteScan();
-				std::cout << "Latest scan has been deleted" << std::endl;
-			}
-			catch (ex_smartScan e)
+			char ack[128];
+			std::cout << "Are you sure you want to delete all? answer y/n: " << std::endl;
+			std::cin.getline(ack,128);
+			if (!strncmp(ack,"y", 1))
 			{
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				try {
+					s3.DeleteScan();
+
+					std::cout << "Deleted all scans!" << std::endl;
+				}
+				catch (ex_smartScan e)
+				{
+					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				}
 			}
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "delete ", 7))
@@ -131,7 +149,15 @@ int main()
 		}
 		else if (!strcmp(cmd, "stop"))
 		{
-			s3.StopScan();
+
+			try {
+				s3.StopScan();
+				std::cout << "All scans have stopped!" << std::endl;
+			}
+			catch (ex_smartScan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
 		}
 		else if (!strcmp(cmd, "list"))
 		{
@@ -243,20 +269,17 @@ void Usage()
 	std::cout << "__________________________________________________________HELP_________________________________________________________" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Measurement control" << std::endl;
-	std::cout << "\t new [id] \t\t\t Create a new measurement" << std::endl;
-	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete the last scan" << std::endl;
-	std::cout << "\t start [id] \t\t\t Start the measurement or create a new one. Leave id blank to use the \n \t\t\t\t\t last scan" << std::endl;
+	std::cout << "\t new \t\t\t Create a new measurement" << std::endl;
+	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete all the scans" << std::endl;
+	std::cout << "\t start [id] \t\t\t Start the measurement. Leave id blank to start all scans" << std::endl;
 	std::cout << "\t find-ref \t\t\t Start the routine for calibrating the reference points for the latest scan" << std::endl;
-	std::cout << "\t stop [id]\t\t\t Stop the latest (running) measurement" << std::endl;
+	std::cout << "\t stop [id]\t\t\t Stop the measurement. Leave id blank to stop all scans" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
 	std::cout << "\t raw-dump \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
-	std::cout << "\t progress \t\t\t Get an estimate of the latest scan's completion" << std::endl;
 	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t export-raw [filename] \t\t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,z) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << std::endl;
-	std::cout << "System preferences" << std::endl;
 	//std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;
 	std::cout << std::endl;
 	std::cout << "CLI usage" << std::endl;
