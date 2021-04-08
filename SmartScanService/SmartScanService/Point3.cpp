@@ -1,5 +1,5 @@
 #include "Point3.h"
-
+#include <iostream>
 using namespace SmartScan;
 
 Rotation3::Rotation3()
@@ -83,4 +83,9 @@ Point3::Point3(double x, double y, double z, double rx, double ry, double rz, do
 	this->r = r;
 	Spherical3 s(sr, sphi, stheta);
 	this->s = s;
+}
+Point3::Point3(double x, double y, double z, double rx, double ry, double rz, unsigned short q, unsigned short button)
+	: x{ x }, y{ y }, z{ z }, r{ Rotation3(rx,ry,rz) }, quality{ q }, button{ button }
+{
+	
 }

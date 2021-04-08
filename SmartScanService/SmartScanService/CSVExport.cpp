@@ -19,7 +19,7 @@ void CSVExport::ExportPoint3(const std::vector<Point3>& data, const std::string 
 	{
 		for (auto& record : data)    //Access by reference to avoid copying
 		{
-			csvFile << record.time << "," << record.x << "," << record.y << "," << record.z << "," << record.r.x << "," << record.r.y << "," << record.r.z << std::endl;
+			csvFile << record.time << "," << record.x << "," << record.y << "," << record.z << "," << record.r.x << "," << record.r.y << "," << record.r.z << "," << record.quality << "," << (int)record.buttonState << std::endl;
 		}
 	}
 	csvFile.close();

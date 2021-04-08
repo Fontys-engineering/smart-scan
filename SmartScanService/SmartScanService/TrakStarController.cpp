@@ -38,23 +38,7 @@ void TrakStarController::Config()
 		return;
 	}
 
-	int errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
-	if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
-
-	pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
-	{
-		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
-		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
-	}
-
-	pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++)
-	{
-		errorCode = GetTransmitterConfiguration(i, &(pXmtr + i)->m_config);
-		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
-	}
-
+	int errorCode;
 	SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER, 0);
 	SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY, 50.0);
 	SET_SYSTEM_PARAMETER(MEASUREMENT_RATE, 50);
@@ -68,6 +52,14 @@ void TrakStarController::Config()
 	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
 	{
 		errorCode = GetSensorConfiguration(i, &(pSensor + i)->m_config);
+		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
+	}
+
+	// Set the data format type for each attached sensor.
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+	{
+		DATA_FORMAT_TYPE type = DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON;
+		errorCode = SetSensorParameter(i, DATA_FORMAT, &type, sizeof(type));
 		if (errorCode != BIRD_ERROR_SUCCESS) ErrorHandler(errorCode);
 	}
 
@@ -188,8 +180,8 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		throw ex_smartScan("Sensor ID out if range", __func__, __FILE__);
 	}
 
-	DOUBLE_POSITION_ANGLES_RECORD record, * pRecord = &record;
-
+	DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD record, * pRecord = &record;
+	
 	// Sensor attached so get record.
 	int errorCode = GetAsynchronousRecord(sensorID, pRecord, sizeof(record));
 	static int lastErrorCode;
@@ -206,7 +198,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		lastErrorCode = errorCode;
 		return Point3();
 	}
-
+	
 	// Only report the data if everything is okay.
 	// Device status handler for sensors 
 	unsigned int status = GetSensorStatus(sensorID);
@@ -224,7 +216,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		lastDeviceStatus = status;
 		return Point3();
 	}
-	return Point3(record.x, record.y, record.z, record.r, record.e, record.a);
+	return Point3(record.x, record.y, record.z, record.r, record.e, record.a, record.quality, record.button);
 }
 
 //This function is not used
@@ -403,7 +395,7 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 			break;
 		}
 	}
-
+	newPoint.button = 1;
 	return newPoint;
 }
 void TrakStarController::DeviceStatusHandler(int deviceStatus)
