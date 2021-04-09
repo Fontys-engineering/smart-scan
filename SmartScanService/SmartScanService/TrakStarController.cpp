@@ -195,9 +195,9 @@ Point3 TrakStarController::GetRecord(int sensorID)
 		{
 			std::cerr << e.what() << std::endl;
 		}
-		lastErrorCode = errorCode;
 		return Point3();
 	}
+    lastErrorCode = errorCode;
 	
 	// Only report the data if everything is okay.
 	// Device status handler for sensors 
