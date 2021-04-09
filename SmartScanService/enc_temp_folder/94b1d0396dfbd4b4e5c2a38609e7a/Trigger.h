@@ -24,7 +24,7 @@ namespace SmartScan
 
 	private:
 		const double buttonDelayTime = 2.0;										// Button buffer change time
-		button_state buttonState = button_state::INVALID;						// Button member
+		button_state buttonState = button_state::MANIPULATE;						// Button member
 		int buttonBuffer = 0;													// Button state buffer
 		std::chrono::time_point<std::chrono::steady_clock> lastRiseTime;		// Time point last rising time
 	};
