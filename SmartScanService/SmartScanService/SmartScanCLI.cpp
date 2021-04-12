@@ -167,9 +167,14 @@ int main()
 				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->IsRunning() ? "running" : "stopped") << std::endl;
 			}
 		}
-		else if (!strcmp(cmd, "find-ref"))
+		else if (strlen(cmd) > 9 && !strncmp(cmd, "find-ref ", 9))
 		{
-			s3.CalibrateReferencePoints();
+			// Get the id from the comand:
+			std::string sCmd = cmd;
+			int id = atoi(sCmd.substr(9).c_str());
+
+			s3.CalibrateReferencePoints(id);
+
 		}
 		else if (!strcmp(cmd, "dump"))
 		{
@@ -215,11 +220,14 @@ int main()
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7))
 		{
+			// Get the id from the comand:
+			std::string sCmd = cmd;
+			int id = atoi(sCmd.substr(7, 1).c_str());
 			// Cut the filepath out:
 			std::string filepath = cmd;
-			std::cout << "exporting to " << filepath.substr(7) << std::endl;
+			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(9) << std::endl;
 			try {
-				s3.ExportCSV(filepath.substr(7));
+				s3.ExportCSV(filepath.substr(9), id);
 				std::cout << "Done.\n";
 			}
 			catch (...)
@@ -227,32 +235,39 @@ int main()
 				std::cerr << "Could not export csv file \n";
 			}
 		}
-		else if (strlen(cmd) > 7 && !strncmp(cmd, "export-raw ", 11))
+		else if (strlen(cmd) > 11 && !strncmp(cmd, "export-raw ", 11))
 		{
-		// Cut the filepath out:
-		std::string filepath = cmd;
-		std::cout << "exporting raw data to " << filepath.substr(11) << std::endl;
-		try {
-			s3.ExportCSV(filepath.substr(11), true);
-			std::cout << "Done.\n";
-		}
-		catch (...)
-		{
-			std::cerr << "Could not export csv file \n";
-		}
-		}
-		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))
-		{
+			// Get the id from the comand:
+			std::string sCmd = cmd;
+			int id = atoi(sCmd.substr(11,1).c_str());
 			// Cut the filepath out:
 			std::string filepath = cmd;
-			std::cout << "exporting to " << filepath.substr(12) << std::endl;
+			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(13) << std::endl;
 			try {
-				s3.ExportPointCloud(filepath.substr(12));
+				s3.ExportCSV(filepath.substr(13), id, true);
 				std::cout << "Done.\n";
 			}
 			catch (...)
 			{
-				std::cerr << "Could not export point-cloud file \n";
+				std::cerr << "Could not export csv file \n";
+			}
+		}
+
+		else if (strlen(cmd) > 10 && !strncmp(cmd, "point-cloud ", 10))
+		{
+			// Get the id from the comand:
+			std::string sCmd = cmd;
+			int id = atoi(sCmd.substr(10, 1).c_str());
+			// Cut the filepath out:
+			std::string filepath = cmd;
+			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(12) << std::endl;
+			try {
+				s3.ExportCSV(filepath.substr(12), id, true);
+				std::cout << "Done.\n";
+			}
+			catch (...)
+			{
+				std::cerr << "Could not export csv file \n";
 			}
 		}
 		else
@@ -269,17 +284,17 @@ void Usage()
 	std::cout << "__________________________________________________________HELP_________________________________________________________" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Measurement control" << std::endl;
-	std::cout << "\t new \t\t\t Create a new measurement" << std::endl;
+	std::cout << "\t new \t\t\t\t Create a new measurement" << std::endl;
 	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete all the scans" << std::endl;
 	std::cout << "\t start [id] \t\t\t Start the measurement. Leave id blank to start all scans" << std::endl;
-	std::cout << "\t find-ref \t\t\t Start the routine for calibrating the reference points for the latest scan" << std::endl;
+	std::cout << "\t find-ref [id] \t\t\t Start the routine for calibrating the reference points for the specified scan" << std::endl;
 	std::cout << "\t stop [id]\t\t\t Stop the measurement. Leave id blank to stop all scans" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
 	std::cout << "\t raw-dump \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
-	std::cout << "\t export [filename] \t\t Export the processed data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t export-raw [filename] \t\t Export the raw data of the latest scan as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
-	std::cout << "\t point-cloud [filename] \t Export the point-cloud data (only x,y,z) of the latest scan as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export [id] [filename] \t Export the processed data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t export-raw [id] [filename] \t Export the raw data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
+	std::cout << "\t point-cloud [id] [filename] \t Export the point-cloud data (only x,y,z) of the scan id as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
 	//std::cout << "\t calibrate \t\t Begin the glove calibration process" << std::endl;
 	std::cout << std::endl;
 	std::cout << "CLI usage" << std::endl;

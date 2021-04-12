@@ -16,11 +16,11 @@ namespace SmartScan
 {
 	struct ScanConfig
 	{
-		bool acquisitionOnly = true;                    // Only get raw sensor data, so no filtering.
-		bool useReferenceSensor = false;                // Use a reference sensor to eliminate object movement during measurements.
+		bool acquisitionOnly = false;                    // Only get raw sensor data, so no filtering.
+		bool useReferenceSensor = true;                // Use a reference sensor to eliminate object movement during measurements.
 
-		int referenceSensorId = 0;                      // Channel number of the reference sensor (when used).
-		std::vector<int> usedSensorIds = { 1, 2, 3 };      // Channel numbers of the non-reference sensors.
+		int referenceSensorId = 1;                      // Channel number of the reference sensor (when used).
+		std::vector<int> usedSensorIds = {  2, 3 };      // Channel numbers of the non-reference sensors.
 
 		double sampleRate = 50;                         // Set the data-acquisition rate.
 		double filteringPrecision = 4;                  // Set the filtering angle width from reference point(s).

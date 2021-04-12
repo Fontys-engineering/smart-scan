@@ -23,10 +23,11 @@ void Trigger::UpdateButtonState(unsigned short buttonBit)
 	// After buttonDelayTime it change the current button state
 	if (elapsedTime.count() >= buttonDelayTime && risingEdge == 1)
 	{
-		buttonBuffer = (buttonBuffer + stateNum)%4;
+		buttonBuffer = (buttonBuffer + stateNum) % 4;
 		buttonState = static_cast<button_state>(buttonBuffer);
-		//std::cout << "The current state: " << buttonBuffer << std::endl;
+		std::cout << "The current state: " << buttonBuffer << std::endl;
 		risingEdge = 0;
+		buttonBuffer = 0;
 	}
 	// Detect rising edge and store its time
 	if (buttonBit != lastButtonBit && buttonBit == 1)
