@@ -114,7 +114,7 @@ void TrakStarController::AttachTransmitter()
 	{
 		return;
 	}
-	for (int id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
+	for (short int id = 0; id < ATC3DG.m_config.numberTransmitters; id++)
 	{
 		if ((pXmtr + id)->m_config.attached)
 		{
