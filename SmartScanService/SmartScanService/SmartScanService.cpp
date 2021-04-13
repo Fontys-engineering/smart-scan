@@ -71,7 +71,7 @@ void SmartScanService::DeleteScan()
 {
 	if (scans.size() > 0)
 	{
-		this->scans.erase(scans.end() - 1);
+		this->scans.clear();
 	}
 	else {
 		throw ex_smartScan("No scans left to delete", __func__, __FILE__);
@@ -97,27 +97,36 @@ void SmartScanService::DeleteScan(int id)
 
 void SmartScanService::StartScan()
 {
-    if (this->scans.size() == 0)
+	char arg[51];
+	const char startString[] = "cannot start scan ";
+	const char endString[] = " without reference points set.";
+	char scan[3];
+	if (this->scans.size() == 0)
     {
         throw ex_smartScan("scan vector is empty", __func__, __FILE__);
     }
-
-	// Check if reference points have been set;
-	if (!this->scans.back()->IsAcquisitionOnly() && !scans.back()->GetReferences().size())
-	{
-		throw ex_smartScan("cannot start scan without reference points set.", __func__, __FILE__);
-	}
-
+	
 	// Start the scan:
 	try
 	{
-		// If UI callback is available, register it with this new Scan:
-		if (mUICallback)
+		for (int i = 0; i < scans.size(); i++)
 		{
-			this->scans.back()->RegisterNewDataCallback(mUICallback);
+			// Check if reference points have been set;
+			if (!this->scans.at(i)->IsAcquisitionOnly() && !scans.at(i)->GetReferences().size())
+			{
+				sprintf_s(scan, "%d", i);
+				strcpy_s(arg, startString);
+				strcat_s(arg, scan);
+				strcat_s(arg, endString);
+				throw ex_smartScan(arg, __func__, __FILE__);
+			}
+			// If UI callback is available, register it with this new Scan:
+			if (mUICallback)
+			{
+				this->scans.at(i)->RegisterNewDataCallback(mUICallback);
+			}
+			scans.at(i)->Run();
 		}
-
-		scans.back()->Run();
 	}
 	catch (ex_scan e)
 	{
@@ -143,6 +152,11 @@ void SmartScanService::StartScan(int scanId)
 	{
         throw ex_smartScan("Scan id does not exist", __func__, __FILE__);
 	}
+	// Check if reference points have been set;
+	if (!this->scans.at(scanId)->IsAcquisitionOnly() && !scans.at(scanId)->GetReferences().size())
+	{
+		throw ex_smartScan("cannot start scan without reference points set.", __func__, __FILE__);
+	}
 
 	// Start the scan:
 	try
@@ -150,9 +164,9 @@ void SmartScanService::StartScan(int scanId)
 		// If UI callback is available, register it with this new Scan:
 		if (mUICallback)
 		{
-			this->scans.back()->RegisterNewDataCallback(mUICallback);
+			this->scans.at(scanId)->RegisterNewDataCallback(mUICallback);
 		}
-		scans.back()->Run(false);
+		scans.at(scanId)->Run(false);
 	}
 	catch (ex_scan e)
 	{
@@ -201,12 +215,13 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 	scans.back()->Stop(true);
 }
 
-void SmartScanService::CalibrateReferencePoints()
+void SmartScanService::CalibrateReferencePoints(int scanId)
 {
 	int refCount;
 
 	// Find how many calibration points are desired:
-	std::cout << "[CALIBRATION] " << "Before starting the scan, reference points must be calibrated. Use the thumb and index finger to point out the knee, ankle and foot ecnter \n";
+	std::cout << "[CALIBRATION] " << "Before starting the scan, reference points must be calibrated. Use the thumb and index finger to point out the knee, ankle and foot ecnter" << std::endl;
+	std::cout << "[CALIBRATION] " << "Setting the reference points for scan ID: " << scanId << std::endl;
 	std::cout << "[CALIBRATION] " << "Enter the number of desired reference points  (by default 3, as mentioned above): ";
 	std::cin >> refCount;
 	std::cin.get();
@@ -217,15 +232,15 @@ void SmartScanService::CalibrateReferencePoints()
 	}
 
 	// Reset the Scan's reference points if some already exist:
-	if (scans.back()->GetReferences().size() > 0)
+	if (scans.at(scanId)->GetReferences().size() > 0)
 	{
-		scans.back()->ResetReferences();
+		scans.at(scanId)->ResetReferences();
 	}
 
 	// Start reading sensor data:
 	std::cout << "[CALIBRATION] " << "A temporary scan will run for the duration of the calibration. The data will be deleted afterwards." << std::endl;
 	// Acquisition only
-	scans.back()->Run(true);
+	scans.at(scanId)->Run(true);
 	// Do this for the given number of ref points:
 	for (int i = 0; i < refCount; i++)
 	{
@@ -233,16 +248,16 @@ void SmartScanService::CalibrateReferencePoints()
 		ReferencePoint newRef;
 
 		// Wait for values:
-		while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
+		while (scans.at(scanId)->mInBuff.size() < 2 || scans.at(scanId)->mRefBuff.size() < 1)
 		{
 		}
 
 		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to capture it" << std::endl;
 		std::cin.get();
 
-		std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - scans.back()->NUsedSensors();
+		std::vector<Point3>::const_iterator firstFingerIterator = scans.at(scanId)->mInBuff.cend() - scans.at(scanId)->NUsedSensors();
 		// Add the referenceSensorPos:
-		newRef.refSensorPos = scans.back()->mRefBuff.back();
+		newRef.refSensorPos = scans.at(scanId)->mRefBuff.back();
 
 		newRef.pos.x = ((firstFingerIterator[0].x + firstFingerIterator[1].x) / 2) - newRef.refSensorPos.x;
 		newRef.pos.y = ((firstFingerIterator[0].y + firstFingerIterator[1].y) / 2) - newRef.refSensorPos.y;
@@ -282,12 +297,12 @@ void SmartScanService::CalibrateReferencePoints()
 
 		newRef.index = i;
 
-		scans.back()->AddReference(newRef);
+		scans.at(scanId)->AddReference(newRef);
 		std::cout << "[CALIBRATION] " << "Reference point at (" << newRef.pos.x << "," << newRef.pos.y << "," << newRef.pos.z << ") with index " << newRef.index << " set" << std::endl;
 	}
 
 	std::cout << "[CALIBRATION] " << "Done setting reference points" << std::endl;
-	scans.back()->Stop(true);
+	scans.at(scanId)->Stop(true);
 }
 
 void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> referencePoints)
@@ -310,7 +325,36 @@ void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> refe
 
 void SmartScanService::StopScan()
 {
-	scans.back()->Stop();
+	if (this->scans.size() == 0)
+	{
+		throw ex_smartScan("scan vector is empty", __func__, __FILE__);
+	}
+	try
+	{
+		for (int i = 0; i < scans.size(); i++)
+		{
+			if (scans.at(i)->IsRunning())
+			{
+				scans.at(i)->Stop();
+			}
+		}
+	}
+	catch (ex_scan e)
+	{
+		throw e;
+	}
+	catch (ex_trakStar e)
+	{
+		throw e;
+	}
+	catch (ex_smartScan e)
+	{
+		throw e;
+	}
+	catch (...)
+	{
+		throw "Cannot stop scan";
+	}
 }
 
 void SmartScanService::DumpScan() const
@@ -351,7 +395,7 @@ const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
 	return scans;
 }
 
-void SmartScanService::ExportCSV(const std::string filename, const bool raw)
+void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw)
 {
 	if (scans.empty())
 	{
@@ -359,11 +403,11 @@ void SmartScanService::ExportCSV(const std::string filename, const bool raw)
 	}
 	if (raw)
 	{
-		csvExport.ExportPoint3(scans.back()->mInBuff, filename, scans.back()->NUsedSensors());
+		csvExport.ExportPoint3(scans.at(scanId)->mInBuff, filename, scans.at(scanId)->NUsedSensors());
 	}
 	else
 	{
-		csvExport.ExportPoint3(scans.back()->mOutBuff, filename, scans.back()->NUsedSensors());
+		csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
 	}
 }
 

@@ -84,7 +84,7 @@ namespace SmartScan
 		/// Clears all existing references for the last scan and starts 
 		/// the reference calibration routine.
 		/// </summary>
-		void CalibrateReferencePoints();
+		void CalibrateReferencePoints(int scanId);
 
 		/// <summary>
 		/// Set the reference points for the latest scan object:
@@ -133,7 +133,7 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="filename"> - the name of the output file</param>
 		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
-		void ExportCSV(const std::string filename, const bool raw = false);
+		void ExportCSV(const std::string filename, int scanId, const bool raw = false);
 
 		/// <summary>
 		/// Export the filtered Point3 array in a Point Cloud format (only x,y,z)
