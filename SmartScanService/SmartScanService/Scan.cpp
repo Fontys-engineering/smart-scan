@@ -164,7 +164,11 @@ void Scan::DataAcquisition()
 					tmp.z = tmp.z * -1;
 				    mInBuff.push_back(tmp);
 				    //std::cout << tmp.time << std::endl;
-                }
+					if (mRawDataCallback)
+					{
+						mRawDataCallback(tmp);
+					}
+                }			
             }
             catch(...)
             {
@@ -269,9 +273,10 @@ void Scan::DataFiltering()
 
 void Scan::DumpData() const
 {
-	for (auto& record : mInBuff)    // Access by reference to avoid copying
+	std::cout << "Time" << "\t" << "X" << "\t" << "Y" << "\t" << "Z" << "\t" << "Rx" << "\t" << "Ry" << "\t" << "Rz" << "\t" << "Quality" << "\t" << "Button" << std::endl;
+	for (auto& record : mOutBuff)    // Access by reference to avoid copying
 	{
-		std::cout << std::setprecision(16) << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\n";
+		std::cout << std::setprecision(4) << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t"  << record.quality << "\t" << (int)record.button << "\n";
 	}
 }
 
@@ -279,7 +284,7 @@ void Scan::RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> cal
 {
 	mNewDataCallback = callback;
 }
-void Scan::RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback)
+void Scan::RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback)
 {
 	mRawDataCallback = callback;
 }

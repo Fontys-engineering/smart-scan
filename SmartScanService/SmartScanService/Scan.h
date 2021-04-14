@@ -74,7 +74,7 @@ namespace SmartScan
 		/// Register a new callback function to be called whenever new raw data is available
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
-		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
+		void RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback);
 
 		/// <summary>
 		/// return the status of the scan
@@ -139,7 +139,7 @@ namespace SmartScan
 		std::unique_ptr<std::thread> pFilteringThread;
 		
 		std::function<void(std::vector<Point3>&)> mNewDataCallback;     // ?New data callback
-		std::function<void(std::vector<Point3>&)> mRawDataCallback;     // Needed for printing values directly to console 
+		std::function<void(SmartScan::Point3 )>mRawDataCallback;     // Needed for printing values directly to console 
 
 		/// <summary>
 		/// Polls the TrakstarController for new data, stores it and filters it.

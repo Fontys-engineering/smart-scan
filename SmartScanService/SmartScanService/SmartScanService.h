@@ -100,7 +100,7 @@ namespace SmartScan
 		/// <summary>
 		/// print the values from the latest scan to console. Debugging only. Not recommended.
 		/// </summary>
-		void DumpScan() const;
+		void DumpScan(int scanId) const;
 
 		/// <summary>
 		/// Specify which sensors are in use for the latest scan;
@@ -154,7 +154,7 @@ namespace SmartScan
 		/// The raw data vector is provided through a reference as a parameter of the callback function.
 		/// </summary>
 		/// <param name="callback"></param>
-		void RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback);
+		void RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback);
 	private:
 		bool mUseMockData;
 		//std::vector<int> usedSensors;

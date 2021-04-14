@@ -176,46 +176,44 @@ int main()
 			s3.CalibrateReferencePoints(id);
 
 		}
-		else if (!strcmp(cmd, "dump"))
+		else if (strlen(cmd) > 5 && !strncmp(cmd, "dump ", 5))
 		{
-			s3.DumpScan();
-		}
-		else if (!strcmp(cmd, "raw-dump"))
-		{
-			// Make sure:
-			std::cout << "This command will start printing the raw values of the latest started scan to console as they come in with no option to stop. Do you want to proceed? (y/n)" << std::endl;
-			char c;
-			std::cin >> c;
-			if (c == 'y' || c == 'Y')
-			{
-				// Register the callback:
-				try
-				{
-					// Slow it down a bit first:
-					//s3.GetScan()->SetSampleRate(10);
-					s3.RegisterRawDataCallback(RawPrintCallback);
-				}
-				catch (ex_trakStar e)
-				{
-					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
-				}
-				catch (ex_smartScan e)
-				{
-					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
-				}
-				catch (ex_scan e)
-				{
-					std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
-				}
-				catch (...)
-				{
-					std::cerr << "Unnable to attach callback due to an unknow error. \n";
-				}
+			// Get the id from the comand:
+			std::string sCmd = cmd;
+			int id = atoi(sCmd.substr(5).c_str());
 
+			try {
+				std::cout << "Dump values of scan: " << id << std::endl;
+				s3.DumpScan(id);
 			}
-			else
+			catch (ex_smartScan e)
 			{
-				std::cout << "operation aborted" << std::endl;
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+		}
+		else if (!strcmp(cmd, "dump-raw"))
+		{
+			try
+			{
+				// Slow it down a bit first:
+				//s3.GetScan()->SetSampleRate(10);
+				s3.RegisterRawDataCallback(RawPrintCallback);
+			}
+			catch (ex_trakStar e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+			catch (ex_smartScan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+			catch (ex_scan e)
+			{
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+			catch (...)
+			{
+				std::cerr << "Unnable to attach callback due to an unknow error. \n";
 			}
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7))
@@ -290,8 +288,8 @@ void Usage()
 	std::cout << "\t find-ref [id] \t\t\t Start the routine for calibrating the reference points for the specified scan" << std::endl;
 	std::cout << "\t stop [id]\t\t\t Stop the measurement. Leave id blank to stop all scans" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
-	std::cout << "\t dump \t\t\t\t Print all the records of the latest scan to the console (for debugging)" << std::endl;
-	std::cout << "\t raw-dump \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
+	std::cout << "\t dump [id] \t\t\t Print all the records of the scan id to the console (for debugging)" << std::endl;
+	std::cout << "\t dump-raw \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t export [id] [filename] \t Export the processed data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t export-raw [id] [filename] \t Export the raw data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [id] [filename] \t Export the point-cloud data (only x,y,z) of the scan id as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
@@ -303,15 +301,13 @@ void Usage()
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void RawPrintCallback(std::vector<SmartScan::Point3>& data)
+void RawPrintCallback(SmartScan::Point3 record)
 {
-	if (data.size() > s3.GetScan()->NUsedSensors() && data.size() % s3.GetScan()->NUsedSensors() == 0)
+	static int printOnce = 0;
+	if (printOnce == 0)
 	{
-		std::cout<<"\r                                                          \rsz:"<< data.size()<< "\t";
-		for (int i = s3.GetScan()->NUsedSensors(); i > 0; i--)
-		{
-			std::cout << "\t"<< std::setprecision(5) << data.end()[-i].x << "\t" << data.end()[-i].y << "\t" << data.end()[-i].z << "\t";
-		}
+		std::cout << "Time" << "\t" << "X" << "\t" << "Y" << "\t" << "Z" << "\t" << "Rx" << "\t" << "Ry" << "\t" << "Rz" << "\t" << "Quality" << "\t" << "Button" << std::endl;
+		printOnce = 1;
 	}
-	
+	std::cout << std::setprecision(4) << "\r" << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t" << record.quality << "\t" << (int)record.button;
 }

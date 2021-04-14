@@ -6,7 +6,7 @@
 #include "SmartScanService.h"
 #include "Point3.h"
 
-const bool mockMode = false;
+const bool mockMode = true;
 
 SmartScan::ScanConfig config = {
     true,                   // acquisitionOnly
@@ -25,4 +25,4 @@ SmartScan::SmartScanService s3(mockMode);
 /// </summary>
 void Usage();
 
-void RawPrintCallback(std::vector<SmartScan::Point3>& data);
+void RawPrintCallback(SmartScan::Point3 record);

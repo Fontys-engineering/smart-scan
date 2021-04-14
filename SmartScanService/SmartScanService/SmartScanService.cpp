@@ -357,9 +357,18 @@ void SmartScanService::StopScan()
 	}
 }
 
-void SmartScanService::DumpScan() const
+void SmartScanService::DumpScan(int scanId) const
 {
-	scans.back()->DumpData();
+	if (!IdExists(scanId))
+	{
+		throw ex_smartScan("Scan id does not exist", __func__, __FILE__);
+	}
+	// Check if reference points have been set;
+	if (this->scans.at(scanId)->IsAcquisitionOnly() && !scans.at(scanId)->GetReferences().size())
+	{
+		throw ex_smartScan("cannot dump scan data without filtering enabled.", __func__, __FILE__);
+	}
+	scans.at(scanId)->DumpData();
 }
 
 void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
@@ -437,14 +446,10 @@ void SmartScanService::RegisterNewDataCallback(std::function<void(std::vector<Po
 	}
 }
 
-void SmartScanService::RegisterRawDataCallback(std::function<void(std::vector<Point3>&)> callback)
+void SmartScanService::RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback)
 {
-	mRawCallback = callback;
 	// Register this callback with all the existing Scans:
-	for (auto& scan : scans)
-	{
-		scan->RegisterRawDataCallback(mRawCallback);
-	}
+	scans.back()->RegisterRawDataCallback(callback);
 }
 
 const int SmartScanService::FindNewScanId() const
