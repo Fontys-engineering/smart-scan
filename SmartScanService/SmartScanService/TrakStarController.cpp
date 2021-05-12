@@ -149,6 +149,21 @@ int TrakStarController::GetSensoridFromSerial(int serialNumber)
     return sensorID;
 }
 
+std::vector<int> TrakStarController::GetAttachedSensors()
+{
+	std::vector<int> attchedSensors;
+
+    for(int i = 0; i < ATC3DG.m_config.numberSensors; i++)
+    {
+        if(pSensor[i].m_config.attached)
+        {
+            attchedSensors.push_back(pSensor[i].m_config.channelNumber);
+        }
+    }
+
+	return attchedSensors;
+}
+
 int TrakStarController::GetNSensors()
 {
 	if (mMock)
@@ -398,6 +413,7 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 	newPoint.button = 1;
 	return newPoint;
 }
+
 void TrakStarController::DeviceStatusHandler(int deviceStatus)
 {
 	switch (deviceStatus & ~GLOBAL_ERROR)
@@ -446,7 +462,6 @@ void TrakStarController::DeviceStatusHandler(int deviceStatus)
 	}
 	
 }
-
 
 void TrakStarController::ErrorHandler(int error)
 {

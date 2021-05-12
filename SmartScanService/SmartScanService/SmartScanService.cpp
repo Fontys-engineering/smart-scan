@@ -22,6 +22,17 @@ void SmartScanService::Init()
 	tSCtrl->Init();
 	tSCtrl->Config();
 	tSCtrl->AttachTransmitter();
+
+	if (mUseMockData)
+	{
+		this->NewScan();
+	}
+	else
+	{
+		SmartScan::ScanConfig localConfig;
+		localConfig.usedSensorIds = tSCtrl->GetAttachedSensors();
+		this->NewScan(localConfig);
+	}
 }
 
 void SmartScanService::NewScan()
@@ -198,11 +209,11 @@ void SmartScan::SmartScanService::CalibrateSingleRefPoint()
 	ReferencePoint newRef;
 
 	// Wait for values:
-	while (scans.back()->mInBuff.size() < 2 || scans.back()->mRefBuff.size() < 1)
+	while (scans.back()->mInBuff[0].size() < 2 || scans.back()->mRefBuff.size() < 1)
 	{
 	}
 
-	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff.cend() - scans.back()->NUsedSensors();
+	std::vector<Point3>::const_iterator firstFingerIterator = scans.back()->mInBuff[0].cend() - scans.back()->NUsedSensors();
 	// Add the referenceSensorPos:
 	newRef.refSensorPos = scans.back()->mRefBuff.back();
 
@@ -248,14 +259,14 @@ void SmartScanService::CalibrateReferencePoints(int scanId)
 		ReferencePoint newRef;
 
 		// Wait for values:
-		while (scans.at(scanId)->mInBuff.size() < 2 || scans.at(scanId)->mRefBuff.size() < 1)
+		while (scans.at(scanId)->mInBuff[0].size() < 2 || scans.at(scanId)->mRefBuff.size() < 1)
 		{
 		}
 
 		std::cout << "[CALIBRATION] " << "Position your fingers around the reference point and press any key to capture it" << std::endl;
 		std::cin.get();
 
-		std::vector<Point3>::const_iterator firstFingerIterator = scans.at(scanId)->mInBuff.cend() - scans.at(scanId)->NUsedSensors();
+		std::vector<Point3>::const_iterator firstFingerIterator = scans.at(scanId)->mInBuff[0].cend() - scans.at(scanId)->NUsedSensors();
 		// Add the referenceSensorPos:
 		newRef.refSensorPos = scans.at(scanId)->mRefBuff.back();
 
@@ -412,7 +423,7 @@ void SmartScanService::ExportCSV(const std::string filename, int scanId, const b
 	}
 	if (raw)
 	{
-		csvExport.ExportPoint3(scans.at(scanId)->mInBuff, filename, scans.at(scanId)->NUsedSensors());
+		csvExport.ExportPoint3Raw(scans.at(scanId)->mInBuff, filename, scans.at(scanId)->NUsedSensors());
 	}
 	else
 	{
@@ -428,7 +439,7 @@ void SmartScanService::ExportPointCloud(const std::string filename, const bool r
 	}
 	if (raw)
 	{
-		csvExport.ExportPC(scans.back()->mInBuff, filename);
+		csvExport.ExportPC(scans.back()->mInBuff[0], filename);
 	}
 	else
 	{

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "Point3.h"
 #include "ReferencePoint.h"
-#include <vector>
 
 namespace SmartScan
 {

@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "Point3.h"
 #include "NDI/ATC3DG.h"
@@ -56,9 +57,14 @@ namespace SmartScan
 		void AttachTransmitter();
     
         /// <summary>
-        /// Try and find the device channel from a specific serial number
+        /// Try and find the device channel from a specific serial number.
         /// </summary>
         int GetSensoridFromSerial(int serialNumber);
+
+        /// <summary>
+        /// Get the port numbers of the attached sensors.
+        /// </summary>
+		std::vector<int> GetAttachedSensors();
 
 		/// <summary>
 		/// Returns the number of sensors in the current config

@@ -8,13 +8,19 @@ using namespace SmartScan;
 
 Scan::Scan(const int id, TrakStarController* pTSCtrl) : mId{ id }, pTSCtrl{ pTSCtrl }
 {
-
+    for(int i = 0; i < mConfig.usedSensorIds.size(); i++)
+    {
+        mInBuff.push_back(std::vector<Point3>());
+    }
 }
 
 Scan::Scan(const int id, TrakStarController* pTSCtrl, const ScanConfig config) 
     : mId{ id }, pTSCtrl{ pTSCtrl }, mConfig{ config }
 {
-
+    for(int i = 0; i < mConfig.usedSensorIds.size(); i++)
+    {
+        mInBuff.push_back(std::vector<Point3>());
+    }
 }
 
 Scan::~Scan()
@@ -122,7 +128,7 @@ const double Scan::GetSampleRate() const
 void Scan::DataAcquisition()
 {
 	// Start the data aquisition:
-	std::cout << "[SCAN] " << (mInBuff.size() > 0? "Resuming" : "Running") <<" data aquisition for " << mConfig.usedSensorIds.size() << " sensors \n";
+	std::cout << "[SCAN] " << (mInBuff[0].size() > 0? "Resuming" : "Running") <<" data aquisition for " << mConfig.usedSensorIds.size() << " sensors \n";
 
 	// Store time on a variable time which increases the sensor sample time
 	double time = 0;
@@ -137,21 +143,9 @@ void Scan::DataAcquisition()
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
 		if (elapsedTime.count() >= 1 / mConfig.sampleRate) 
         {
-            if (!mConfig.acquisitionOnly)
-            {
-                try
-                {
-                    mRefBuff.push_back(pTSCtrl->GetRecord(mConfig.referenceSensorId));
-                }
-                catch(...)
-                {
-                    throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
-                }
-            }
-
+            time += elapsedTime.count();
             try
             {
-				time += elapsedTime.count();
                 for(int i = 0; i < mConfig.usedSensorIds.size(); i++) 
                 {
                     // Make Point3 obj to get the position info of the trackStar device
@@ -162,7 +156,7 @@ void Scan::DataAcquisition()
 				    // Add sample time to overal time and store in mInBuff
 					tmp.time = time;
 					tmp.z = tmp.z * -1;
-				    mInBuff.push_back(tmp);
+				    mInBuff[i].push_back(tmp);
 				    //std::cout << tmp.time << std::endl;
 					if (mRawDataCallback)
 					{
@@ -192,7 +186,7 @@ void Scan::DataAcquisition()
 	mStopDataAcquisition = false;
 
 	std::chrono::duration<double> totalScanTime = std::chrono::steady_clock::now() - startSampling;
-	std::cout << "[SCAN] " << mInBuff.size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << mConfig.sampleRate << " Hz sample rate\n";
+	std::cout << "[SCAN] " << mInBuff[0].size() << " samples aquired in the bg during a " << totalScanTime.count() << " seconds scan using a " << mConfig.sampleRate << " Hz sample rate\n";
 	std::cout << "[SCAN] " << "Please wait for filtering to complete. \n";
 }
 
@@ -207,15 +201,16 @@ void Scan::DataFiltering()
 		auto startTime = std::chrono::steady_clock::now();
 
 		// Check if there is new data available:
-		const int inSize = mInBuff.size();
+		const int inSize = mInBuff[0].size();
 		const int outSize = mOutBuff.size();
 
 		if (inSize > (lastFilteredSample) && frameCounter < frameSize)
 		{
 			// Add the new data to the output buffer:
+			// Might remove for efficiency
 			try
 			{
-				mOutBuff.push_back(mInBuff.begin()[lastFilteredSample]);
+				mOutBuff.push_back(mInBuff[0].begin()[lastFilteredSample]);
 				++frameCounter;
 				++lastFilteredSample;
 
@@ -261,7 +256,7 @@ void Scan::DataFiltering()
 	}
 
 	// Handle the leftover stuff:
-	if (lastFilteredSample < mInBuff.size() - 1)
+	if (lastFilteredSample < mInBuff[0].size() - 1)
 	{
 		// Send the rest to be filtered.
 	}
@@ -306,12 +301,12 @@ void Scan::ResetReferences()
 
 const std::vector<int> SmartScan::Scan::GetUsedSensors() const
 {
-	return this->mConfig.usedSensorIds;
+	return mConfig.usedSensorIds;
 }
 
 const int SmartScan::Scan::GetReferenceSensorId()
 {
-	return mConfig.useReferenceSensor;
+	return mConfig.referenceSensorId;
 }
 
 const int SmartScan::Scan::NUsedSensors() const

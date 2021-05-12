@@ -240,9 +240,9 @@ int main()
 			int id = atoi(sCmd.substr(11,1).c_str());
 			// Cut the filepath out:
 			std::string filepath = cmd;
-			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(13) << std::endl;
+			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(11) << std::endl;
 			try {
-				s3.ExportCSV(filepath.substr(13), id, true);
+				s3.ExportCSV(filepath.substr(11), id, true);
 				std::cout << "Done.\n";
 			}
 			catch (...)
@@ -301,7 +301,7 @@ void Usage()
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void RawPrintCallback(SmartScan::Point3 record)
+void RawPrintCallback(const SmartScan::Point3* record)
 {
 	static int printOnce = 0;
 	if (printOnce == 0)
