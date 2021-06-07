@@ -7,7 +7,12 @@
 
 using namespace SmartScan;
 
-DataAcq::DataAcq(bool mock, const DataAcqConfig config) : mMock { mock }, mConfig { config }, mTSCtrl { TrakStarController(mock) }
+DataAcq::DataAcq(bool useMockData) : mUseMockData { useMockData }, mTSCtrl(useMockData)
+{
+
+}
+
+DataAcq::DataAcq(bool useMockData, DataAcqConfig acquisitionConfig) : mUseMockData { useMockData }, mTSCtrl(useMockData), mConfig { acquisitionConfig } 
 {
 
 }
@@ -19,43 +24,59 @@ DataAcq::~DataAcq()
 
 void DataAcq::Init()
 {
-	mTSCtrl.Init();
-	mTSCtrl.Config();
-	mTSCtrl.AttachTransmitter();
+	if (!mUseMockData) {
+		try {
+			mTSCtrl.Init();
+			mTSCtrl.SelectTransmitter(mConfig.transmitterID);
+			mTSCtrl.SetPowerlineFrequency(mConfig.powerLineFrequency);
+			mTSCtrl.SetMeasurementRate(mConfig.measurementRate);
+			mTSCtrl.SetMaxRange(mConfig.maximumRange);
+			mTSCtrl.SetMetric();
+			mTSCtrl.SetSensorFormat();
+		}
+		catch (ex_trakStar e) {
+			std::cerr << e.what() << std::endl;
+		}
+	}
 
-	mIndexBuff = mTSCtrl.GetAttachedSensors();
+	mPortNumBuff = mTSCtrl.GetAttachedPorts();
+	mSerialBuff = mTSCtrl.GetAttachedSerials();
 
-	for (int i = 0; i < mIndexBuff.size(); i++)
-	{
+	if (mConfig.refSensorSerial >= 0) {
+		for(int i = 0; i < mSerialBuff.size(); i++) {
+			if (mSerialBuff[i] == mConfig.refSensorSerial) {
+				refSensorPort = mPortNumBuff[i];
+				mSerialBuff.erase(mSerialBuff.cbegin()+i);
+				mPortNumBuff.erase(mPortNumBuff.cbegin()+i);
+			}
+		}
+	}
+
+	for (int i = 0; i < mPortNumBuff.size(); i++) {
 		mRawBuff.push_back(std::vector<Point3>());
-		mSerialBuff.push_back(mTSCtrl.GetSerialFromSensorId());
 	}
 }
 
-
 void DataAcq::Start()
 {
-	// Check wether trak star controller has been initialised 
-	if (mRawBuff.size())
-	{
-		throw ex_trakStar("Data acquisition is not initialized", __func__, __FILE__);
-	}
-
-	// Check if this scan is already running:
-	if (this->mRunning)
-	{
-		std::cout << "[SCAN] " << "DataAcquisition already in progress" << std::endl;
+	// Check whether trak star controller has been initialised 
+	if (!mRawBuff.size()) {
+		throw ex_acq("[DAcq] Data acquisition is not initialized.", __func__, __FILE__);
 		return;
 	}
 
-	try
-	{
+	// Check if this scan is already running:
+	if (this->mRunning)	{
+		return;
+	}
+
+	try	{
 		this->pAcquisitionThread = std::make_unique<std::thread>(&DataAcq::DataAcquisition, this);
 	}
-	catch (...)
-	{
-		throw ex_scan("unnable to start thread", __func__, __FILE__);
+	catch (...)	{
+		throw ex_acq("[DAcq] unnable to start thread", __func__, __FILE__);
 	}
+
 	// Let it gooooo, let it gooo
 	this->pAcquisitionThread->detach();
 
@@ -64,20 +85,16 @@ void DataAcq::Start()
 
 void DataAcq::Stop(bool clearData)
 {
-	// Check if already running.
-	if (!this->mRunning)
-	{
-		std::cout << "[SCAN] " << "DataAcquisition is already stopped." << std::endl;
+	// Check if already stoppped.
+	if (!this->mRunning) {
 		return;
 	}
 
 	// Wait a bit for the other threads to finish.
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    if (clearData)
-	{
-		for (int i = 0; i < mRawBuff.size(); i++)
-		{
+    if (clearData) {
+		for (int i = 0; i < mRawBuff.size(); i++) {
 			mRawBuff.at(i).clear();
 		}
 	}
@@ -90,88 +107,77 @@ const bool DataAcq::IsRunning() const
 	return mRunning;
 }
 
-const double DataAcq::GetMeasurementRate() const
-{
-	return mConfig.measurementRate;
-}
-
 void DataAcq::DataAcquisition()
 {
-	// Start the data aquisition:
-	std::cout << "[SCAN] " << (mRawBuff[0].size() > 0? "Resuming" : "Running") <<" data aquisition for " << mIndexBuff.size() << " sensors \n";
-
 	// Store time on a variable time which increases the sensor sample time
+	const double pi = 3.14159265;
 	double time = 0;
 	auto startSampling = std::chrono::steady_clock::now();
 
 	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
+	std::cout << mRawBuff.size() << std::endl;
 
-	while (!mRunning)
-	{
+	Point3 ref;
+
+	while (mRunning) {
 		// Store time and calculate the elapsed time since last sample
 		auto startSampleTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
-		if (elapsedTime.count() >= 1 / mConfig.measurementRate) 
-        {
+
+		if (elapsedTime.count() >= 1 / mConfig.measurementRate) {
             time += elapsedTime.count();
-            try
-            {
-                for(int i = 0; i < mIndexBuff.size(); i++) 
-                {
-                    // Make Point3 obj to get the position info of the trackStar device
-				    Point3 tmp = mTSCtrl.GetRecord(mIndexBuff[i]); 
-					button_obj.UpdateButtonState(tmp.button); 
-					tmp.buttonState = button_obj.GetButtonState();
-				    // Add sample time to overal time and store in mInBuff
-					tmp.time = time;
-					tmp.z = tmp.z * -1;
-				    mRawBuff[i].push_back(tmp);
-				    //std::cout << tmp.time << std::endl;
-					if (mRawDataCallback)
-					{
-						mRawDataCallback(tmp);
-					}
-                }			
-            }
-            catch(...)
-            {
-                throw ex_scan("Failed to get record from sensor", __func__, __FILE__);
-            }
-      
+
+			if (refSensorPort >= 0) {
+				ref = mTSCtrl.GetRecord(refSensorPort);
+			}
+
+            for(int i = 0; i < mPortNumBuff.size(); i++) {
+                // Make Point3 obj to get the position info of the trackStar device
+				Point3 raw = mTSCtrl.GetRecord(mPortNumBuff[i]); 
+				button_obj.UpdateButtonState(raw.button); 
+				raw.buttonState = button_obj.GetButtonState();
+				// Add sample time to overal time and store in mInBuff
+				raw.time = time;
+
+				if (refSensorPort >= 0) {
+		   	        // Check the orientation of the current point
+					raw.x = raw.x - ref.x;
+					raw.y = raw.y - ref.y;
+					raw.z = raw.z - ref.z;
+
+		   	        // Use the azimuth to calculate the rotation around the z-axis
+		   	        double distance = sqrt(pow(raw.x, 2) + pow(raw.y, 2));
+		   	        double angle = (atan2(raw.y, raw.x) * 180 / pi) - ref.r.z;
+		   	        raw.x = distance * cos(angle * pi/180);
+		   	        raw.y = distance * sin(angle * pi/180);
+
+		   	        // Use the elevation to calculate the rotation around the y-axis
+		   	        distance = sqrt(pow(raw.x, 2) + pow(raw.z, 2));
+		   	        angle = (atan2(raw.z, raw.x) * 180 / pi) + ref.r.y;
+		   	        raw.x = distance * cos(angle * pi / 180);
+		   	        raw.z = distance * sin(angle * pi / 180);
+
+		   	        // Use the roll difference to calculate the rotation around the x-axis
+		   	        distance = sqrt(pow(raw.y, 2) + pow(raw.z, 2));
+		   	        angle = (atan2(raw.z, raw.y) * 180 / pi) - ref.r.x;
+		   	        raw.y = distance * cos(angle * pi / 180);
+		   	        raw.z = distance * sin(angle * pi / 180);
+				}
+				mRawBuff[i].push_back(raw);
+		    }			
+
 			// Store current time and calculate duration of the samples
 			endSampleTime = std::chrono::steady_clock::now();
-
-			// Make sure we are not slower than the required sample rate:
-			elapsedTime = std::chrono::steady_clock::now() - startSampleTime;
-			if (elapsedTime.count() > (1 / (mConfig.measurementRate/3)))
-			{
-				std::cerr << "[SCAN] " << "Sampling is too slow!" << std::endl;
-			}
-        } 
-		
+		}
     }
 }
 
-void DataAcq::DumpData() const
-{
-	std::cout << "Time" << "\t" << "X" << "\t" << "Y" << "\t" << "Z" << "\t" << "Rx" << "\t" << "Ry" << "\t" << "Rz" << "\t" << "Quality" << "\t" << "Button" << std::endl;
-	for (auto& record : mRawBuff[0])    // Access by reference to avoid copying
-	{
-		std::cout << std::setprecision(4) << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t"  << record.quality << "\t" << (int)record.button << "\n";
-	}
-}
-
-void DataAcq::RegisterRawDataCallback(std::function<void(SmartScan::Point3*)> callback)
+void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)
 {
 	mRawDataCallback = callback;
 }
 
-const std::vector<int> DataAcq::GetUsedSensors() const
+const std::vector<std::vector<Point3>>* DataAcq::getRawBuffer()
 {
-	return mSerialBuff;
-}
-
-const int DataAcq::NUsedSensors() const
-{
-	return mSerialBuff.size();
+	return &mRawBuff;
 }

@@ -14,7 +14,7 @@
 #include "ReferencePoint.h"
 #include "Scan.h"
 #include "ScanDb.h"
-#include "TrakStarController.h"
+#include "DataAcquisition.h"
 #include "CSVExport.h"
 
 namespace SmartScan
@@ -108,8 +108,6 @@ namespace SmartScan
 		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
 		void SetUsedSensors(const std::vector<int> sensorIds);
 
-		void SetFilteringPrecision(const double precision);
-
 		/// <summary>
 		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
@@ -154,21 +152,18 @@ namespace SmartScan
 		/// The raw data vector is provided through a reference as a parameter of the callback function.
 		/// </summary>
 		/// <param name="callback"></param>
-		void RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback);
+		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
-		bool mUseMockData;
-		//std::vector<int> usedSensors;
-		//unsigned int refSensorId;
-		double mFilteringPrecision = 4;
+		const bool mUseMockData;
 
+		DataAcq mDataAck;								// Data acquisition obj
 		std::vector<std::shared_ptr<Scan>> scans;       // This vector stores the current scan objects. 
-
-		TrakStarController *tSCtrl;                     // Pointer to trackstarcontroller obj
-
 		CSVExport csvExport;                            // CSVexport obj
 
+		TrakStarController* tSCtrl;
+
 		std::function<void(std::vector<Point3>&)> mUICallback;  // ?UI callback
-		std::function<void(std::vector<Point3>&)> mRawCallback; // Needed to print raw data in console
+		std::function<void(const std::vector<Point3>&)> mRawCallback; // Needed to print raw data in console
 
 		//calibration and configuration:
 		int mThumbSensorId = 0;

@@ -29,7 +29,7 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="data"> - Reference to Point3 vector to be exported</param>
 		/// <param name="filename"> - The name under which the file will be stored. If the file already exists it will be overwritten</param>
-		void ExportPoint3Raw(const std::vector<std::vector<Point3>>& data, const std::string filename, const int NUsedSensors);
+		void ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename);
 
 		/// <summary>
 		/// Export a Point3 vector in a Point Cloud compatible format.

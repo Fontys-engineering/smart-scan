@@ -66,9 +66,10 @@ int main()
 				s3.StartScan();
 				std::cout << "All scans have started!" << std::endl;
 			}
-			catch (ex_smartScan e)
+			catch (...)
 			{
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				std::cerr << "Error" << std:: endl;
+				//std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
 		else if (strlen(cmd) > 6 && !strncmp(cmd, "start ", 6))
@@ -242,7 +243,7 @@ int main()
 			std::string filepath = cmd;
 			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(11) << std::endl;
 			try {
-				s3.ExportCSV(filepath.substr(11), id, true);
+				s3.ExportCSV(filepath.substr(13), id, true);
 				std::cout << "Done.\n";
 			}
 			catch (...)
@@ -301,7 +302,7 @@ void Usage()
 	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
 }
 
-void RawPrintCallback(const SmartScan::Point3* record)
+void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 {
 	static int printOnce = 0;
 	if (printOnce == 0)
@@ -309,5 +310,5 @@ void RawPrintCallback(const SmartScan::Point3* record)
 		std::cout << "Time" << "\t" << "X" << "\t" << "Y" << "\t" << "Z" << "\t" << "Rx" << "\t" << "Ry" << "\t" << "Rz" << "\t" << "Quality" << "\t" << "Button" << std::endl;
 		printOnce = 1;
 	}
-	std::cout << std::setprecision(4) << "\r" << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t" << record.quality << "\t" << (int)record.button;
+	//std::cout << std::setprecision(4) << "\r" << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t" << record.quality << "\t" << (int)record.button;
 }

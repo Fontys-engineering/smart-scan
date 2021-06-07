@@ -1,12 +1,12 @@
 #include <chrono>
 #include <iomanip>
-
+#include "DataAcquisition.h"
 #include "SmartScanService.h"
 #include "Exceptions.h"
 
 using namespace SmartScan;
 
-SmartScanService::SmartScanService(bool useMockData) : mUseMockData{ useMockData }
+SmartScanService::SmartScanService(bool useMockData) : mUseMockData{ useMockData }, mDataAck(useMockData)
 {
 
 }
@@ -18,21 +18,7 @@ SmartScanService::~SmartScanService()
 
 void SmartScanService::Init()
 {
-	tSCtrl = new TrakStarController(mUseMockData);
-	tSCtrl->Init();
-	tSCtrl->Config();
-	tSCtrl->AttachTransmitter();
-
-	if (mUseMockData)
-	{
-		this->NewScan();
-	}
-	else
-	{
-		SmartScan::ScanConfig localConfig;
-		localConfig.usedSensorIds = tSCtrl->GetAttachedSensors();
-		this->NewScan(localConfig);
-	}
+	mDataAck.Init();
 }
 
 void SmartScanService::NewScan()
@@ -42,6 +28,7 @@ void SmartScanService::NewScan()
 
 void SmartScanService::NewScan(const SmartScan::ScanConfig config, bool useSerials)
 {
+	/*
     // Create a local copy of the configuration
     SmartScan::ScanConfig localConfig = config;
 
@@ -76,6 +63,7 @@ void SmartScanService::NewScan(const SmartScan::ScanConfig config, bool useSeria
         }
         this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl, localConfig));
     }
+	*/
 }
 
 void SmartScanService::DeleteScan()
@@ -112,14 +100,12 @@ void SmartScanService::StartScan()
 	const char startString[] = "cannot start scan ";
 	const char endString[] = " without reference points set.";
 	char scan[3];
-	if (this->scans.size() == 0)
-    {
-        throw ex_smartScan("scan vector is empty", __func__, __FILE__);
-    }
-	
+
 	// Start the scan:
 	try
 	{
+		mDataAck.Start();
+
 		for (int i = 0; i < scans.size(); i++)
 		{
 			// Check if reference points have been set;
@@ -336,10 +322,8 @@ void SmartScanService::SetReferencePoints(const std::vector<ReferencePoint> refe
 
 void SmartScanService::StopScan()
 {
-	if (this->scans.size() == 0)
-	{
-		throw ex_smartScan("scan vector is empty", __func__, __FILE__);
-	}
+	mDataAck.Stop();
+
 	try
 	{
 		for (int i = 0; i < scans.size(); i++)
@@ -387,11 +371,6 @@ void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
 	//scans.back()->SetUsedSensors(sensorIds);
 }
 
-void SmartScan::SmartScanService::SetFilteringPrecision(const double precision)
-{
-	mFilteringPrecision = precision;
-}
-
 // TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
 // while new data is acquired usign a different Scan object"
 const std::shared_ptr<Scan> SmartScanService::GetScan() const
@@ -417,13 +396,9 @@ const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
 
 void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw)
 {
-	if (scans.empty())
-	{
-		throw "No measurement available for export";
-	}
 	if (raw)
 	{
-		csvExport.ExportPoint3Raw(scans.at(scanId)->mInBuff, filename, scans.at(scanId)->NUsedSensors());
+		csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename);
 	}
 	else
 	{
@@ -457,10 +432,10 @@ void SmartScanService::RegisterNewDataCallback(std::function<void(std::vector<Po
 	}
 }
 
-void SmartScanService::RegisterRawDataCallback(std::function<void(SmartScan::Point3)> callback)
+void SmartScanService::RegisterRawDataCallback(std::function<void(const std::vector<SmartScan::Point3>&)> callback)
 {
 	// Register this callback with all the existing Scans:
-	scans.back()->RegisterRawDataCallback(callback);
+	//scans.back()->RegisterRawDataCallback(callback);
 }
 
 const int SmartScanService::FindNewScanId() const

@@ -6,6 +6,7 @@
 #include <thread> 
 #include <chrono>
 #include <functional>
+#include <cmath>
 
 #include "Point3.h"
 #include "TrakStarController.h"
@@ -19,8 +20,9 @@ namespace SmartScan
         double measurementRate = 50;                    // Between 20.0 and 255.0
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
-        bool useMetric = true;                          // Set the unit of the measured points.
+		int refSensorSerial = 0;						// Serial number of the reference sensor
     };
+
 	class DataAcq 
 	{
 	public:
@@ -29,7 +31,8 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="id"> - Scan unique identifier.</param>
 		/// <param name="pTSCtrl"> - Pointer to a trackstar controller object.</param>
-		DataAcq(bool mock, const DataAcqConfig config = DataAcqConfig());
+		DataAcq(bool useMockData);
+		DataAcq(bool useMockData, DataAcqConfig acquisitionConfig);
 		~DataAcq();
 
 		void Init();
@@ -51,52 +54,33 @@ namespace SmartScan
 		/// Register a new callback function to be called whenever new raw data is available
 		/// </summary>
 		/// <param name="callback"> - the efunction to be called back.</param>
-		void RegisterRawDataCallback(std::function<void(SmartScan::Point3*)> callback);
+		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 
+		const std::vector<std::vector<Point3>>* getRawBuffer();
 		/// <summary>
 		/// return the status of the scan
 		/// </summary>
 		/// <returns> - status (true if the scan is running)</returns>
 		const bool IsRunning() const;
 
-		/// <summary>
-		/// Dumps all samples for the inBuffer to the console
-		/// </summary>
-		void DumpData() const;
-
-		/// <summary>
-		/// Return a vector containing the sensors ports used for data acquisition.
-		/// </summary>
-		/// <returns> - number of sensors used</returns>
-		const std::vector<int> GetUsedSensors() const;
-
-		/// <summary>
-		/// Return the number of sensors used for the measurement.
-		/// </summary>
-		/// <returns> - number of sensors used</returns>
-		const int NUsedSensors() const;
-
 	private:
-		const bool mMock;								// Mock data indicator
-		const DataAcqConfig mConfig;                    // Scan configuration struct
+		const bool mUseMockData;											// Mock data indicator
 
-		std::vector<int> mIndexBuff;					// Vector containing sensor port numbers
-		std::vector<int> mSerialBuff;					// Vector containing sensor serial numbers
-		std::vector<std::vector<Point3>> mRawBuff;      // Raw data vector.
+		const DataAcqConfig mConfig;                    					// Scan configuration obj
+		TrakStarController mTSCtrl;                     					// TrackStar controller obj
+		Trigger button_obj;													// Trigger obj
 
-		bool mRunning = false;                          // Indicates if scan is running.
+		int refSensorPort;													// Port number of the reference sensor
+		std::vector<int> mPortNumBuff;										// Vector containing the sensor port numbers
+		std::vector<int> mSerialBuff;										// Vector containing sensor serial numbers
+		std::vector<std::vector<Point3>> mRawBuff;      					// Raw data vector.
 
-		TrakStarController mTSCtrl;                     // Pointer to Track star controller obj
+		bool mRunning = false;                          					// Indicates if scan is running.
 
-		Trigger button_obj;								
-
-		std::unique_ptr<std::thread> pAcquisitionThread;
+		std::unique_ptr<std::thread> pAcquisitionThread;					// Data acquisition thread
 		
-		std::function<void(SmartScan::Point3*)>mRawDataCallback;     // Needed for printing values directly to console 
+		std::function<void(const std::vector<Point3>&)>mRawDataCallback;    // Callback for printing raw data in real time
 
-		/// <summary>
-		/// Polls the TrakstarController for new data, stores it and filters it.
-		/// </summary>
 		void DataAcquisition();
 	};
 }

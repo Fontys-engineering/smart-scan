@@ -29,19 +29,18 @@ void CSVExport::ExportPoint3(const std::vector<Point3>& data, const std::string 
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>& data, const std::string filename, const int NUsedSensors)
+void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename)
 {
 	csvFile.open(filename);
-	time_t now = time(0);
 
-	csvFile << data[0].size() << "," << NUsedSensors << std::endl;    //Add info on the first line
-	if (!data[0].empty())    //Write to file:
+	csvFile << data->at(0).size() << "," << data->size() << std::endl;    //Add info on the first line
+	if (!data->at(0).empty())    //Write to file:
 	{
-		for (int i = 0; i < data[0].size(); i = i+NUsedSensors)    //Access by reference to avoid copying
+		for (int i = 0; i < data->at(0).size(); i = i++)    //Access by reference to avoid copying
 		{
-			for (int j = 0; j < NUsedSensors; j++)
+			for (int j = 0; j < data->size(); j++)
 			{
-				csvFile << data[j][i].time << "," << data[j][i].x << "," << data[j][i].y << "," << data[j][i].z << "," << data[j][i].r.x << "," << data[j][i].r.y << "," << data[j][i].r.z << "," << data[j][i].quality << "," << (int)data[j][i].buttonState << ",";
+				csvFile << data->at(j).at(i).time << "," << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << "," << data->at(j).at(i).r.x << "," << data->at(j).at(i).r.y << "," << data->at(j).at(i).r.z << "," << data->at(j).at(i).quality << "," << (int)data->at(j).at(i).buttonState << ",";
 			}
 			csvFile << std::endl;
 		}

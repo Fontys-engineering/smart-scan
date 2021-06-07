@@ -25,4 +25,4 @@ SmartScan::SmartScanService s3(mockMode);
 /// </summary>
 void Usage();
 
-void RawPrintCallback(SmartScan::Point3 record);
+void RawPrintCallback(const std::vector<SmartScan::Point3>& record);
