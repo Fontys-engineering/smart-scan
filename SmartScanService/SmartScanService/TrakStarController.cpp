@@ -51,17 +51,17 @@ void TrakStarController::StopTransmit()
 		return;
 	}
 
-	int id = -1;
+	short int id = -1;
 	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SelectTransmitter(int id)
+void TrakStarController::SelectTransmitter(short int id)
 {
-	int errorCode = GetTransmitterStatus(id);
-	DeviceStatusHandler(errorCode);
-	errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	ErrorHandler(errorCode);
+	errorCode = GetTransmitterStatus(id);
+	DeviceStatusHandler(errorCode);
 }
 
 void TrakStarController::SetPowerlineFrequency(double freq)
@@ -76,7 +76,7 @@ void TrakStarController::SetMeasurementRate(double freq)
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetMaxRange(int range)
+void TrakStarController::SetMaxRange(double range)
 {
 	int errorCode = SetSystemParameter(MAXIMUM_RANGE, &range, sizeof(range));
 	ErrorHandler(errorCode);
@@ -84,8 +84,8 @@ void TrakStarController::SetMaxRange(int range)
 
 void TrakStarController::SetMetric()
 {
-	bool isTrue = true;
-	int errorCode = SetSystemParameter(METRIC, &isTrue, sizeof(bool));
+	BOOL isTrue = true;
+	int errorCode = SetSystemParameter(METRIC, &isTrue, sizeof(isTrue));
 	ErrorHandler(errorCode);
 }
 
@@ -100,14 +100,19 @@ void TrakStarController::SetSensorFormat()
 
 std::vector<int> TrakStarController::GetAttachedPorts()
 {
-	std::vector<int> attachedSensors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+	std::vector<int> attachedSensors;
 
-	if (mUseMockData) {
-    	for(int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
+	if (!mUseMockData) {
+    	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
     	    if(pSensor[i].m_config.attached) {
     	        attachedSensors.push_back(pSensor[i].m_config.channelNumber);
     	    }
     	}
+	}
+	else {
+		for (int i = 0; i < 4; i++) {
+			attachedSensors.push_back(i);
+		}
 	}
 
 	return attachedSensors;
@@ -115,14 +120,19 @@ std::vector<int> TrakStarController::GetAttachedPorts()
 
 std::vector<int> TrakStarController::GetAttachedSerials()
 {
-	std::vector<int> attachedSensors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+	std::vector<int> attachedSensors;
 
-	if (mUseMockData) {
-    	for(int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
-    	    if(pSensor[i].m_config.attached) {
+	if (!mUseMockData) {
+    	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
+    	    if (pSensor[i].m_config.attached) {
     	        attachedSensors.push_back(pSensor[i].m_config.serialNumber);
     	    }
     	}
+	}
+	else {
+		for (int i = 0; i < 4; i++) {
+			attachedSensors.push_back(i);
+		}
 	}
 
 	return attachedSensors;

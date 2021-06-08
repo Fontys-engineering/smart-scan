@@ -52,13 +52,13 @@ namespace SmartScan
 		/// </summary>
 		void StopTransmit();
 
-		void SelectTransmitter(int id);
+		void SelectTransmitter(short int id);
 
 		void SetPowerlineFrequency(double freq);
 
 		void SetMeasurementRate(double freq);
 
-		void SetMaxRange(int range);
+		void SetMaxRange(double range);
 
 		void SetMetric();
 
