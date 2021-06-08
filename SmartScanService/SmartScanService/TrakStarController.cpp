@@ -105,12 +105,12 @@ std::vector<int> TrakStarController::GetAttachedPorts()
 	if (!mUseMockData) {
     	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
     	    if(pSensor[i].m_config.attached) {
-    	        attachedSensors.push_back(pSensor[i].m_config.channelNumber);
+    	        attachedSensors.push_back(i);
     	    }
     	}
 	}
 	else {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			attachedSensors.push_back(i);
 		}
 	}
@@ -130,7 +130,7 @@ std::vector<int> TrakStarController::GetAttachedSerials()
     	}
 	}
 	else {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			attachedSensors.push_back(i);
 		}
 	}
@@ -143,8 +143,8 @@ Point3 TrakStarController::GetRecord(int sensorID)
 {
 	// When in mock mode, return a random value on a sphere.
 	if (mUseMockData) {
-		return GetMockRecord();
-		//return GetMockRecordFromFile(sensorID-1);
+		//return GetMockRecord();
+		return GetMockRecordFromFile(sensorID);
 	}
 
 	// Only report the data if everything is okay.

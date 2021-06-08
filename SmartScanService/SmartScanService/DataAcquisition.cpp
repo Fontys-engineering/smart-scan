@@ -127,11 +127,11 @@ void DataAcq::DataAcquisition()
 		if (elapsedTime.count() >= 1 / mConfig.measurementRate) {
             time += elapsedTime.count();
 
-			if (refSensorPort >= 0) {
+			if (mConfig.refSensorSerial >= 0) {
 				ref = mTSCtrl.GetRecord(refSensorPort);
 			}
 
-            for(int i = 0; i < mPortNumBuff.size(); i++) {
+            for (int i = 0; i < mPortNumBuff.size(); i++) {
                 // Make Point3 obj to get the position info of the trackStar device
 				Point3 raw = mTSCtrl.GetRecord(mPortNumBuff[i]); 
 				button_obj.UpdateButtonState(raw.button); 
@@ -139,7 +139,7 @@ void DataAcq::DataAcquisition()
 				// Add sample time to overal time and store in mInBuff
 				raw.time = time;
 
-				if (refSensorPort >= 0) {
+				if (mConfig.refSensorSerial >= 0) {
 		   	        // Check the orientation of the current point
 					raw.x = raw.x - ref.x;
 					raw.y = raw.y - ref.y;
@@ -165,6 +165,14 @@ void DataAcq::DataAcquisition()
 				}
 				mRawBuff[i].push_back(raw);
 		    }			
+
+			if (mRawDataCallback) {
+				std::vector<Point3> sampleRow;
+				for (int i = 0; i < mRawBuff.size(); i++) {
+					sampleRow.push_back(mRawBuff.at(i).back());
+				}
+				mRawDataCallback(sampleRow);
+			}
 
 			// Store current time and calculate duration of the samples
 			endSampleTime = std::chrono::steady_clock::now();

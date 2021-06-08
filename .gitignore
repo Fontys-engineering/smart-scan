@@ -351,3 +351,6 @@ MigrationBackup/
 
 # CSV remove
 SmartScanService/SmartScanService/*.csv
+
+# VSCODE files
+.vscode/

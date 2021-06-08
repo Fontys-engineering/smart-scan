@@ -32,8 +32,7 @@ int main()
 
 		// Register the callback (uncomment this to see a demo. Warninig: it will flood the console with values):
 		//s3.RegisterNewDataCallback(TestUICallback);
-
-		std::cout << "SmartScan>" << "TrakSTAR device initialisation done. \n";
+		s3.RegisterRawDataCallback(RawPrintCallback);
 	}
 	catch (ex_trakStar& e)
 	{
@@ -290,7 +289,6 @@ void Usage()
 	std::cout << "\t stop [id]\t\t\t Stop the measurement. Leave id blank to stop all scans" << std::endl;
 	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console" << std::endl;
 	std::cout << "\t dump [id] \t\t\t Print all the records of the scan id to the console (for debugging)" << std::endl;
-	std::cout << "\t dump-raw \t\t\t Print records real-time from the latest scan to console (for debugging)" << std::endl;
 	std::cout << "\t export [id] [filename] \t Export the processed data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t export-raw [id] [filename] \t Export the raw data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)" << std::endl;
 	std::cout << "\t point-cloud [id] [filename] \t Export the point-cloud data (only x,y,z) of the scan id as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)" << std::endl;
@@ -305,10 +303,28 @@ void Usage()
 void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 {
 	static int printOnce = 0;
-	if (printOnce == 0)
-	{
-		std::cout << "Time" << "\t" << "X" << "\t" << "Y" << "\t" << "Z" << "\t" << "Rx" << "\t" << "Ry" << "\t" << "Rz" << "\t" << "Quality" << "\t" << "Button" << std::endl;
+
+	if (printOnce == 0) {
+		std::cout << std::setw(4) << "Sec";
+		std::cout << std::setw(4) << "But";
+
+		for (int i = 0; i < record.size(); i++) {
+			std::cout << std::setw(4) << 'X' << i;
+			std::cout << std::setw(4) << 'Y' << i;
+			std::cout << std::setw(4) << 'Z' << i;
+		}
+		std::cout << std::endl;
+
 		printOnce = 1;
 	}
+	std::cout << std::setw(4) << (int)record[0].time;
+	std::cout << std::setw(4) << (int)record[0].buttonState;
+
+	for (int i = 0; i < record.size(); i++) {
+		std::cout << std::setw(5) << (int)record[i].x;
+		std::cout << std::setw(5) << (int)record[i].y;
+		std::cout << std::setw(5) << (int)record[i].z;
+	}
+	std::cout << '\r' << std::flush;
 	//std::cout << std::setprecision(4) << "\r" << record.time << "\t" << record.x << "\t" << record.y << "\t" << record.z << "\t" << record.r.x << "\t" << record.r.y << "\t" << record.r.z << "\t" << record.quality << "\t" << (int)record.button;
 }

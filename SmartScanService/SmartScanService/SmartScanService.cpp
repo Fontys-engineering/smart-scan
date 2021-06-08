@@ -1,8 +1,9 @@
 #include <chrono>
 #include <iomanip>
-#include "DataAcquisition.h"
-#include "SmartScanService.h"
+
 #include "Exceptions.h"
+#include "SmartScanService.h"
+#include "DataAcquisition.h"
 
 using namespace SmartScan;
 
@@ -396,12 +397,10 @@ const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
 
 void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw)
 {
-	if (raw)
-	{
+	if (raw) {
 		csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename);
 	}
-	else
-	{
+	else {
 		csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
 	}
 }
@@ -435,7 +434,7 @@ void SmartScanService::RegisterNewDataCallback(std::function<void(std::vector<Po
 void SmartScanService::RegisterRawDataCallback(std::function<void(const std::vector<SmartScan::Point3>&)> callback)
 {
 	// Register this callback with all the existing Scans:
-	//scans.back()->RegisterRawDataCallback(callback);
+	mDataAck.RegisterRawDataCallback(callback);
 }
 
 const int SmartScanService::FindNewScanId() const
