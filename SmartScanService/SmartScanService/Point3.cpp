@@ -89,3 +89,43 @@ Point3::Point3(double x, double y, double z, double rx, double ry, double rz, un
 {
 	
 }
+
+
+Point3Ref::Point3Ref()
+{
+
+}
+
+Point3Ref::Point3Ref(double x, double y, double z) : x { x }, y { y }, z { z }
+{
+
+}
+
+Point3Ref::Point3Ref(double x, double y, double z, double m[3][3]) : x { x }, y { y }, z { z }, m { m }
+{
+
+}
+
+void Point3Ref::inverseRotm()
+{
+	double temp[3][3];
+
+	double detDownRig = m[1][1]*m[2][2] - m[2][1]*m[1][2];
+	double detDownMid = m[1][0]*m[2][2] - m[2][0]*m[1][2];
+	double detDownLef = m[1][0]*m[2][1] - m[2][0]*m[1][1];
+
+	double detAll = m[0][0]*detDownRig - m[0][1]*detDownMid + m[0][2]*detDownLef;
+	double invDet = 1.0/detAll;
+
+	temp[0][0] = detDownRig * invDet;
+	temp[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invDet;
+	temp[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * invDet;
+	temp[1][0] = -1 * detDownMid * invDet;
+	temp[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * invDet;
+	temp[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) * invDet;
+	temp[2][0] = detDownLef * invDet;
+	temp[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invDet;
+	temp[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invDet;
+
+	m = temp;
+}

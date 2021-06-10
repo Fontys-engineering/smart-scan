@@ -103,16 +103,11 @@ namespace SmartScan
 		void DumpScan(int scanId) const;
 
 		/// <summary>
-		/// Specify which sensors are in use for the latest scan;
-		/// </summary>
-		/// <param name="sensorIds"> - vector of sensor ids. TrakSTAR ids start at 0</param>
-		void SetUsedSensors(const std::vector<int> sensorIds);
-
-		/// <summary>
 		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
 		/// <returns> - The latest scan (could be one still in progress)</returns>
 		const std::shared_ptr<Scan> GetScan() const;
+
 		/// <summary>
 		/// Get a pointer to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		/// </summary>
@@ -126,6 +121,10 @@ namespace SmartScan
 		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
 		const std::vector<std::shared_ptr<Scan>>& GetScansList() const;
 
+		const int NumAttachedBoards() const;
+		const int NumAttachedTransmitters() const;
+		const int NumAttachedSensors(bool includeRef) const;
+
 		/// <summary>
 		/// Export the Point3 array in a csv format. Contains rotation.
 		/// </summary>
@@ -138,7 +137,7 @@ namespace SmartScan
 		/// </summary>
 		/// <param name="filename"> - the name of the output file</param>
 		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
-		void ExportPointCloud(const std::string filename, const bool raw = false);
+		void ExportPointCloud(const std::string filename, int scanId, const bool raw = false);
 
 		/// <summary>
 		/// Register a new callback function to be called whenever new filtered data is available.

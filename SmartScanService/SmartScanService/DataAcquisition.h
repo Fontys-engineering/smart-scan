@@ -36,15 +36,21 @@ namespace SmartScan
 
 		void Stop(bool clearData = false);
 
-		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
-
-		const std::vector<std::vector<Point3>>* getRawBuffer();
-
 		const bool IsRunning() const;
 
+		const std::vector<std::vector<Point3>>* getRawBuffer();
+		//const std::vector<Point3>* getSingleRawBuffer(int serialNumber);
+
+		const int NumAttachedBoards() const;
+		const int NumAttachedTransmitters() const;
+		const int NumAttachedSensors(bool includeRef) const;
+
+		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
 		const bool mUseMockData;											// Mock data indicator
 		const DataAcqConfig mConfig;                    					// Scan configuration obj
+
+		bool mRunning = false;                          					// Indicates if scan is running.
 
 		TrakStarController mTSCtrl;                     					// TrackStar controller obj
 		Trigger button_obj;													// Trigger obj
@@ -53,8 +59,6 @@ namespace SmartScan
 		std::vector<int> mPortNumBuff;										// Vector containing the sensor port numbers
 		std::vector<int> mSerialBuff;										// Vector containing sensor serial numbers
 		std::vector<std::vector<Point3>> mRawBuff;      					// Raw data vector.
-
-		bool mRunning = false;                          					// Indicates if scan is running.
 
 		std::unique_ptr<std::thread> pAcquisitionThread;					// Data acquisition thread
 		

@@ -98,7 +98,32 @@ void TrakStarController::SetSensorFormat()
 	}
 }
 
-std::vector<int> TrakStarController::GetAttachedPorts()
+void TrakStarController::SetRefSensorFormat(int id)
+{
+	DATA_FORMAT_TYPE type = DOUBLE_POSITION_MATRIX;
+	int errorCode = SetSensorParameter(id, DATA_FORMAT, &type, sizeof(type));
+	ErrorHandler(errorCode);
+}
+
+const int TrakStarController::NumAttachedBoards() const
+{
+	if (mUseMockData) {
+		return 1;
+	}
+	
+	return ATC3DG.m_config.numberBoards;
+}
+
+const int TrakStarController::NumAttachedTransmitters() const
+{
+	if (mUseMockData) {
+		return 1;
+	}
+
+	return pXmtr.size();
+}
+
+std::vector<int> TrakStarController::GetAttachedPorts() const
 {
 	std::vector<int> attachedSensors;
 
@@ -118,7 +143,7 @@ std::vector<int> TrakStarController::GetAttachedPorts()
 	return attachedSensors;
 }
 
-std::vector<int> TrakStarController::GetAttachedSerials()
+std::vector<int> TrakStarController::GetAttachedSerials() const
 {
 	std::vector<int> attachedSensors;
 
@@ -139,17 +164,17 @@ std::vector<int> TrakStarController::GetAttachedSerials()
 }
 
 /* Measurements: 235*/
-Point3 TrakStarController::GetRecord(int sensorID)
+Point3 TrakStarController::GetRecord(int id)
 {
 	// When in mock mode, return a random value on a sphere.
 	if (mUseMockData) {
 		//return GetMockRecord();
-		return GetMockRecordFromFile(sensorID);
+		return GetMockRecordFromFile(id);
 	}
 
 	// Only report the data if everything is okay.
 	// Device status handler for sensors 
-	unsigned int status = GetSensorStatus(sensorID);
+	unsigned int status = GetSensorStatus(id);
 	static int lastDeviceStatus;
 
 	try	{
@@ -164,7 +189,7 @@ Point3 TrakStarController::GetRecord(int sensorID)
 	}
     
 	DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD record;
-	int errorCode = GetAsynchronousRecord(sensorID, &record, sizeof(record));
+	int errorCode = GetAsynchronousRecord(id, &record, sizeof(record));
 	static int lastErrorCode;
 
 	try	{
@@ -179,6 +204,48 @@ Point3 TrakStarController::GetRecord(int sensorID)
     lastErrorCode = errorCode;
 
 	return Point3(record.x, record.y, record.z, record.r, record.e, record.a, record.quality, record.button);
+}
+
+Point3Ref TrakStarController::GetRefRecord(int id)
+{
+	// When in mock mode, return a random value on a sphere.
+	if (mUseMockData) {
+		//return GetMockRecord();
+		return Point3Ref();
+	}
+
+	// Only report the data if everything is okay.
+	// Device status handler for sensors 
+	unsigned int status = GetSensorStatus(id);
+	static int lastDeviceStatus;
+
+	try	{
+		DeviceStatusHandler(status);
+	}
+	catch (ex_trakStar e) {
+		if (status != lastDeviceStatus)	{
+			std::cerr << e.what() << std::endl;
+		}
+		lastDeviceStatus = status;
+		return Point3Ref();
+	}
+    
+	DOUBLE_POSITION_MATRIX_RECORD record;
+	int errorCode = GetAsynchronousRecord(id, &record, sizeof(record));
+	static int lastErrorCode;
+
+	try	{
+		ErrorHandler(errorCode);
+	}
+	catch (ex_trakStar e) {
+		if (errorCode != lastErrorCode)	{
+			std::cerr << e.what() << std::endl;
+		}
+		return Point3Ref();
+	}
+    lastErrorCode = errorCode;
+
+	return Point3Ref(record.x, record.y, record.z, record.s);
 }
 
 Point3 TrakStarController::GetMockRecord()

@@ -48,6 +48,8 @@ void DataAcq::Init()
 				refSensorPort = mPortNumBuff[i];
 				mSerialBuff.erase(mSerialBuff.cbegin()+i);
 				mPortNumBuff.erase(mPortNumBuff.cbegin()+i);
+
+				//mTSCtrl.SetRefSensorFormat(refSensorPort);
 			}
 		}
 	}
@@ -107,6 +109,34 @@ const bool DataAcq::IsRunning() const
 	return mRunning;
 }
 
+const std::vector<std::vector<Point3>>* DataAcq::getRawBuffer()
+{
+	return &mRawBuff;
+}
+
+const int DataAcq::NumAttachedBoards() const
+{
+	return mTSCtrl.NumAttachedBoards();
+} 
+
+const int DataAcq::NumAttachedTransmitters() const
+{
+	return mTSCtrl.NumAttachedTransmitters();
+} 
+
+const int DataAcq::NumAttachedSensors(bool includeRef) const
+{
+	if (includeRef && mConfig.refSensorSerial > -1) {
+		return mPortNumBuff.size() + 1;
+	}
+	return mPortNumBuff.size();
+} 
+
+void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)
+{
+	mRawDataCallback = callback;
+}
+
 void DataAcq::DataAcquisition()
 {
 	// Store time on a variable time which increases the sensor sample time
@@ -115,9 +145,9 @@ void DataAcq::DataAcquisition()
 	auto startSampling = std::chrono::steady_clock::now();
 
 	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
-	std::cout << mRawBuff.size() << std::endl;
 
 	Point3 ref;
+	//Point3Ref ref;
 
 	while (mRunning) {
 		// Store time and calculate the elapsed time since last sample
@@ -127,19 +157,24 @@ void DataAcq::DataAcquisition()
 		if (elapsedTime.count() >= 1 / mConfig.measurementRate) {
             time += elapsedTime.count();
 
-			if (mConfig.refSensorSerial >= 0) {
+			if (mConfig.refSensorSerial > -1) {
 				ref = mTSCtrl.GetRecord(refSensorPort);
+				//ref = mTSCtrl.GetRefRecord(refSensorPort);
+				//ref.
 			}
 
             for (int i = 0; i < mPortNumBuff.size(); i++) {
                 // Make Point3 obj to get the position info of the trackStar device
 				Point3 raw = mTSCtrl.GetRecord(mPortNumBuff[i]); 
+
+				// Check and store the buttonstate
 				button_obj.UpdateButtonState(raw.button); 
 				raw.buttonState = button_obj.GetButtonState();
+
 				// Add sample time to overal time and store in mInBuff
 				raw.time = time;
 
-				if (mConfig.refSensorSerial >= 0) {
+				if (mConfig.refSensorSerial > -1) {
 		   	        // Check the orientation of the current point
 					raw.x = raw.x - ref.x;
 					raw.y = raw.y - ref.y;
@@ -150,24 +185,24 @@ void DataAcq::DataAcquisition()
 		   	        //double angle = (atan2(raw.y, raw.x) * 180 / pi) - ref.r.z;
 		   	        //raw.x = distance * cos(angle * pi/180);
 		   	        //raw.y = distance * sin(angle * pi/180);
-					int x_new = raw.x * cos(ref.r.z * toRad) + raw.y * sin(ref.r.z * toRad);
-					int y_new = raw.y * cos(ref.r.z * toRad) - raw.x * sin(ref.r.z * toRad);
+					double x_new = raw.x * cos(ref.r.z * toRad) + raw.y * sin(ref.r.z * toRad);
+					double y_new = raw.y * cos(ref.r.z * toRad) - raw.x * sin(ref.r.z * toRad);
 
 		   	        // Use the elevation to calculate the rotation around the y-axis
 		   	        //distance = sqrt(pow(raw.x, 2) + pow(raw.z, 2));
 		   	        //angle = (atan2(raw.z, raw.x) * 180 / pi) + ref.r.y;
 		   	        //raw.x = distance * cos(angle * pi / 180);
 		   	        //raw.z = distance * sin(angle * pi / 180);
-					raw.x = x_new * cos(ref.r.y * toRad) + raw.z * sin(ref.r.y * toRad);
-					int z_new = raw.z * cos(ref.r.y * toRad) - x_new * sin(ref.r.y * toRad);
+					raw.x = x_new * cos(ref.r.y * toRad) - raw.z * sin(ref.r.y * toRad);
+					double z_new = raw.z * cos(ref.r.y * toRad) + x_new * sin(ref.r.y * toRad);
 
 		   	        // Use the roll difference to calculate the rotation around the x-axis
 		   	        //distance = sqrt(pow(raw.y, 2) + pow(raw.z, 2));
 		   	        //angle = (atan2(raw.z, raw.y) * 180 / pi) - ref.r.x;
 		   	        //raw.y = distance * cos(angle * pi / 180);
 		   	        //raw.z = distance * sin(angle * pi / 180);
-					raw.y = y_new * cos(ref.r.x * toRad) - z_new * sin(ref.r.x * toRad);
-					raw.z = z_new * cos(ref.r.x * toRad) + y_new * sin(ref.r.x * toRad);
+					raw.y = y_new * cos(ref.r.x * toRad) + z_new * sin(ref.r.x * toRad);
+					raw.z = z_new * cos(ref.r.x * toRad) - y_new * sin(ref.r.x * toRad);
 				}
 				mRawBuff[i].push_back(raw);
 		    }			
@@ -184,14 +219,4 @@ void DataAcq::DataAcquisition()
 			endSampleTime = std::chrono::steady_clock::now();
 		}
     }
-}
-
-void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)
-{
-	mRawDataCallback = callback;
-}
-
-const std::vector<std::vector<Point3>>* DataAcq::getRawBuffer()
-{
-	return &mRawBuff;
 }

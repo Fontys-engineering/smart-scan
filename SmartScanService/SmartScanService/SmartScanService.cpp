@@ -367,11 +367,6 @@ void SmartScanService::DumpScan(int scanId) const
 	scans.at(scanId)->DumpData();
 }
 
-void SmartScanService::SetUsedSensors(const std::vector<int> sensorIds)
-{
-	//scans.back()->SetUsedSensors(sensorIds);
-}
-
 // TODO: Optionally handle multiple simultaneous scans (i.e. some processing is being done on a previous scan
 // while new data is acquired usign a different Scan object"
 const std::shared_ptr<Scan> SmartScanService::GetScan() const
@@ -395,29 +390,54 @@ const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
 	return scans;
 }
 
+const int SmartScanService::NumAttachedBoards() const
+{
+	return mDataAck.NumAttachedBoards();
+}
+
+const int SmartScanService::NumAttachedTransmitters() const
+{
+	return mDataAck.NumAttachedTransmitters();
+}
+
+const int SmartScanService::NumAttachedSensors(bool includeRef) const
+{
+	return mDataAck.NumAttachedSensors(includeRef);
+}
+
 void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw)
 {
-	if (raw) {
-		csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename);
+	try {
+		if (raw) {
+			csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename, true);
+		}
+		else {
+			csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
+		}
 	}
-	else {
-		csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
+	catch(ex_export e) {
+		throw e;
+	}
+	catch (...) {
+		throw ex_smartScan("Could not export data.", __func__, __FILE__);
 	}
 }
 
-void SmartScanService::ExportPointCloud(const std::string filename, const bool raw)
+void SmartScanService::ExportPointCloud(const std::string filename, int scanId, const bool raw)
 {
-	if (scans.empty())
-	{
-		throw "No measurement available for export";
+	try {
+		if (raw) {
+			csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename, false);
+		}
+		else {
+			csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
+		}
 	}
-	if (raw)
-	{
-		csvExport.ExportPC(scans.back()->mInBuff[0], filename);
+	catch(ex_export e) {
+		throw e;
 	}
-	else
-	{
-		csvExport.ExportPC(scans.back()->mOutBuff, filename);
+	catch (...) {
+		throw ex_smartScan("Could not export data.", __func__, __FILE__);
 	}
 }
 

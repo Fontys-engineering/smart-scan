@@ -63,19 +63,23 @@ namespace SmartScan
 		void SetMetric();
 
 		void SetSensorFormat();
+		void SetRefSensorFormat(int id);
 
         /// <summary>
         /// Get the port numbers of the attached sensors.
         /// </summary>
-		std::vector<int> GetAttachedPorts();
-		std::vector<int> GetAttachedSerials();
+		const int NumAttachedBoards() const;
+		const int NumAttachedTransmitters() const;
+		std::vector<int> GetAttachedPorts() const;
+		std::vector<int> GetAttachedSerials() const;
 
 		/// <summary>
 		/// Get the latest record for a specific sensor
 		/// </summary>
 		/// <param name="sensorID"> - The ID of the sensor from which the record will be returned</param>
 		/// <returns> - The sensor record</returns>
-		Point3 GetRecord(int sensorID);
+		Point3 GetRecord(int id);
+		Point3Ref GetRefRecord(int id);
 
 	private:
 		const bool mUseMockData;
