@@ -196,7 +196,8 @@ int main()
 			std::cout << "Exporting raw data into file: " << filepath.substr(11) << std::endl;
 
 			try {
-				s3.ExportCSV(filepath.substr(13), 0, true);
+				s3.ExportCSV(filepath.substr(11), 0, true);
+                s3.ExportPointCloud("pc_" + filepath.substr(1), 0, true);
 				std::cout << "Done.\n";
 			}
 			catch(ex_export e) {
@@ -205,48 +206,6 @@ int main()
 			catch (...)	{
 				std::cerr << "Could not export csv file" << std::endl;
 			}
-		}
-		else if (strlen(cmd) > 12 && !strncmp(cmd, "point-cloud ", 12))	{
-			// Get the id from the comand:
-			std::string sCmd = cmd;
-			int id = atoi(sCmd.substr(12, 1).c_str());
-
-			// Cut the filepath out:
-			std::string filepath = cmd;
-			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(12) << std::endl;
-
-			try {
-				s3.ExportPointCloud(filepath.substr(12), id, false);
-				std::cout << "Done.\n";
-			}
-			catch (...)	{
-				std::cerr << "Could not export csv file \n";
-			}
-		}
-		else if (strlen(cmd) > 16 && !strncmp(cmd, "point-cloud-raw ", 16)) {
-			// Get the id from the comand:
-			std::string sCmd = cmd;
-
-			// Cut the filepath out:
-			std::string filepath = cmd;
-			std::cout << "Exporting raw data into file: " << filepath.substr(16) << std::endl;
-
-			try {
-				s3.ExportPointCloud(filepath.substr(16), 0, true);
-				std::cout << "Done.\n";
-			}
-			catch(ex_export e) {
-				std::cerr << e.what() << std::endl;
-			}
-			catch (...)	{
-				std::cerr << "Could not export csv file" << std::endl;
-			}
-		}
-		else if (!strcmp(cmd, "help")) {
-				Usage();
-		}
-		else {
-			std::cout << "Command does not exist, type help for a full list of commands." << std::endl;
 		}
 	} while (strcmp(cmd, "exit"));	
 }
@@ -266,8 +225,6 @@ void Usage()
 	std::cout << "\t dump [id] \t\t\t Print all the records of the scan id to the console." << std::endl;
 	std::cout << "\t export [id] [filename] \t Export the processed data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)." << std::endl;
 	std::cout << "\t export-raw [filename] \t\t Export the raw data of all the sensors as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)." << std::endl;
-	std::cout << "\t point-cloud [id] [filename] \t Export the point-cloud data (only x,y,z) of the scan id as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)." << std::endl;
-	std::cout << "\t point-cloud-raw [filename] \t Export the point-cloud data (only x,y,z) of all sensors as \n \t\t\t\t\t a CSV file with the given filename (no spaces allowed in the filename)." << std::endl;
 	std::cout << std::endl;
 	std::cout << "CLI usage" << std::endl;
 	std::cout << "\t help \t\t\t\t print this screen again" << std::endl;
@@ -286,5 +243,5 @@ void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 		std::cout << std::setw(5) << (int)record[i].y;
 		std::cout << std::setw(5) << (int)record[i].z;
 	}
-	std::cout << std::string(50, ' ') << '\r' << std::flush;
+	std::cout << std::string(10, ' ') << '\r' << std::flush;
 }
