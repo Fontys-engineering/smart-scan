@@ -20,31 +20,53 @@ namespace SmartScan
         double measurementRate = 50;                    // Between 20.0 and 255.0
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
-		int refSensorSerial = -1;						// Serial number of the reference sensor
+		int refSensorSerial = 55431;					// Serial number of the reference sensor, set as -1 when no reference sensor is used.
     };
 
 	class DataAcq 
 	{
 	public:
+        // Data acquisition constructor.
+        // If useMockData, is true it will not initalize a real trakStar device but use mockdata instead.
+        // AcquisitionConfig contains the parameters with which the trakStar device is initialized.
 		DataAcq(bool useMockData);
 		DataAcq(bool useMockData, DataAcqConfig acquisitionConfig);
 		~DataAcq();
 
+        // Initialize data acquisition.
+        // It will initialize the trakStar device using either the default paramaters or the user defined
+        // ones if specifified in the constructor.
+        // It will also retrieve sensor information and match ports and serial numbers.
 		void Init();
 
+        // Start a data-acquisition thread that will continuously record values into a buffer.
 		void Start();
 
+        // Stop the data-acquisition thread.
+        // If clearData is true, it will erase all recorded data after stopping the thread.
 		void Stop(bool clearData = false);
 
+        // Returns a boolean indicating if the data-acquisition thread is running.
 		const bool IsRunning() const;
 
+        // Returns a pointer to the raw data buffer,for read-only access.
 		const std::vector<std::vector<Point3>>* getRawBuffer();
 		//const std::vector<Point3>* getSingleRawBuffer(int serialNumber);
 
+        // Returns the number of attached trakStar boards.
+        // Returns 1 if mock data is used.
 		const int NumAttachedBoards() const;
+
+        // Returns the number of attached transmitters.
+        // Returns 1 if mock data is used.
 		const int NumAttachedTransmitters() const;
+
+        // Returns the number of attached sensors.
+        // Returns 3 if mock data is used.
 		const int NumAttachedSensors(bool includeRef) const;
 
+        // Register a raw callback that is given to the data-acquisition thread
+        // for displaying measurements in real-time.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
 		const bool mUseMockData;											// Mock data indicator

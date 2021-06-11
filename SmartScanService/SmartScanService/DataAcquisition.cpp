@@ -19,6 +19,7 @@ DataAcq::DataAcq(bool useMockData, DataAcqConfig acquisitionConfig) : mUseMockDa
 
 DataAcq::~DataAcq()
 {
+    // Delete all raw data when this object is removed.
 	this->Stop(true);
 }
 
@@ -42,6 +43,7 @@ void DataAcq::Init()
 	mPortNumBuff = mTSCtrl.GetAttachedPorts();
 	mSerialBuff = mTSCtrl.GetAttachedSerials();
 
+    // Remove reference sensor from sensor vector, because it is special.
 	if (mConfig.refSensorSerial >= 0) {
 		for(int i = 0; i < mSerialBuff.size(); i++) {
 			if (mSerialBuff[i] == mConfig.refSensorSerial) {
@@ -49,11 +51,17 @@ void DataAcq::Init()
 				mSerialBuff.erase(mSerialBuff.cbegin()+i);
 				mPortNumBuff.erase(mPortNumBuff.cbegin()+i);
 
-				//mTSCtrl.SetRefSensorFormat(refSensorPort);
+                try {
+				    //mTSCtrl.SetRefSensorFormat(refSensorPort);
+                }
+                catch(...) {
+                    
+                }
 			}
 		}
 	}
 
+    // Initialize raw data buffer.
 	for (int i = 0; i < mPortNumBuff.size(); i++) {
 		mRawBuff.push_back(std::vector<Point3>());
 	}
@@ -67,11 +75,12 @@ void DataAcq::Start()
 		return;
 	}
 
-	// Check if this scan is already running:
+	// Check if the data-acquisition thread is already running:
 	if (this->mRunning)	{
 		return;
 	}
 
+    // Create a new data data-acquisition thread.
 	try	{
 		this->pAcquisitionThread = std::make_unique<std::thread>(&DataAcq::DataAcquisition, this);
 	}
@@ -87,7 +96,7 @@ void DataAcq::Start()
 
 void DataAcq::Stop(bool clearData)
 {
-	// Check if already stoppped.
+	// Check if data-acquisition thread is already stoppped.
 	if (!this->mRunning) {
 		return;
 	}
@@ -139,18 +148,19 @@ void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point
 
 void DataAcq::DataAcquisition()
 {
-	// Store time on a variable time which increases the sensor sample time
+	// Store degree to rad constant for easier acces later.
 	const double toRad = 3.14159265/180;
+
+    // Store the current time.
 	double time = 0;
 	auto startSampling = std::chrono::steady_clock::now();
-
 	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
 
 	Point3 ref;
 	//Point3Ref ref;
 
 	while (mRunning) {
-		// Store time and calculate the elapsed time since last sample
+		// Store time and calculate the elapsed time since last sample.
 		auto startSampleTime = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsedTime = startSampleTime - endSampleTime;
 
@@ -160,7 +170,7 @@ void DataAcq::DataAcquisition()
 			if (mConfig.refSensorSerial > -1) {
 				ref = mTSCtrl.GetRecord(refSensorPort);
 				//ref = mTSCtrl.GetRefRecord(refSensorPort);
-				//ref.
+				//ref.inverseRotm();
 			}
 
             for (int i = 0; i < mPortNumBuff.size(); i++) {
@@ -171,7 +181,7 @@ void DataAcq::DataAcquisition()
 				button_obj.UpdateButtonState(raw.button); 
 				raw.buttonState = button_obj.GetButtonState();
 
-				// Add sample time to overal time and store in mInBuff
+				// Add total measurement time to point3.
 				raw.time = time;
 
 				if (mConfig.refSensorSerial > -1) {
@@ -179,6 +189,13 @@ void DataAcq::DataAcquisition()
 					raw.x = raw.x - ref.x;
 					raw.y = raw.y - ref.y;
 					raw.z = raw.z - ref.z;
+
+                    //double x_new = raw.x*ref.s[0][0]+raw.y*ref.s[1][0]+raw.z*ref.[2][0];
+                    //double y_new = raw.x*ref.s[0][1]+raw.y*ref.s[1][1]+raw.z*ref.[2][1];
+                    //double z_new = raw.x*ref.s[0][2]+raw.y*ref.s[1][2]+raw.z*ref.[2][2];
+                    //raw.x = x_new;
+                    //raw.y = y_new;
+                    //raw.z = z_new;
 
 		   	        // Use the azimuth to calculate the rotation around the z-axis
 		   	        //double distance = sqrt(pow(raw.x, 2) + pow(raw.y, 2));

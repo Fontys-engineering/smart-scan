@@ -69,13 +69,15 @@ void SmartScanService::NewScan(const SmartScan::ScanConfig config, bool useSeria
 
 void SmartScanService::DeleteScan()
 {
-	if (scans.size() > 0)
-	{
-		this->scans.clear();
-	}
-	else {
-		throw ex_smartScan("No scans left to delete", __func__, __FILE__);
-	}
+    try {
+        mDataAck.Stop(true);
+        if (scans.size() > 0) {
+		    this->scans.clear();
+        }
+    }
+    catch(...) {
+        
+    }
 }
 
 void SmartScanService::DeleteScan(int id)

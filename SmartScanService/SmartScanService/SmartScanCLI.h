@@ -6,7 +6,7 @@
 #include "SmartScanService.h"
 #include "Point3.h"
 
-const bool mockMode = true;
+const bool mockMode = false;
 
 SmartScan::ScanConfig config = {
     true,                   // acquisitionOnly
