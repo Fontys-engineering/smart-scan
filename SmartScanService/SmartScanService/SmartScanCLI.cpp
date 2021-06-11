@@ -196,8 +196,8 @@ int main()
 			std::cout << "Exporting raw data into file: " << filepath.substr(11) << std::endl;
 
 			try {
-				s3.ExportCSV(filepath.substr(11), 0, true);
-                s3.ExportPointCloud("pc_" + filepath.substr(1), 0, true);
+				s3.ExportCSV(filepath.substr(11) + ".csv", 0, true);
+                s3.ExportPointCloud(filepath.substr(11) + "_pc.csv", 0, true);
 				std::cout << "Done.\n";
 			}
 			catch(ex_export e) {
