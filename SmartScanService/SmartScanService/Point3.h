@@ -56,7 +56,7 @@ namespace SmartScan
     {
     public:
         double x, y, z;
-        double (*m)[3];
+        double m[3][3];
 
         Point3Ref();
         Point3Ref(double x, double y, double z);
