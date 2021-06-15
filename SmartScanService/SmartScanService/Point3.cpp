@@ -101,13 +101,23 @@ Point3Ref::Point3Ref(double x, double y, double z) : x { x }, y { y }, z { z }
 
 }
 
-Point3Ref::Point3Ref(double x, double y, double z, double m[3][3]) : x { x }, y { y }, z { z }, m { m }
+Point3Ref::Point3Ref(double x, double y, double z, double m[3][3]) : x { x }, y { y }, z { z }
 {
-
+    for (int i = 0; i < 3; i++) {
+        for (int k = 0; k < 3; k++) {
+            this->m[i][k] = m[i][k];
+        }
+    }
 }
 
 void Point3Ref::inverseRotm()
 {
+    for (int i = 0; i < 3; i++) {
+        for (int k = 0; k < 3; k++) {
+            std::cout << this->m[i][k] << " ";
+        }
+        std::cout << std::endl;
+    }
 	double temp[3][3];
 
 	double detDownRig = m[1][1]*m[2][2] - m[2][1]*m[1][2];

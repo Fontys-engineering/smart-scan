@@ -63,6 +63,7 @@ int main()
 
 	char cmd[128];
 	do {
+        std::cout << std::string(30, ' ') << '\r';
 		std::cout << "SmartScan>";
 		std::cin.getline(cmd, 128);
 
@@ -243,5 +244,5 @@ void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 		std::cout << std::setw(5) << (int)record[i].y;
 		std::cout << std::setw(5) << (int)record[i].z;
 	}
-	std::cout << std::string(10, ' ') << '\r' << std::flush;
+	std::cout << '\r' << std::flush;
 }
