@@ -20,7 +20,8 @@ namespace SmartScan
         double measurementRate = 50;                    // Between 20.0 and 255.0
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
-		int refSensorSerial = 55431;					// Serial number of the reference sensor, set as -1 when no reference sensor is used.
+		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
+		bool useMatrix = true;							// Use rotation matrixes to correct for the reference sensor instead of euler angles.
     };
 
 	class DataAcq 
@@ -30,7 +31,6 @@ namespace SmartScan
         // If useMockData, is true it will not initalize a real trakStar device but use mockdata instead.
         // AcquisitionConfig contains the parameters with which the trakStar device is initialized.
 		DataAcq(bool useMockData);
-		DataAcq(bool useMockData, DataAcqConfig acquisitionConfig);
 		~DataAcq();
 
         // Initialize data acquisition.
@@ -38,6 +38,7 @@ namespace SmartScan
         // ones if specifified in the constructor.
         // It will also retrieve sensor information and match ports and serial numbers.
 		void Init();
+		void Init(DataAcqConfig acquisitionConfig);
 
         // Start a data-acquisition thread that will continuously record values into a buffer.
 		void Start();
@@ -49,9 +50,10 @@ namespace SmartScan
         // Returns a boolean indicating if the data-acquisition thread is running.
 		const bool IsRunning() const;
 
+		Point3 getSingleSample(int sensorSerial);
         // Returns a pointer to the raw data buffer,for read-only access.
+		const std::vector<Point3>* getSingleRawBuffer(int serialNumber);
 		const std::vector<std::vector<Point3>>* getRawBuffer();
-		//const std::vector<Point3>* getSingleRawBuffer(int serialNumber);
 
         // Returns the number of attached trakStar boards.
         // Returns 1 if mock data is used.
@@ -70,14 +72,14 @@ namespace SmartScan
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
 		const bool mUseMockData;											// Mock data indicator
-		const DataAcqConfig mConfig;                    					// Scan configuration obj
+		DataAcqConfig mConfig;                    							// Scan configuration obj
 
 		bool mRunning = false;                          					// Indicates if scan is running.
 
 		TrakStarController mTSCtrl;                     					// TrackStar controller obj
 		Trigger button_obj;													// Trigger obj
 
-		int refSensorPort;													// Port number of the reference sensor
+		int refSensorPort = -1;												// Port number of the reference sensor
 		std::vector<int> mPortNumBuff;										// Vector containing the sensor port numbers
 		std::vector<int> mSerialBuff;										// Vector containing sensor serial numbers
 		std::vector<std::vector<Point3>> mRawBuff;      					// Raw data vector.
@@ -86,6 +88,14 @@ namespace SmartScan
 		
 		std::function<void(const std::vector<Point3>&)>mRawDataCallback;    // Callback for printing raw data in real time
 
+		const double toRad = 3.14159265/180;								// Store degree to rad constant for easier acces later.
+
+		int findPortNum(int sensorSerial);
+		int findBuffNum(int sensorSerial);
+
 		void DataAcquisition();
+
+		void referenceCorrect(Point3* refPoint, Point3* sensorPoint);
+		void referenceCorrect(Point3Ref* refPoint, Point3* sensorPoint);
 	};
 }

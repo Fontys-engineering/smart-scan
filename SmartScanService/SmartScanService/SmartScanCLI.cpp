@@ -1,5 +1,5 @@
 
-// SmartScanService.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// SmartScanService.cpp : This file contains the 'main' function. Program execution begins and ends here.
 // This provides an interface for the SmartScanServices.
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
@@ -13,13 +13,16 @@
 //   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
 //   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
 
-#include "SmartScanCLI.h"
-#include "Exceptions.h"
-#include "Filtering.h"
+#include "SmartScanConfig.h"
 
 using namespace SmartScan;
 
-#include <iomanip>
+// Pre-define functions
+void Usage();
+void RawPrintCallback(const std::vector<SmartScan::Point3>& record);
+
+// Create SmartScanService object
+SmartScanService s3(mockMode);
 
 int main()
 {
@@ -37,20 +40,20 @@ int main()
 
 	// Initialise the service:
 	try {
-		s3.Init();
+		s3.Init(acquisitionConfig);
 		s3.RegisterRawDataCallback(RawPrintCallback);
 	}
-	catch (ex_trakStar& e)
-	{
-		std::cerr << "\nTrakSTAR exception: " << e.what() << "\nthrown in " << e.get_function() << " in " << e.get_file() << std::endl << std::endl;
+	catch (ex_trakStar e) {
+		std::cerr << "\t\tException thrown in TrakStar initialization: " << std::endl << "\t\t- " << e.what() << std::endl;
 	}
-	catch (ex_scan& e)
-	{
-		std::cerr << "Smart Scan Service Exception: " << e.what() << " thrown in " << e.get_function() << " in " << e.get_file() << std::endl;
+	catch (ex_acq e) {
+		std::cerr << "\t\tException thrown in Data-acquisition initialization: " << std::endl << "\t\t- " << e.what() << std::endl;
 	}
-	catch (...)
-	{
-		std::cerr << "Unknown exception. Could not initialise Smart Scan Service" << std::endl;
+	catch (ex_scan e) {
+		std::cerr << "\t\tException thrown in Scan initialization: " << std::endl << "\t\t- " << e.what() << std::endl;
+	}
+	catch (...)	{
+		std::cerr << "\t\tUnknown exception. Could not initialise Smart Scan Service" << std::endl;
 		return -1;
 	}
 
@@ -63,57 +66,93 @@ int main()
 
 	char cmd[128];
 	do {
-        std::cout << std::string(30, ' ') << '\r';
 		std::cout << "SmartScan>";
 		std::cin.getline(cmd, 128);
 
 		if (!strcmp(cmd, "start")) {
 			try {
 				s3.StartScan();
+
+				// Print legend.
+				std::cout << std::setw(4) << "Sec";
+				std::cout << std::setw(4) << "But";
+
+				for (int i = 0; i < s3.NumAttachedSensors(false); i++) {
+					std::cout << std::setw(4) << 'X' << i;
+					std::cout << std::setw(4) << 'Y' << i;
+					std::cout << std::setw(4) << 'Z' << i;
+				}
+				std::cout << std::endl;
 			}
-			catch (ex_trakStar e) {
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			catch (ex_acq e) {
+				std::cerr << e.what() << " Thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 			catch (ex_smartScan e) {
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				std::cerr << e.what() << " Thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 			catch (ex_scan e) {
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				std::cerr << e.what() << " Thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 			catch (...)	{
 				std::cerr << "Unnable to start the scan due to an unknow error. \n";
 			}
-
-			std::cout << std::endl;
-			std::cout << std::setw(4) << "Sec";
-			std::cout << std::setw(4) << "But";
-
-			for (int i = 0; i < s3.NumAttachedSensors(false); i++) {
-				std::cout << std::setw(4) << 'X' << i;
-				std::cout << std::setw(4) << 'Y' << i;
-				std::cout << std::setw(4) << 'Z' << i;
-			}
-			std::cout << std::endl;
-
 		}
 		else if (!strcmp(cmd, "stop")) {
-			try {
-				s3.StopScan();
-				std::cout << "All scans have stopped!" << std::string(50, ' ') << std::endl << std::endl;
-			}
-			catch (ex_smartScan e) {
-				std::cout << std::endl;
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
-			}
+			s3.StopScan();
+			std::cout << "All scans have stopped!" << std::string(70, ' ') << std::endl;
 		}
 		else if (!strcmp(cmd, "new")) {
             try {
-                s3.NewScan(config);
+				int numRefPoints;
+				refPoints.clear();
+
+				std::cout << "Welcome to the scan creation wizard!" << std::endl;
+				std::cout << "Enter the number of desired reference points: " << std::flush;
+				while(!(std::cin >> numRefPoints)){
+					std::cin.clear();
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cout << "Invalid input.  Try again: ";
+				}
+				std::cin.ignore();
+
+				std::cout << "Position the thumb and index finger around the reference point and press any key when ready.";
+				for (int i = 0; i < numRefPoints; i++) {
+					std::cin.ignore();
+					Point3 PointThumb = s3.GetSingleSample(rThumbSerial);
+					Point3 PointIndex = s3.GetSingleSample(rIndexSerial);
+					Point3 refPoint;
+
+					refPoint.x = ((PointThumb.x + PointIndex.x) / 2);
+					refPoint.y = ((PointThumb.y + PointIndex.y) / 2);
+					refPoint.z = ((PointThumb.z + PointIndex.z) / 2);
+
+					refPoints.push_back(refPoint);
+					std::cout << "Reference point number " << i << " set at (" << refPoint.x << ',' << refPoint.y << ',' << refPoint.z << ").";
+				}
+
+				std::cout << std::endl << "Enter the desired filtering precision (180 needs to be a multiple): " << std::flush;
+				while(!(std::cin >> filteringPrecision)){
+					std::cin.clear();
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cout << "Invalid input.  Try again: ";
+				}
+				std::cin.ignore();
+
+                //s3.NewScan(usedSerials, refPoints, filteringPrecision);
+				std::cout << "New scan created" << std::endl;
             }
+            catch (ex_trakStar e) {
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+            catch (ex_acq e) {
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
             catch (ex_smartScan e) {
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
-			std::cout << "New scan created" << std::endl;
+            catch (ex_scan e) {
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
 		}
 		else if (!strcmp(cmd, "delete")) {
 			char ack[128];
@@ -149,26 +188,6 @@ int main()
 
 			for (int s = 0; s < s3.GetScansList().size(); s++) {
 				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->IsRunning() ? "running" : "stopped") << std::endl;
-			}
-		}
-		else if (strlen(cmd) > 9 && !strncmp(cmd, "find-ref ", 9)) {
-			// Get the id from the comand:
-			std::string sCmd = cmd;
-			int id = atoi(sCmd.substr(9).c_str());
-
-			s3.CalibrateReferencePoints(id);
-		}
-		else if (strlen(cmd) > 5 && !strncmp(cmd, "dump ", 5)) {
-			// Get the id from the comand:
-			std::string sCmd = cmd;
-			int id = atoi(sCmd.substr(5).c_str());
-
-			try {
-				std::cout << "Dump values of scan: " << id << std::endl;
-				s3.DumpScan(id);
-			}
-			catch (ex_smartScan e) {
-				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7)) {
@@ -208,34 +227,31 @@ int main()
 				std::cerr << "Could not export csv file" << std::endl;
 			}
 		}
+		else if (!strcmp(cmd, "help")) {
+			Usage();
+		}
 	} while (strcmp(cmd, "exit"));	
 }
 
 void Usage()
 {
 	std::cout << std::endl;
-	std::cout << "__________________________________________________________HELP_________________________________________________________" << std::endl;
-	std::cout << std::endl;
-	std::cout << "Measurement control" << std::endl;
-	std::cout << "\t new \t\t\t\t Create a new measurement" << std::endl;
-	std::cout << "\t delete [id] \t\t\t Delete a measurement. Leave id blank to delete all the scans." << std::endl;
-	std::cout << "\t start [id] \t\t\t Start the measurement. Leave id blank to start all scans." << std::endl;
-	std::cout << "\t find-ref [id] \t\t\t Start the routine for calibrating the reference points for the specified scan." << std::endl;
-	std::cout << "\t stop [id]\t\t\t Stop the measurement. Leave id blank to stop all scans." << std::endl;
-	std::cout << "\t list \t\t\t\t Print all the existing Scans to the console." << std::endl;
-	std::cout << "\t dump [id] \t\t\t Print all the records of the scan id to the console." << std::endl;
-	std::cout << "\t export [id] [filename] \t Export the processed data of the scan id as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)." << std::endl;
-	std::cout << "\t export-raw [filename] \t\t Export the raw data of all the sensors as a CSV file with \n \t\t\t\t\t the given filename (no spaces allowed in the filename)." << std::endl;
-	std::cout << std::endl;
-	std::cout << "CLI usage" << std::endl;
-	std::cout << "\t help \t\t\t\t print this screen again" << std::endl;
-	std::cout << "\t exit \t\t\t\t cleanly exit the application" << std::endl;
-	std::cout << "_______________________________________________________________________________________________________________________" << std::endl;
+	std::cout << "Command" << "\t\t\t\t" << "Description" << std::endl;
+	std::cout << "\tnew\t\t\t\tCreate a new measurement." << std::endl;
+	std::cout << "\tdelete [id]\t\t\tDelete a measurement. Leave id blank to delete all scans" << std::endl << "\t\t\t\t\t" << "and clear the raw data." << std::endl;
+	std::cout << "\tstart [id]\t\t\tStart the measurement. Leave id blank to start all scans." << std::endl;
+	std::cout << "\tstop [id]\t\t\tStop the measurement. Leave id blank to stop all scans." << std::endl;
+	std::cout << "\tlist\t\t\t\tPrint all the existing Scans to the console." << std::endl;
+	std::cout << "\texport [id] [filename]\t\tExport the processed data of the scan id as a CSV file with" << std::endl << "\t\t\t\t\tthe given filename (no spaces allowed in filename)." << std::endl;
+	std::cout << "\texport-raw [filename]\t\tExport the raw data of all the sensors as a CSV file with" << std::endl << "\t\t\t\t\tthe given filename (no spaces allowed in filename)." << std::endl;
+	std::cout << "\thelp \t\t\t\tPrint this screen again." << std::endl;
+	std::cout << "\texit \t\t\t\tCleanly exit the application." << std::endl;
 	std::cout << std::endl;
 }
 
 void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 {
+	std::cout << '\r';
 	std::cout << std::setw(4) << (int)record[0].time;
 	std::cout << std::setw(4) << (int)record[0].buttonState;
 
@@ -244,5 +260,5 @@ void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 		std::cout << std::setw(5) << (int)record[i].y;
 		std::cout << std::setw(5) << (int)record[i].z;
 	}
-	std::cout << '\r' << std::flush;
+	std::cout << ' ' << '\r' << std::flush;
 }

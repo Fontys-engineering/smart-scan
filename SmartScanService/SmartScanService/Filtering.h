@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Point3.h"
-#include "ReferencePoint.h"
 
 namespace SmartScan
 {
@@ -13,7 +12,7 @@ namespace SmartScan
 	{
 	public:
 		Filtering();
-		Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range);
+		Filtering(std::vector<Point3> ref_point, double phi_range, double theta_range);
 
 		/// <summary>
 		/// Process the data in place and keep only the filtered data points. 
@@ -28,7 +27,7 @@ namespace SmartScan
 		/// Set the reference points for this filtering object.
 		/// </summary>
 		/// <param name="referencePoints"> - Vector of points of type ReferencePoint.</param>
-		void SetReferencePoints(std::vector<ReferencePoint> referencePoints);
+		void SetReferencePoints(std::vector<Point3> referencePoints);
 
 		void SetPrecision(double phi_range, double theta_range);
 
@@ -37,7 +36,7 @@ namespace SmartScan
 		double phi_range;                               // Properties.
 		double theta_range;                             // Properties.
 		unsigned int mFramesize;                        // Frame size of the measurement.
-		std::vector<ReferencePoint> referencePoints;    // Reference points (for gradient smoothing).
+		std::vector<Point3> referencePoints;    // Reference points (for gradient smoothing).
 
         /// <summary>
         /// RotationOrientation calculates new x, y and z values based on the azimuth, elevation and roll values.
@@ -50,7 +49,7 @@ namespace SmartScan
 	
 		double findMean(double a[], int n);
 
-		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data);
+		std::vector<std::vector<Point3>> CalculateCoordinates(std::vector<Point3>& ref, std::vector<Point3>& data);
 
         /// <summary>
 		/// Tests if a point is valid or not, by testing if there are other points
@@ -66,8 +65,8 @@ namespace SmartScan
 		/// <param name="m_data"> - Measurement data.</param>
 		/// <param name="s_data"> - Spherical coordinates data.</param>
 		/// <param name="ref_data"> - Reference point data.</param>
-		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data);
+		std::vector<std::vector<Point3>> SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data);
 
-		void FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range);
+		void FilterIteration(std::vector<Point3>& data, std::vector<Point3>& referencePoints, double phi_range, double theta_range);
 	};
 }

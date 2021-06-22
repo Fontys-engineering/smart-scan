@@ -7,7 +7,7 @@ SmartScan::Filtering::Filtering()
 
 }
 
-SmartScan::Filtering::Filtering(std::vector<ReferencePoint> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }
+SmartScan::Filtering::Filtering(std::vector<Point3> ref_point, double phi_range, double theta_range) : referencePoints{ ref_point }, phi_range{ phi_range }, theta_range{ theta_range }
 {
 
 }
@@ -23,7 +23,7 @@ void SmartScan::Filtering::Filter(std::vector<Point3>& data, std::vector<Point3>
     FilterIteration(data, this->referencePoints, this->phi_range, this->theta_range);
 }
 
-void SmartScan::Filtering::SetReferencePoints(std::vector<ReferencePoint> referencePoints)
+void SmartScan::Filtering::SetReferencePoints(std::vector<Point3> referencePoints)
 {
     this->referencePoints = referencePoints;
 }
@@ -204,7 +204,7 @@ double SmartScan::Filtering::findMean(double a[], int n)
     return (double)sum / (double)n;
 }
 
-std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<ReferencePoint>& ref, std::vector<Point3>& data)
+std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std::vector<Point3>& ref, std::vector<Point3>& data)
 {
     std::vector<std::vector<Point3>> vectorSet;
     double pi = 3.1415;
@@ -215,9 +215,9 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::CalculateCoordinates(std:
         for (int count = 0; count < data.size(); count++)
         {
             vectorSet[i].emplace_back(Point3());
-            vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2));
-            vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].pos.y ,data[count].x - ref[i].pos.x) * 180/pi;
-            vectorSet[i][count].s.theta = acos((data[count].z - ref[i].pos.z) / sqrt(pow(data[count].x - ref[i].pos.x, 2) + pow(data[count].y - ref[i].pos.y, 2) + pow(data[count].z - ref[i].pos.z, 2))) * 180/pi;
+            vectorSet[i][count].s.r = sqrt(pow(data[count].x - ref[i].x, 2) + pow(data[count].y - ref[i].y, 2) + pow(data[count].z - ref[i].z, 2));
+            vectorSet[i][count].s.phi = atan2(data[count].y - ref[i].y ,data[count].x - ref[i].x) * 180/pi;
+            vectorSet[i][count].s.theta = acos((data[count].z - ref[i].z) / sqrt(pow(data[count].x - ref[i].x, 2) + pow(data[count].y - ref[i].y, 2) + pow(data[count].z - ref[i].z, 2))) * 180/pi;
         }
 	}
 
@@ -252,7 +252,7 @@ bool SmartScan::Filtering::TestPoint(std::vector<Point3>& data, double phi_range
 	return result;
 }
 
-std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<ReferencePoint> ref_data)
+std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Point3> m_data, std::vector<std::vector<Point3>> s_data, std::vector<Point3> ref_data)
 {
     // Declare a number of vectors to the point vectors for all the reference points, so we can split all data points.
     std::vector<std::vector<Point3>> vectorSet;
@@ -286,7 +286,7 @@ std::vector<std::vector<Point3>> SmartScan::Filtering::SortArrays(std::vector<Po
     return vectorSet;
 }
 
-void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<ReferencePoint>& referencePoints, double phi_range, double theta_range)
+void SmartScan::Filtering::FilterIteration(std::vector<Point3>& data, std::vector<Point3>& referencePoints, double phi_range, double theta_range)
 {
     std::vector<std::vector<Point3>> vectorSet;
     std::vector<std::vector<Point3>> vectorSetSort;

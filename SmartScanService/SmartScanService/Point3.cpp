@@ -105,35 +105,7 @@ Point3Ref::Point3Ref(double x, double y, double z, double m[3][3]) : x { x }, y 
 {
     for (int i = 0; i < 3; i++) {
         for (int k = 0; k < 3; k++) {
-            this->m[i][k] = m[i][k];
-        }
-    }
-}
-
-void Point3Ref::inverseRotm()
-{
-	double temp[3][3];
-
-	double detDownRig = m[1][1]*m[2][2] - m[2][1]*m[1][2];
-	double detDownMid = m[2][0]*m[1][2] - m[1][0]*m[2][2];
-	double detDownLef = m[1][0]*m[2][1] - m[2][0]*m[1][1];
-
-	double detAll = m[0][0]*detDownRig + m[0][1]*detDownMid + m[0][2]*detDownLef;
-	double invDet = 1.0/detAll;
-
-	temp[0][0] = detDownRig * invDet;
-	temp[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invDet;
-	temp[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * invDet;
-	temp[1][0] = detDownMid * invDet;
-	temp[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * invDet;
-	temp[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) * invDet;
-	temp[2][0] = detDownLef * invDet;
-	temp[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invDet;
-	temp[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invDet;
-
-	for (int i = 0; i < 3; i++) {
-        for (int k = 0; k < 3; k++) {
-            this->m[i][k] = temp[i][k];
+            this->m[i][k] = m[k][i]; // Transpose matrix.
         }
     }
 }

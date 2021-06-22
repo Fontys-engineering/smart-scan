@@ -11,9 +11,7 @@
 #include <chrono>
 
 #include "Point3.h"
-#include "ReferencePoint.h"
 #include "Scan.h"
-#include "ScanDb.h"
 #include "DataAcquisition.h"
 #include "CSVExport.h"
 
@@ -35,19 +33,12 @@ namespace SmartScan
 		/// Initialise the Smart Scan service, Trak star device etc. Call this after the TrakStar system is pluged-in
 		/// </summary>
 		void Init();
+		void Init(DataAcqConfig acquisitionConfig);
 
 		/// <summary>
 		/// Creates a new scan with the default scan configuration settings.
 		/// </summary>
-		/// <param name="sensorIds"> - if specified, only the sensors with the ids in this list will be used</param>
-		void NewScan();
-		/// <summary>
-		/// Creates a new scan with a specific configuration. Depending on the flag it may also support sensor serial numbers
-        /// instead of port numbers.
-		/// </summary>
-		/// <param name="config"> - Scan configuration.</param>
-		/// <param name="useSerials"> - Try and find the right port numbers using the sensor serial numbers.</param>
-		void NewScan(ScanConfig config, bool useSerials = true);
+		void NewScan(std::vector<int> usedSerials, std::vector<Point3> refPoints, int filteringPrecision);
 
 		/// <summary>
 		/// Deletes the latest scan.
@@ -69,38 +60,13 @@ namespace SmartScan
 		/// <param name="scanId"> - id of the scan to start</param>
 		void StartScan(int scanId);
 
-		/// <summary>
-		/// Routine for calibrating the position of the sensors relative to the fingertips
-		/// </summary>
-		//void CalibrateSensors();
-
-		/// <summary>
-		/// When called, it sets a single reference point between the thub and index finger
-		/// No CMDL interaction required
-		/// </summary>
-		void CalibrateSingleRefPoint();
-
-		/// <summary>
-		/// Clears all existing references for the last scan and starts 
-		/// the reference calibration routine.
-		/// </summary>
-		void CalibrateReferencePoints(int scanId);
-
-		/// <summary>
-		/// Set the reference points for the latest scan object:
-		/// </summary>
-		/// <param name="referencePoints"> - vector of reference points</param>
-		void SetReferencePoints(const std::vector<ReferencePoint> referencePoints);
+		Point3 GetSingleSample(int sensorSerial);
 
 		/// <summary>
 		/// Stop the latest scan
 		/// </summary>
 		void StopScan();
-
-		/// <summary>
-		/// print the values from the latest scan to console. Debugging only. Not recommended.
-		/// </summary>
-		void DumpScan(int scanId) const;
+		void StopScan(int scanId);
 
 		/// <summary>
 		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
@@ -138,13 +104,6 @@ namespace SmartScan
 		/// <param name="filename"> - the name of the output file</param>
 		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
 		void ExportPointCloud(const std::string filename, int scanId, const bool raw = false);
-
-		/// <summary>
-		/// Register a new callback function to be called whenever new filtered data is available.
-		/// The filtered data vector is provided through a reference as a parameter of the callback function.
-		/// </summary>
-		/// <param name="callback"> - the efunction to be called back.</param>
-		void RegisterNewDataCallback(std::function<void(std::vector<Point3>&)> callback);
 
 		/// <summary>
 		/// Register a new callback function to be called whenever new raw data is available.

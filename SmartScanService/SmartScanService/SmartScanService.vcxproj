@@ -149,7 +149,6 @@
     <ClCompile Include="DataAcquisition.cpp" />
     <ClCompile Include="Filtering.cpp" />
     <ClCompile Include="Point3.cpp" />
-    <ClCompile Include="ReferencePoint.cpp" />
     <ClCompile Include="Scan.cpp" />
     <ClCompile Include="SmartScanCLI.cpp" />
     <ClCompile Include="SmartScanService.cpp" />
@@ -163,10 +162,8 @@
     <ClInclude Include="Filtering.h" />
     <ClInclude Include="NDI\ATC3DG.h" />
     <ClInclude Include="Point3.h" />
-    <ClInclude Include="ReferencePoint.h" />
     <ClInclude Include="Scan.h" />
-    <ClInclude Include="ScanDb.h" />
-    <ClInclude Include="SmartScanCLI.h" />
+    <ClInclude Include="SmartScanConfig.h" />
     <ClInclude Include="SmartScanService.h" />
     <ClInclude Include="TrakStarController.h" />
     <ClInclude Include="Trigger.h" />
