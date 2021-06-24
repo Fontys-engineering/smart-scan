@@ -4,22 +4,28 @@
 #include <deque>
 #include <iostream>
 #include <thread> 
-#include <chrono>
 #include <functional>
+#include <cmath>
 
 #include "Point3.h"
-#include "Filtering.h"
-#include "TrakStarController.h"
-#include "Trigger.h"
 
 namespace SmartScan
 {
+    struct ScanConfig
+    {
+		const std::vector<std::vector<Point3>>* inBuff;    			// Raw data vector.
+		std::vector<Point3> refPoints;              				// Reference point vector.
+		int filteringPrecision;										// Filtering precision.
+		int stopAtSample;											// Stop scanning after a certain sample is reached.
+		float outlierThreshold;										// Do not store points if their distance from the reference points are larger than this value.
+    };
+
 	class Scan
 	{
 	public:
 		const int mId;                                  			// Scan identifier.
 
-		Scan(const int id, std::vector<std::vector<Point3>*> rawDataBuffer, std::vector<Point3> refPoints, int filteringPrecision);
+		Scan(const int id, ScanConfig config);
 
 		~Scan();
 
@@ -29,22 +35,33 @@ namespace SmartScan
 
 		const bool IsRunning() const;
 
+		void CopyOutputBuffer(std::vector<Point3>* buffer) const;
+
 		const int NumUsedSensors() const;
 
 		const int NumRefPoints() const;
 
-		const double GetFilteringPrecision() const;
-	private:
-		bool mRunning = false;                          			// Indicates if scan is running.
+		const int GetFilteringPrecision() const;
 
-		const std::vector<std::vector<Point3>*> mInBuff;    		// Raw data vector.
-		const std::vector<Point3> mRefPoints;              			// Reference point vector.
-		const int mFilteringPrecision;							// Filtering precision.
+		const int GetStopAtSample() const;
+
+		const double GetOutlierThreshold() const;
+	private:
+		bool mRunning = false;
+		const ScanConfig mConfig;
+
+		const double pi = 3.141592653589793238463;
+		const float toAngle = 180/pi;
 
 		std::vector<std::vector<std::vector<Point3>>> mSortedBuff;	// Vector containing ther sorted points.
+
+		int mLastFilteredSample = 0;
 
 		std::unique_ptr<std::thread> pScanningThread;
 		
 		void DataFiltering();
+
+		int CalcNearestRef(Point3* point);
+		void calcAngle(Point3 refPoint, Point3* point);
 	};
 }

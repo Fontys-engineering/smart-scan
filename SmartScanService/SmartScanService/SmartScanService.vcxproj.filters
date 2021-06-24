@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="CSVExport.cpp" />
-    <ClCompile Include="Filtering.cpp" />
     <ClCompile Include="Point3.cpp" />
     <ClCompile Include="Scan.cpp" />
     <ClCompile Include="SmartScanCLI.cpp" />
@@ -13,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVExport.h" />
-    <ClInclude Include="Filtering.h" />
     <ClInclude Include="NDI\ATC3DG.h" />
     <ClInclude Include="Point3.h" />
     <ClInclude Include="Scan.h" />

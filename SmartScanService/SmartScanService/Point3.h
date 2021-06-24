@@ -1,5 +1,7 @@
 #pragma once
 
+#include <float.h>
+
 namespace SmartScan
 {
     enum class button_state
@@ -61,7 +63,5 @@ namespace SmartScan
         Point3Ref();
         Point3Ref(double x, double y, double z);
         Point3Ref(double x, double y, double z, double m[3][3]);
-
-        void inverseRotm();
     };
 }

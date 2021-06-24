@@ -147,7 +147,6 @@
   <ItemGroup>
     <ClCompile Include="CSVExport.cpp" />
     <ClCompile Include="DataAcquisition.cpp" />
-    <ClCompile Include="Filtering.cpp" />
     <ClCompile Include="Point3.cpp" />
     <ClCompile Include="Scan.cpp" />
     <ClCompile Include="SmartScanCLI.cpp" />
@@ -159,7 +158,6 @@
     <ClInclude Include="CSVExport.h" />
     <ClInclude Include="DataAcquisition.h" />
     <ClInclude Include="Exceptions.h" />
-    <ClInclude Include="Filtering.h" />
     <ClInclude Include="NDI\ATC3DG.h" />
     <ClInclude Include="Point3.h" />
     <ClInclude Include="Scan.h" />

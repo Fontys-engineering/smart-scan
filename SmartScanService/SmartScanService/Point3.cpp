@@ -8,97 +8,88 @@ Rotation3::Rotation3()
 }
 
 Rotation3::Rotation3(double x, double y, double z)
+	: x { x }, y { y }, z { z }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+
 }
 
 Spherical3::Spherical3()
 {
-	this->r = this->phi = this->theta = 0;
+	this->r = DBL_MAX;
+	this->phi = this->theta = 0;
 }
 
-Spherical3::Spherical3(double r, double phi, double theta)
+Spherical3::Spherical3(double r, double theta, double phi)
+	: r { r }, theta { theta }, phi { phi }
 {
-	this->r = r;
-	this->phi = phi;
-	this->theta = theta;
+
 }
 
 Point3::Point3()
 {
-	this->x = this->y = this->z = 0;
+	this->time = this->x = this->y = this->z = this->quality = this->button = 0;
 }
 
 Point3::Point3(double x, double y, double z)
+	: x { x }, y { y }, z { z }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+
 }
 
 Point3::Point3(double x, double y, double z, Rotation3 r)
+	: x { x }, y { y }, z { z }, r { r }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->r = r;
+
 }
 
 Point3::Point3(double x, double y, double z, Spherical3 s)
+	: x { x }, y { y }, z { z }, s { s }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->s = s;
+
 }
 
-Point3::Point3(double x, double y, double z, Rotation3 r, Spherical3 s)
+Point3::Point3(double x, double y, double z, Rotation3 r, Spherical3 s) 
+	: x { x }, y { y }, z { z }, r { r }, s { s }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->r = r;
-	this->s = s;
+
 }
 
 Point3::Point3(double x, double y, double z, double rx, double ry, double rz)
+	: x { x }, y { y }, z { z }, r { Rotation3(rx, ry, rz) }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
 
-	Rotation3 r(rx, ry, rz);
-	this->r = r;
 }
 
-Point3::Point3(double x, double y, double z, double rx, double ry, double rz, double sr, double sphi, double stheta)
+Point3::Point3(double x, double y, double z, double rx, double ry, double rz, double sr, double stheta, double sphi)
+	: x { x }, y { y }, z { z }, r { Rotation3(rx, ry, rz) }, s { Spherical3(sr, stheta, sphi) }
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
 
-	Rotation3 r(rx, ry, rz);
-	this->r = r;
-	Spherical3 s(sr, sphi, stheta);
-	this->s = s;
 }
+
 Point3::Point3(double x, double y, double z, double rx, double ry, double rz, unsigned short q, unsigned short button)
-	: x{ x }, y{ y }, z{ z }, r{ Rotation3(rx,ry,rz) }, quality{ q }, button{ button }
+	: x{ x }, y{ y }, z{ z }, r{ Rotation3(rx, ry, rz) }, quality{ q }, button{ button }
 {
 	
 }
 
-
 Point3Ref::Point3Ref()
 {
+	this->x = this->y = this->z = 0;
 
+    for (int i = 0; i < 3; i++) {
+        for (int k = 0; k < 3; k++) {
+            this->m[i][k] = 0;
+        }
+	}
 }
 
 Point3Ref::Point3Ref(double x, double y, double z) : x { x }, y { y }, z { z }
 {
-
+    for (int i = 0; i < 3; i++) {
+        for (int k = 0; k < 3; k++) {
+            this->m[i][k] = 0;
+        }
+	}
 }
 
 Point3Ref::Point3Ref(double x, double y, double z, double m[3][3]) : x { x }, y { y }, z { z }

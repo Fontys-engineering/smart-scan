@@ -104,7 +104,7 @@ int main()
 		else if (!strcmp(cmd, "new")) {
             try {
 				int numRefPoints;
-				refPoints.clear();
+				ScanConfig config;
 
 				std::cout << "Welcome to the scan creation wizard!" << std::endl;
 				std::cout << "Enter the number of desired reference points: " << std::flush;
@@ -126,20 +126,41 @@ int main()
 					refPoint.y = ((PointThumb.y + PointIndex.y) / 2);
 					refPoint.z = ((PointThumb.z + PointIndex.z) / 2);
 
-					refPoints.push_back(refPoint);
+					config.refPoints.push_back(refPoint);
 					std::cout << "Reference point number " << i << " set at (" << refPoint.x << ',' << refPoint.y << ',' << refPoint.z << ").";
 				}
 
 				std::cout << std::endl << "Enter the desired filtering precision (180 needs to be a multiple): " << std::flush;
-				while(!(std::cin >> filteringPrecision)){
+				while(!(std::cin >> config.filteringPrecision)){
 					std::cin.clear();
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input.  Try again: ";
 				}
 				std::cin.ignore();
 
-                //s3.NewScan(usedSerials, refPoints, filteringPrecision);
-				std::cout << "New scan created" << std::endl;
+				std::cout << "Enter the samplenumber after which the scan is stopped (-1 for infite duration): " << std::flush;
+				while(!(std::cin >> config.stopAtSample)){
+					std::cin.clear();
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cout << "Invalid input.  Try again: ";
+				}
+				std::cin.ignore();
+
+				std::cout << "Enter the outlier point Threshold in mm: " << std::flush;
+				while(!(std::cin >> config.outlierThreshold)){
+					std::cin.clear();
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cout << "Invalid input.  Try again: ";
+				}
+				std::cin.ignore();
+
+				try {
+					s3.NewScan(config);
+					std::cout << "New scan created" << std::endl;
+				}
+				catch (ex_smartScan e) {
+					std::cerr << e.what() << " Thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+				}
             }
             catch (ex_trakStar e) {
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
@@ -154,15 +175,18 @@ int main()
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
+		else if (!strcmp(cmd, "clear")) {
+			s3.ClearData();
+			std::cout << "All data cleared!" << std::endl;
+		}
 		else if (!strcmp(cmd, "delete")) {
 			char ack[128];
-			std::cout << "Are you sure you want to delete all? answer y/n: " << std::endl;
+			std::cout << "Are you sure you want to delete all? answer y/n: ";
 			std::cin.getline(ack,128);
 
 			if (!strncmp(ack,"y", 1)) {
 				try {
 					s3.DeleteScan();
-
 					std::cout << "Deleted all scans!" << std::endl;
 				}
 				catch (ex_smartScan e) {
@@ -184,10 +208,11 @@ int main()
 			}
 		}
 		else if (!strcmp(cmd, "list")) {
-			std::cout << "Scan ID \t Status" << std::endl;
+			std::cout << "Scan ID\t\tNumRefs\t\tPrecision\tStopAt\t\tThreshold" << std::endl;
 
 			for (int s = 0; s < s3.GetScansList().size(); s++) {
-				std::cout << s3.GetScansList().at(s)->mId << " \t\t " << (s3.GetScansList().at(s)->IsRunning() ? "running" : "stopped") << std::endl;
+				std::cout << s3.GetScansList().at(s)->mId << "\t\t" << s3.GetScansList().at(s)->NumRefPoints() << "\t\t" << s3.GetScansList().at(s)->GetFilteringPrecision() << "\t\t";
+				std::cout << s3.GetScansList().at(s)->GetStopAtSample() << "\t\t" << s3.GetScansList().at(s)->GetOutlierThreshold() << std::endl;
 			}
 		}
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7)) {
@@ -200,11 +225,15 @@ int main()
 			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(9) << std::endl;
 
 			try {
-				s3.ExportCSV(filepath.substr(9), id);
+				s3.ExportCSV(filepath.substr(9) + ".csv", id, true);
+                s3.ExportPointCloud(filepath.substr(9) + "_pc.csv", id, true);
 				std::cout << "Done.\n";
 			}
+			catch(ex_export e) {
+				std::cerr << e.what() << std::endl;
+			}
 			catch (...)	{
-				std::cerr << "Could not export csv file \n";
+				std::cerr << "Could not export csv file" << std::endl;
 			}
 		}
 		else if (strlen(cmd) > 11 && !strncmp(cmd, "export-raw ", 11)) {
@@ -237,10 +266,11 @@ void Usage()
 {
 	std::cout << std::endl;
 	std::cout << "Command" << "\t\t\t\t" << "Description" << std::endl;
-	std::cout << "\tnew\t\t\t\tCreate a new measurement." << std::endl;
-	std::cout << "\tdelete [id]\t\t\tDelete a measurement. Leave id blank to delete all scans" << std::endl << "\t\t\t\t\t" << "and clear the raw data." << std::endl;
 	std::cout << "\tstart [id]\t\t\tStart the measurement. Leave id blank to start all scans." << std::endl;
 	std::cout << "\tstop [id]\t\t\tStop the measurement. Leave id blank to stop all scans." << std::endl;
+	std::cout << "\tnew\t\t\t\tCreate a new measurement." << std::endl;
+	std::cout << "\tclear\t\t\t\tClear all recorded data." << std::endl;
+	std::cout << "\tdelete [id]\t\t\tDelete a measurement. Leave id blank to delete all scans" << std::endl << "\t\t\t\t\t" << "and clear the raw data." << std::endl;
 	std::cout << "\tlist\t\t\t\tPrint all the existing Scans to the console." << std::endl;
 	std::cout << "\texport [id] [filename]\t\tExport the processed data of the scan id as a CSV file with" << std::endl << "\t\t\t\t\tthe given filename (no spaces allowed in filename)." << std::endl;
 	std::cout << "\texport-raw [filename]\t\tExport the raw data of all the sensors as a CSV file with" << std::endl << "\t\t\t\t\tthe given filename (no spaces allowed in filename)." << std::endl;

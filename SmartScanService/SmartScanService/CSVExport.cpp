@@ -9,58 +9,75 @@ CSVExport::CSVExport()
 
 }
 
-void CSVExport::ExportPoint3(const std::vector<Point3>& data, const std::string filename, const int NUsedSensors)
+void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string filename)
 {
 	csvFile.open(filename);
-	time_t now = time(0);
 
-	csvFile << data.size() << "," << NUsedSensors << std::endl;    //Add info on the first line
-	if (data.size() > 0)    //Write to file:
-	{
-		for (int i = 0; i < data.size(); i = i+NUsedSensors)    //Access by reference to avoid copying
-		{
-			for (int j = 0; j < NUsedSensors; j++)
-			{
-				csvFile << data.at(i + j).time << "," << data.at(i + j).x << "," << data.at(i + j).y << "," << data.at(i + j).z << "," << data.at(i + j).r.x << "," << data.at(i + j).r.y << "," << data.at(i + j).r.z << "," << data.at(i + j).quality << "," << (int)data.at(i + j).buttonState << ",";
-			}
-			csvFile << std::endl;
+	csvFile << data->size() << std::endl;
+	if (!data->empty())	{
+		for (int i = 0; i < data->size(); i = i++) {
+			csvFile << data->at(i).time << "," << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << "," << data->at(i).r.x << "," << data->at(i).r.y << "," << data->at(i).r.z << "," << data->at(i).quality << "," << (int)data->at(i).buttonState << std::endl;
 		}
+	}
+	else {
+		throw ex_export("Raw buffer is empty.", __func__, __FILE__);
 	}
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename, bool cloud)
+void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::string filename)
 {
 	csvFile.open(filename);
 
-	if (cloud) {
-		csvFile << data->at(0).size() << "," << data->size() << std::endl;
-		if (!data->at(0).empty()) {
-			for (int i = 0; i < data->at(0).size(); i++)
-			{
-				for (int j = 0; j < data->size(); j++) {
-					csvFile << data->at(j).at(i).time << "," << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << "," << data->at(j).at(i).r.x << "," << data->at(j).at(i).r.y << "," << data->at(j).at(i).r.z << "," << data->at(j).at(i).quality << "," << (int)data->at(j).at(i).buttonState << ",";
-				}
-				csvFile << std::endl;
-			}
-		}
-		else {
-			throw ex_export("Raw buffer is empty.", __func__, __FILE__);
+	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << ',' << "Button" << std::endl;
+	if (!data->empty())	{
+		for (int i = 0; i < data->size(); i = i++) {
+			csvFile << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << "," << (int)data->at(i).buttonState << std::endl;
 		}
 	}
 	else {
-		csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << std::endl;
-		if (!data->at(0).empty()) {
-			for (int j = 0; j < data->size(); j++)
-			{
-				for (int i = 0; i < data->at(j).size(); i++) {
-					csvFile << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << std::endl; 
-				}
+		throw ex_export("Raw buffer is empty.", __func__, __FILE__);
+	}
+	csvFile.close();
+}
+
+void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename)
+{
+	csvFile.open(filename);
+
+	csvFile << data->at(0).size() << "," << data->size() << std::endl;
+	if (!data->at(0).empty()) {
+		for (int i = 0; i < data->at(0).size(); i++)
+		{
+			for (int j = 0; j < data->size(); j++) {
+				csvFile << data->at(j).at(i).time << "," << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << "," << data->at(j).at(i).r.x << "," << data->at(j).at(i).r.y << "," << data->at(j).at(i).r.z << "," << data->at(j).at(i).quality << "," << (int)data->at(j).at(i).buttonState << ",";
 			}
-		}
-		else {
-			throw ex_export("Raw buffer is empty.", __func__, __FILE__);
+			csvFile << std::endl;
 		}
 	}
+	else {
+		throw ex_export("Raw buffer is empty.", __func__, __FILE__);
+	}
+
+	csvFile.close();
+}
+
+void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename)
+{
+	csvFile.open(filename);
+
+	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << ',' << "Button" << std::endl;
+	if (!data->at(0).empty()) {
+		for (int j = 0; j < data->size(); j++)
+		{
+			for (int i = 0; i < data->at(j).size(); i++) {
+				csvFile << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << "," << (int)data->at(j).at(i).buttonState << std::endl; 
+			}
+		}
+	}
+	else {
+		throw ex_export("Raw buffer is empty.", __func__, __FILE__);
+	}
+
 	csvFile.close();
 }

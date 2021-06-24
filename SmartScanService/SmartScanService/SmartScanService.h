@@ -38,7 +38,7 @@ namespace SmartScan
 		/// <summary>
 		/// Creates a new scan with the default scan configuration settings.
 		/// </summary>
-		void NewScan(std::vector<int> usedSerials, std::vector<Point3> refPoints, int filteringPrecision);
+		void NewScan(ScanConfig config);
 
 		/// <summary>
 		/// Deletes the latest scan.
@@ -60,6 +60,7 @@ namespace SmartScan
 		/// <param name="scanId"> - id of the scan to start</param>
 		void StartScan(int scanId);
 
+		void ClearData();
 		Point3 GetSingleSample(int sensorSerial);
 
 		/// <summary>

@@ -92,13 +92,8 @@ void DataAcq::Start()
 
 void DataAcq::Stop(bool clearData)
 {
-	// Check if data-acquisition thread is already stoppped.
-	if (!this->mRunning) {
-		return;
-	}
-
 	// Wait a bit for the other threads to finish.
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     if (clearData) {
 		for (int i = 0; i < mRawBuff.size(); i++) {

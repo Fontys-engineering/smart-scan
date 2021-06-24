@@ -27,49 +27,17 @@ void SmartScanService::Init(DataAcqConfig acquisitionConfig)
 	mDataAck.Init(acquisitionConfig);
 }
 
-void NewScan(std::vector<int> usedSerials, std::vector<Point3> refPoints, int filteringPrecision)
+void SmartScanService::NewScan(ScanConfig config)
 {
-	/*
-    // Create a local copy of the configuration
-    SmartScan::ScanConfig localConfig = config;
-
-    // Use default config when mock data is enabled
-    if (mUseMockData)
-    {
-        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl));
-    }
-    else
-    {
-        // Replace sensor serial numbers with port numbers
-        if (useSerials)
-        {
-            if (localConfig.useReferenceSensor)
-            {
-                localConfig.referenceSensorId = tSCtrl->GetSensoridFromSerial(localConfig.referenceSensorId);
-
-                if(localConfig.referenceSensorId < 0)
-                {
-                    throw ex_smartScan("Could not find reference sensor serial number", __func__, __FILE__);
-                }
-            }
-            for(int i = 0; i < localConfig.usedSensorIds.size(); i++)
-            {
-                localConfig.usedSensorIds[i] = tSCtrl->GetSensoridFromSerial(localConfig.usedSensorIds[i]);
-
-                if(localConfig.usedSensorIds[i] < 0)
-                {
-                    throw ex_smartScan("Could not find used sensor serial number", __func__, __FILE__);
-                }
-            }
-        }
-        this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), tSCtrl, localConfig));
-    }
-	*/
+	if (180%config.filteringPrecision != 0) {
+		throw ex_smartScan("180 is not a multiple of the filtering precision", __func__, __FILE__);
+	}
+	config.inBuff = mDataAck.getRawBuffer();
+	this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), config));
 }
 
 void SmartScanService::DeleteScan()
 {
-	mDataAck.Stop(true);
 	this->scans.clear();
 }
 
@@ -124,6 +92,15 @@ void SmartScanService::StartScan(int scanId)
 	}
 
 	scans.at(scanId)->Run();
+}
+
+void SmartScanService::ClearData()
+{
+	mDataAck.Stop(true);
+
+	for (int i = 0; i < scans.size(); i++) {
+		scans.at(i)->Stop(true);
+	}
 }
 
 Point3 SmartScanService::GetSingleSample(int sensorSerial)
@@ -191,10 +168,12 @@ void SmartScanService::ExportCSV(const std::string filename, int scanId, const b
 {
 	try {
 		if (raw) {
-			csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename, true);
+			csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename);
 		}
 		else {
-			//csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
+			std::vector<Point3> temp;
+			scans.at(scanId)->CopyOutputBuffer(&temp);
+			csvExport.ExportPoint3(&temp, filename);
 		}
 	}
 	catch(ex_export e) {
@@ -209,10 +188,12 @@ void SmartScanService::ExportPointCloud(const std::string filename, int scanId, 
 {
 	try {
 		if (raw) {
-			csvExport.ExportPoint3Raw(mDataAck.getRawBuffer(), filename, false);
+			csvExport.ExportPoint3RawCloud(mDataAck.getRawBuffer(), filename);
 		}
 		else {
-			//csvExport.ExportPoint3(scans.at(scanId)->mOutBuff, filename, scans.at(scanId)->NUsedSensors());
+			std::vector<Point3> temp;
+			scans.at(scanId)->CopyOutputBuffer(&temp);
+			csvExport.ExportPoint3Cloud(&temp, filename);
 		}
 	}
 	catch(ex_export e) {
