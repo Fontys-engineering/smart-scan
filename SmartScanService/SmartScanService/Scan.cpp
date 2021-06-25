@@ -107,7 +107,7 @@ const double Scan::GetOutlierThreshold() const
 
 void Scan::DataFiltering()
 {
-	while ((mLastFilteredSample != mConfig.stopAtSample && mRunning) || mLastFilteredSample != mConfig.inBuff->back().size() - 1) {
+	while (mLastFilteredSample != mConfig.stopAtSample && (mRunning || mLastFilteredSample != mConfig.inBuff->back().size() - 1)) {
 		int nearestRef, nearestTheta, nearestPhi;
 
 		if (mConfig.inBuff->back().size() > mLastFilteredSample + 1) {

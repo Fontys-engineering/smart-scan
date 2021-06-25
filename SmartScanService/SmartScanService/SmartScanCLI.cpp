@@ -225,8 +225,8 @@ int main()
 			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(9) << std::endl;
 
 			try {
-				s3.ExportCSV(filepath.substr(9) + ".csv", id, true);
-                s3.ExportPointCloud(filepath.substr(9) + "_pc.csv", id, true);
+				s3.ExportCSV(filepath.substr(9) + ".csv", id);
+                s3.ExportPointCloud(filepath.substr(9) + "_pc.csv", id);
 				std::cout << "Done.\n";
 			}
 			catch(ex_export e) {
