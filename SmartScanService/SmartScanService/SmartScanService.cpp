@@ -27,6 +27,14 @@ void SmartScanService::Init(DataAcqConfig acquisitionConfig)
 	mDataAck.Init(acquisitionConfig);
 }
 
+void SmartScanService::SetZOffset(int serialNumber, double offset)
+{
+	if (mUseMockData) {
+		return;
+	}
+	mDataAck.SetZOffset(serialNumber, offset);
+}
+
 void SmartScanService::NewScan(ScanConfig config)
 {
 	if (180%config.filteringPrecision != 0) {
@@ -103,9 +111,9 @@ void SmartScanService::ClearData()
 	}
 }
 
-Point3 SmartScanService::GetSingleSample(int sensorSerial)
+Point3 SmartScanService::GetSingleSample(int sensorSerial, bool angleCorrect)
 {
-	return mDataAck.getSingleSample(sensorSerial);
+	return mDataAck.getSingleSample(sensorSerial, angleCorrect);
 }
 
 void SmartScanService::StopScan()

@@ -35,6 +35,8 @@ namespace SmartScan
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
 
+		void SetZOffset(int serialNumber, double offset);
+
 		/// <summary>
 		/// Creates a new scan with the default scan configuration settings.
 		/// </summary>
@@ -61,7 +63,7 @@ namespace SmartScan
 		void StartScan(int scanId);
 
 		void ClearData();
-		Point3 GetSingleSample(int sensorSerial);
+		Point3 GetSingleSample(int sensorSerial, bool angleCorrect = false);
 
 		/// <summary>
 		/// Stop the latest scan
@@ -119,17 +121,7 @@ namespace SmartScan
 		std::vector<std::shared_ptr<Scan>> scans;       // This vector stores the current scan objects. 
 		CSVExport csvExport;                            // CSVexport obj
 
-		TrakStarController* tSCtrl;
-
-		std::function<void(std::vector<Point3>&)> mUICallback;  // ?UI callback
 		std::function<void(const std::vector<Point3>&)> mRawCallback; // Needed to print raw data in console
-
-		//calibration and configuration:
-		int mThumbSensorId = 0;
-		int mIndexSensorId = 1;
-		const double refSetTime = 5000;		            // Time in milliseconds after which the point is considered a reference.
-		const double tError = 20;			            // Tolerated translation error in mm
-		const double rError = 20;			            // Tolerated rotation error in mm
 
 		/// <summary>
 		/// Looks at the scans and returns the first unused id;
@@ -143,9 +135,5 @@ namespace SmartScan
 		/// <param name="scanId"> - the id we are checking for</param>
 		/// <returns> - true if a scan with the same id exists</returns>
 		const bool IdExists(const int scanId) const;
-
-		//TODO: handle older scans
-		//the scan files database object:
-		//ScanDb scanDb;
 	};
 }

@@ -78,7 +78,12 @@ Point3Ref::Point3Ref()
 
     for (int i = 0; i < 3; i++) {
         for (int k = 0; k < 3; k++) {
-            this->m[i][k] = 0;
+			if (k == i) {
+				this->m[i][k] = 1;
+			}
+			else {
+				this->m[i][k] = 0;
+			}
         }
 	}
 }

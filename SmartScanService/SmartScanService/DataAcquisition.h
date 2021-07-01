@@ -21,7 +21,10 @@ namespace SmartScan
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
 		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
-		bool useMatrix = true;							// Use rotation matrixes to correct for the reference sensor instead of euler angles.
+		double frameRotations[3] = {0, 0, 0};			// Serial number of the reference sensor, set as -1 when no reference sensor is used.
+
+		DataAcqConfig();
+		DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3]);
     };
 
 	class DataAcq 
@@ -39,6 +42,7 @@ namespace SmartScan
         // It will also retrieve sensor information and match ports and serial numbers.
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
+		void SetZOffset(int serialNumber, double offset);
 
         // Start a data-acquisition thread that will continuously record values into a buffer.
 		void Start();
@@ -50,7 +54,7 @@ namespace SmartScan
         // Returns a boolean indicating if the data-acquisition thread is running.
 		const bool IsRunning() const;
 
-		Point3 getSingleSample(int sensorSerial);
+		Point3 getSingleSample(int sensorSerial, bool angleCorrect);
         // Returns a pointer to the raw data buffer,for read-only access.
 		const std::vector<Point3>* getSingleRawBuffer(int serialNumber);
 		const std::vector<std::vector<Point3>>* getRawBuffer();
@@ -95,7 +99,7 @@ namespace SmartScan
 
 		void DataAcquisition();
 
-		void referenceCorrect(Point3* refPoint, Point3* sensorPoint);
+		void angleCorrect(Point3* sensorPoint);
 		void referenceCorrect(Point3Ref* refPoint, Point3* sensorPoint);
 	};
 }

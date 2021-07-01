@@ -89,6 +89,21 @@ void TrakStarController::SetMetric()
 	ErrorHandler(errorCode);
 }
 
+void TrakStarController::SetReferenceFrame(short int id, double angles[3])
+{
+	BOOL isTrue = true;
+	DOUBLE_ANGLES_RECORD record;
+
+	record.a = angles[0];
+	record.e = angles[1];
+	record.r = angles[2];
+
+	int errorCode = SetTransmitterParameter(id, XYZ_REFERENCE_FRAME, &record, sizeof(record));
+	ErrorHandler(errorCode);
+	errorCode = SetTransmitterParameter(id, REFERENCE_FRAME, &isTrue, sizeof(isTrue));
+	ErrorHandler(errorCode);
+}
+
 void TrakStarController::SetSensorFormat()
 {
 	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)	{
@@ -102,6 +117,18 @@ void TrakStarController::SetRefSensorFormat(int id)
 {
 	DATA_FORMAT_TYPE type = DOUBLE_POSITION_MATRIX;
 	int errorCode = SetSensorParameter(id, DATA_FORMAT, &type, sizeof(type));
+	ErrorHandler(errorCode);
+}
+
+void TrakStarController::SetSensorZOffset(int id, double offset)
+{
+	DOUBLE_POSITION_RECORD record;
+
+	record.x = 0.0;
+	record.y = 0.0;
+	record.z = offset * toInch;
+
+	int errorCode = SetSensorParameter(id, SENSOR_OFFSET, &record, sizeof(record));
 	ErrorHandler(errorCode);
 }
 

@@ -32,7 +32,7 @@ void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::st
 	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << ',' << "Button" << std::endl;
 	if (!data->empty())	{
 		for (int i = 0; i < data->size(); i = i++) {
-			csvFile << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << "," << (int)data->at(i).buttonState << std::endl;
+			csvFile << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << std::endl;
 		}
 	}
 	else {
@@ -71,7 +71,7 @@ void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* dat
 		for (int j = 0; j < data->size(); j++)
 		{
 			for (int i = 0; i < data->at(j).size(); i++) {
-				csvFile << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << "," << (int)data->at(j).at(i).buttonState << std::endl; 
+				csvFile << data->at(j).at(i).x << "," << data->at(j).at(i).y << "," << data->at(j).at(i).z << std::endl; 
 			}
 		}
 	}

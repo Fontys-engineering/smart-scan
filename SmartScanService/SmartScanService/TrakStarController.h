@@ -61,9 +61,11 @@ namespace SmartScan
 		void SetMaxRange(double range);
 
 		void SetMetric();
+		void SetReferenceFrame(short int id, double angles[3]);
 
 		void SetSensorFormat();
 		void SetRefSensorFormat(int id);
+		void SetSensorZOffset(int id, double offset);
 
         /// <summary>
         /// Get the port numbers of the attached sensors.
@@ -82,6 +84,7 @@ namespace SmartScan
 		Point3Ref GetRefRecord(int id);
 
 	private:
+		const double toInch = 0.03937008;
 		const bool mUseMockData;
 
 		std::string s0MockDataFilePath = "MockData/s0.csv";

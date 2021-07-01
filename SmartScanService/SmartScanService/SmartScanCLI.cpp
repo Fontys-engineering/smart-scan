@@ -57,6 +57,7 @@ int main()
 		return -1;
 	}
 
+	std::cout << "\t\tApplication " << (mockMode ? "" : "not ") << "in mockmode" << std::endl;
 	std::cout << "\t\tFound " << s3.NumAttachedBoards() << " attached board(s)" << std::endl; 
 	std::cout << "\t\tFound " << s3.NumAttachedTransmitters() << " attached transmitter(s)" << std::endl; 
 	std::cout << "\t\tFound " << s3.NumAttachedSensors(true) << " attached sensor(s)" << std::endl << std::endl << std::endl;
@@ -172,6 +173,30 @@ int main()
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
             catch (ex_scan e) {
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+		}
+		else if (!strcmp(cmd, "calibrate")) {
+            try {
+				std::cout << "Put your hand on the table of the transmitter and press enter when ready." << std::flush;
+				std::cin.ignore();
+
+				Point3 thumbPoint = s3.GetSingleSample(rThumbSerial);
+				Point3 indexPoint = s3.GetSingleSample(rIndexSerial);
+				Point3 middlePoint = s3.GetSingleSample(rMiddleSerial);
+
+				s3.SetZOffset(rThumbSerial, thumbPoint.z);
+				s3.SetZOffset(rIndexSerial, indexPoint.z);
+				s3.SetZOffset(rMiddleSerial, middlePoint.z);
+
+				std::cout << "Set thumb to have a Z offset of: " << thumbPoint.z << " ." << std::endl;
+				std::cout << "Set index finger to have a Z offset of: " << indexPoint.z << " ." << std::endl;
+				std::cout << "Set middle finger to have a Z offset of: " << middlePoint.z << " ." << std::endl;
+            }
+            catch (ex_trakStar e) {
+				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
+			}
+            catch (ex_acq e) {
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}

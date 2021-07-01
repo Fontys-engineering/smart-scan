@@ -7,6 +7,19 @@
 
 using namespace SmartScan;
 
+DataAcqConfig::DataAcqConfig() 
+{
+
+}
+
+DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3])
+	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }, refSensorSerial { refSensorSerial }
+{
+	for (int i = 0; i < 3; i ++) {
+		this->frameRotations[i] = frameRotations[i];
+	}
+}
+
 DataAcq::DataAcq(bool useMockData) : mUseMockData { useMockData }, mTSCtrl(useMockData)
 {
 
@@ -27,6 +40,7 @@ void DataAcq::Init()
 		mTSCtrl.SetMeasurementRate(mConfig.measurementRate);
 		mTSCtrl.SetMaxRange(mConfig.maximumRange);
 		mTSCtrl.SetMetric();
+		mTSCtrl.SetReferenceFrame(mConfig.transmitterID, mConfig.frameRotations);
 		mTSCtrl.SetSensorFormat();
 	}
 
@@ -62,6 +76,11 @@ void DataAcq::Init(DataAcqConfig acquisitionConfig)
 {
 	this->mConfig = acquisitionConfig;
 	this->Init();
+}
+
+void DataAcq::SetZOffset(int serialNumber, double offset)
+{
+	mTSCtrl.SetSensorZOffset(findPortNum(serialNumber), offset);
 }
 
 void DataAcq::Start()
@@ -142,29 +161,25 @@ void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point
 	mRawDataCallback = callback;
 }
 
-Point3 DataAcq::getSingleSample(int sensorSerial)
+Point3 DataAcq::getSingleSample(int sensorSerial, bool angleCorrect)
 {
 	// Check whether trak star controller has been initialised 
 	if (!mRawBuff.size()) {
 		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
 	}
 
-	Point3 ref;
 	Point3Ref refMatrix;
 
 	// Make Point3 obj to get the position info of the trackStar device
 	Point3 raw = mTSCtrl.GetRecord(findPortNum(sensorSerial)); 
 
 	// Check if a reference sensor is defined.
-	if (refSensorPort > -1) {
-		if (mConfig.useMatrix) {
-			refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
-			referenceCorrect(&refMatrix, &raw);
-		}
-		else {
-			ref = mTSCtrl.GetRecord(refSensorPort);
-			referenceCorrect(&ref, &raw);
-		}
+	if (angleCorrect) {
+		//this->angleCorrect(&raw);
+	}
+	else if (refSensorPort > -1) {
+		refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
+		referenceCorrect(&refMatrix, &raw);
 	}
 
 	return raw;
@@ -213,7 +228,6 @@ void DataAcq::DataAcquisition()
 	auto startSampling = std::chrono::steady_clock::now();
 	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
 
-	Point3 ref;
 	Point3Ref refMatrix;
 
 	while (mRunning) {
@@ -226,12 +240,7 @@ void DataAcq::DataAcquisition()
 
 			// Check if a reference sensor is defined.
 			if (refSensorPort > -1) {
-				if (mConfig.useMatrix) {
-					refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
-				}
-				else {
-					ref = mTSCtrl.GetRecord(refSensorPort);
-				}
+				refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
 			}
 
             for (int i = 0; i < mPortNumBuff.size(); i++) {
@@ -247,12 +256,7 @@ void DataAcq::DataAcquisition()
 
 				// Correct point for reference sensor
 				if (refSensorPort > -1) {
-					if (mConfig.useMatrix) {
-						referenceCorrect(&refMatrix, &raw);
-					}
-					else {
-						referenceCorrect(&ref, &raw);
-					}
+					referenceCorrect(&refMatrix, &raw);
 				}
 
 				mRawBuff[i].push_back(raw);
@@ -273,24 +277,19 @@ void DataAcq::DataAcquisition()
     }
 }
 
-void DataAcq::referenceCorrect(Point3* refPoint, Point3* sensorPoint)
+void DataAcq::angleCorrect(Point3* sensorPoint)
 {
-	// Check the orientation of the current point.
-	sensorPoint->x = sensorPoint->x - refPoint->x;
-	sensorPoint->y = sensorPoint->y - refPoint->y;
-	sensorPoint->z = sensorPoint->z - refPoint->z;
-
 	// Use the azimuth to calculate the rotation around the z-axis.
-	double x_new = sensorPoint->x * cos(refPoint->r.z * toRad) + sensorPoint->y * sin(refPoint->r.z * toRad);
-	double y_new = sensorPoint->y * cos(refPoint->r.z * toRad) - sensorPoint->x * sin(refPoint->r.z * toRad);
+	double x_new = sensorPoint->x * cos(sensorPoint->r.z * toRad) + sensorPoint->y * sin(sensorPoint->r.z * toRad);
+	double y_new = sensorPoint->y * cos(sensorPoint->r.z * toRad) - sensorPoint->x * sin(sensorPoint->r.z * toRad);
 
 	// Use the elevation to calculate the rotation around the y-axis.
-	sensorPoint->x = x_new * cos(refPoint->r.y * toRad) - sensorPoint->z * sin(refPoint->r.y * toRad);
-	double z_new = sensorPoint->z * cos(refPoint->r.y * toRad) + x_new * sin(refPoint->r.y * toRad);
+	sensorPoint->x = x_new * cos(sensorPoint->r.y * toRad) - sensorPoint->z * sin(sensorPoint->r.y * toRad);
+	double z_new = sensorPoint->z * cos(sensorPoint->r.y * toRad) + x_new * sin(sensorPoint->r.y * toRad);
 
 	// Use the roll difference to calculate the rotation around the x-axis.
-	sensorPoint->y = y_new * cos(refPoint->r.x * toRad) + z_new * sin(refPoint->r.x * toRad);
-	sensorPoint->z = z_new * cos(refPoint->r.x * toRad) - y_new * sin(refPoint->r.x * toRad);
+	sensorPoint->y = y_new * cos(sensorPoint->r.x * toRad) + z_new * sin(sensorPoint->r.x * toRad);
+	sensorPoint->z = z_new * cos(sensorPoint->r.x * toRad) - y_new * sin(sensorPoint->r.x * toRad);
 }
 
 void DataAcq::referenceCorrect(Point3Ref* refPoint, Point3* sensorPoint)
