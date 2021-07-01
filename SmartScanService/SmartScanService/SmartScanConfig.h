@@ -14,13 +14,13 @@ const bool mockMode = false;
 // Glove setup
 int rThumbSerial = 55430;
 int rIndexSerial = 55432;
-int rMiddleSerial = 55429;
+int rMiddleSerial = 55435;
 //int rRingSerial = 1;
 //int rPinkySerial = 1;
 
 // Data-acquisition configuration
 short int transmitterID = 0;                    // Port of the transmitter, is usually 0 with one trakStar device.
-double measurementRate = 50;                    // Between 20.0 and 255.0
+double measurementRate = 255;                    // Between 20.0 and 255.0
 double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
 double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
 int refSensorSerial = 55431;					// Serial number of the reference sensor, set as -1 when no reference sensor is used.

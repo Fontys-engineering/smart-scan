@@ -20,7 +20,7 @@ namespace SmartScan
         double measurementRate = 50;                    // Between 20.0 and 255.0
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
-		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
+		int refSensorSerial = 55431;// -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
 		bool useMatrix = true;							// Use rotation matrixes to correct for the reference sensor instead of euler angles.
     };
 
