@@ -27,4 +27,4 @@ This repository contains the source code for the Semester 7 Fontys project "Smar
 ![Image of pipeline](readme_img/pipeline.png?raw=true)
 
 ## UML
-![Image of architecture](readme_img/uml.png?raw=true)
+![Image of architecture](readme_img/software_architecure.png?raw=true)
