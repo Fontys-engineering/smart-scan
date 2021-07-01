@@ -1,10 +1,10 @@
+![Image of smartscan](readme_img/SmartScan_header.png?raw=true)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # SmartScan Software Repository
-This repository contains the source code for the Semester 7 Fontys project "SmartScan".
-
-**This project is no longer in active development.**
+This repository contains the source code for the Fontys project "Smart Scan".
 
 **A release CLI application and library version is available to download.**
-**A Rhino plug-in implementation using the smart scan service can be found at https://github.com/eduardcazacu/smart-scan-rhino**
+**A Rhino plug-in implementation using the smart scan service can be found at https://github.com/eduardcazacu/smart-scan-rhino** (No documentation)
 
 ## Folder Structure:
 1. Root
