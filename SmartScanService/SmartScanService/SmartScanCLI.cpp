@@ -26,6 +26,7 @@ SmartScanService s3(mockMode);
 
 int main()
 {
+	// Print welcome screen.
 	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	std::cout << "                /$$$$$$                                      /$$      /$$$$$$                               " << std::endl;
 	std::cout << "               /$$__  $$                                    | $$     /$$__  $$                              " << std::endl;
@@ -57,6 +58,7 @@ int main()
 		return -1;
 	}
 
+	// Print general info.
 	std::cout << "\t\tApplication " << (mockMode ? "" : "not ") << "in mockmode" << std::endl;
 	std::cout << "\t\tFound " << s3.NumAttachedBoards() << " attached board(s)" << std::endl; 
 	std::cout << "\t\tFound " << s3.NumAttachedTransmitters() << " attached transmitter(s)" << std::endl; 
@@ -67,9 +69,13 @@ int main()
 
 	char cmd[128];
 	do {
+		// Print prompt.
 		std::cout << "SmartScan>";
+
+		// Wait for user input and store it in cmd.
 		std::cin.getline(cmd, 128);
 
+		// Start collecting data.
 		if (!strcmp(cmd, "start")) {
 			try {
 				s3.StartScan();
@@ -98,10 +104,12 @@ int main()
 				std::cerr << "Unnable to start the scan due to an unknow error. \n";
 			}
 		}
+		// Stop collecting data.
 		else if (!strcmp(cmd, "stop")) {
 			s3.StopScan();
 			std::cout << "All scans have stopped!" << std::string(70, ' ') << std::endl;
 		}
+		// Create a new scan.
 		else if (!strcmp(cmd, "new")) {
             try {
 				int numRefPoints;
@@ -109,7 +117,7 @@ int main()
 
 				std::cout << "Welcome to the scan creation wizard!" << std::endl;
 				std::cout << "Enter the number of desired reference points: " << std::flush;
-				while(!(std::cin >> numRefPoints)){
+				while(!(std::cin >> numRefPoints)){ // Make sure the user can only input numbers.
 					std::cin.clear();
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input.  Try again: ";
@@ -117,12 +125,13 @@ int main()
 				std::cin.ignore();
 
 				std::cout << "Position the thumb and index finger around the reference point and press any key when ready.";
-				for (int i = 0; i < numRefPoints; i++) {
+				for (int i = 0; i < numRefPoints; i++) { // Collect the same amount of reference points as specified earlier.
 					std::cin.ignore();
 					Point3 PointThumb = s3.GetSingleSample(rThumbSerial);
 					Point3 PointIndex = s3.GetSingleSample(rIndexSerial);
 					Point3 refPoint;
 
+					// Average every coordinate to get the point in between the two fingers.
 					refPoint.x = ((PointThumb.x + PointIndex.x) / 2);
 					refPoint.y = ((PointThumb.y + PointIndex.y) / 2);
 					refPoint.z = ((PointThumb.z + PointIndex.z) / 2);
@@ -176,6 +185,8 @@ int main()
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
+		// Calibrate the sensor offset with respect to the glove and finger t h i c c n e s s.
+		// This function probably still needs adjustsments or a better implementation.
 		else if (!strcmp(cmd, "calibrate")) {
             try {
 				std::cout << "Put your hand on the table of the transmitter and press enter when ready." << std::flush;
@@ -185,6 +196,7 @@ int main()
 				Point3 indexPoint = s3.GetSingleSample(rIndexSerial);
 				Point3 middlePoint = s3.GetSingleSample(rMiddleSerial);
 
+				// Offset would only be in the Z direction.
 				s3.SetZOffset(rThumbSerial, thumbPoint.z);
 				s3.SetZOffset(rIndexSerial, indexPoint.z);
 				s3.SetZOffset(rMiddleSerial, middlePoint.z);
@@ -200,10 +212,12 @@ int main()
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
+		// Clear all recorded data.
 		else if (!strcmp(cmd, "clear")) {
 			s3.ClearData();
 			std::cout << "All data cleared!" << std::endl;
 		}
+		// Delete all the scans.
 		else if (!strcmp(cmd, "delete")) {
 			char ack[128];
 			std::cout << "Are you sure you want to delete all? answer y/n: ";
@@ -219,6 +233,7 @@ int main()
 				}
 			}
 		}
+		// Delete a specific scan.
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "delete ", 7)) {
 			// Get the id from the comand:
 			std::string sCmd = cmd;
@@ -232,6 +247,7 @@ int main()
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
 			}
 		}
+		// List all the created scans and its options.
 		else if (!strcmp(cmd, "list")) {
 			std::cout << "Scan ID\t\tNumRefs\t\tPrecision\tStopAt\t\tThreshold" << std::endl;
 
@@ -240,6 +256,7 @@ int main()
 				std::cout << s3.GetScansList().at(s)->GetStopAtSample() << "\t\t" << s3.GetScansList().at(s)->GetOutlierThreshold() << std::endl;
 			}
 		}
+		// Export a specific scan.
 		else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7)) {
 			// Get the id from the comand:
 			std::string sCmd = cmd;
@@ -250,6 +267,7 @@ int main()
 			std::cout << "exporting raw data from scan: " << id << " into file: " << filepath.substr(9) << std::endl;
 
 			try {
+				// Export both the MATLAB format and the Point cloud format.
 				s3.ExportCSV(filepath.substr(9) + ".csv", id);
                 s3.ExportPointCloud(filepath.substr(9) + "_pc.csv", id);
 				std::cout << "Done.\n";
@@ -261,6 +279,7 @@ int main()
 				std::cerr << "Could not export csv file" << std::endl;
 			}
 		}
+		// Export all sensor data (except for the reference sensor) without any filtering, but with reference sensor correction.
 		else if (strlen(cmd) > 11 && !strncmp(cmd, "export-raw ", 11)) {
 			// Get the id from the comand:
 			std::string sCmd = cmd;
@@ -270,6 +289,7 @@ int main()
 			std::cout << "Exporting raw data into file: " << filepath.substr(11) << std::endl;
 
 			try {
+				// Export both the MATLAB format and the Point cloud format.
 				s3.ExportCSV(filepath.substr(11) + ".csv", 0, true);
                 s3.ExportPointCloud(filepath.substr(11) + "_pc.csv", 0, true);
 				std::cout << "Done.\n";
@@ -281,12 +301,14 @@ int main()
 				std::cerr << "Could not export csv file" << std::endl;
 			}
 		}
+		// Print the help menu.
 		else if (!strcmp(cmd, "help")) {
 			Usage();
 		}
-	} while (strcmp(cmd, "exit"));	
+	} while (strcmp(cmd, "exit"));	// Exit the application.
 }
 
+// Help menu.
 void Usage()
 {
 	std::cout << std::endl;
@@ -294,6 +316,7 @@ void Usage()
 	std::cout << "\tstart [id]\t\t\tStart the measurement. Leave id blank to start all scans." << std::endl;
 	std::cout << "\tstop [id]\t\t\tStop the measurement. Leave id blank to stop all scans." << std::endl;
 	std::cout << "\tnew\t\t\t\tCreate a new measurement." << std::endl;
+	std::cout << "\tcalibrate\t\t\t\tCalibrate the sensor offsets with respect to finger t h i c c n e s s." << std::endl;
 	std::cout << "\tclear\t\t\t\tClear all recorded data." << std::endl;
 	std::cout << "\tdelete [id]\t\t\tDelete a measurement. Leave id blank to delete all scans" << std::endl << "\t\t\t\t\t" << "and clear the raw data." << std::endl;
 	std::cout << "\tlist\t\t\t\tPrint all the existing Scans to the console." << std::endl;
@@ -304,9 +327,12 @@ void Usage()
 	std::cout << std::endl;
 }
 
+// Function that is called everytime a new set of samples has been collected.
 void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
 {
-	std::cout << '\r';
+	std::cout << '\r'; // Set cursor to the beginning of the line to prevent messy couts.
+	// All data is casted to an int so that the amount of characters that are going to be printed are predictable and concise.
+	// This is important since you can only rewrite over the current line, so all sensor data needs to be printed on one line.
 	std::cout << std::setw(4) << (int)record[0].time;
 	std::cout << std::setw(4) << (int)record[0].buttonState;
 

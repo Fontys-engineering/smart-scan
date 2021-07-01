@@ -16,7 +16,7 @@ DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, do
 	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }, refSensorSerial { refSensorSerial }
 {
 	for (int i = 0; i < 3; i ++) {
-		this->frameRotations[i] = frameRotations[i];
+		this->frameRotations[i] = frameRotations[i]; // Copy the array.
 	}
 }
 
@@ -33,6 +33,7 @@ DataAcq::~DataAcq()
 
 void DataAcq::Init()
 {
+	// Skip initalization of the TrakStar device when in Mock mode.
 	if (!mUseMockData) {
 		mTSCtrl.Init();
 		mTSCtrl.SelectTransmitter(mConfig.transmitterID);
@@ -44,6 +45,7 @@ void DataAcq::Init()
 		mTSCtrl.SetSensorFormat();
 	}
 
+	// Get sensor info from TrakStar object.
 	mPortNumBuff = mTSCtrl.GetAttachedPorts();
 	mSerialBuff = mTSCtrl.GetAttachedSerials();
 
@@ -58,9 +60,12 @@ void DataAcq::Init()
 				foundSensor = true;
 			}
 		}
+
+		// Throw an error if the user specified a reference sensor serial number that is not attached.
 		if (!foundSensor) {
 			throw ex_acq("Could not find the reference sensor specified.", __func__, __FILE__);
 		}
+		// Set the reference sensor to use rotation matrices instead of Euler angles.
 		if (!mUseMockData) {
 			mTSCtrl.SetRefSensorFormat(refSensorPort);
 		}
@@ -85,17 +90,17 @@ void DataAcq::SetZOffset(int serialNumber, double offset)
 
 void DataAcq::Start()
 {
-	// Check whether trak star controller has been initialised 
+	// Check whether trak star controller has been initialised.
 	if (!mRawBuff.size()) {
 		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
 	}
 
-	// Check if the data-acquisition thread is already running:
+	// Check if the DataAcquisition thread is already running.
 	if (this->mRunning)	{
 		return;
 	}
 
-    // Create a new data data-acquisition thread.
+    // Create a new DataAcquisition thread.
 	try	{
 		this->pAcquisitionThread = std::make_unique<std::thread>(&DataAcq::DataAcquisition, this);
 	}
@@ -103,7 +108,7 @@ void DataAcq::Start()
 		throw ex_acq("Unnable to start data-acquisition thread.", __func__, __FILE__);
 	}
 
-	// Let it gooooo, let it gooo
+	// Let it gooooo, let it gooo.
 	this->pAcquisitionThread->detach();
 
 	mRunning = true;
@@ -128,11 +133,6 @@ const bool DataAcq::IsRunning() const
 	return mRunning;
 }
 
-const std::vector<Point3>* DataAcq::getSingleRawBuffer(int serialNumber)
-{
-	return &mRawBuff[findBuffNum(serialNumber)];
-}
-
 const std::vector<std::vector<Point3>>* DataAcq::getRawBuffer()
 {
 	return &mRawBuff;
@@ -150,6 +150,7 @@ const int DataAcq::NumAttachedTransmitters() const
 
 const int DataAcq::NumAttachedSensors(bool includeRef) const
 {
+	// Add + 1 since the reference sensor is removed from the sensor list.
 	if (includeRef && refSensorPort > -1) {
 		return mPortNumBuff.size() + 1;
 	}
@@ -161,41 +162,45 @@ void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point
 	mRawDataCallback = callback;
 }
 
-Point3 DataAcq::getSingleSample(int sensorSerial, bool angleCorrect)
+Point3 DataAcq::getSingleSample(int sensorSerial, bool raw)
 {
-	// Check whether trak star controller has been initialised 
+	// Check whether trak star controller has been initialised.
 	if (!mRawBuff.size()) {
 		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
 	}
 
+	// Create empty reference point for later use.
 	Point3Ref refMatrix;
 
-	// Make Point3 obj to get the position info of the trackStar device
-	Point3 raw = mTSCtrl.GetRecord(findPortNum(sensorSerial)); 
+	// Make Point3 obj to get the position info of the trackStar device.
+	Point3 rawPoint = mTSCtrl.GetRecord(findPortNum(sensorSerial)); 
 
-	// Check if a reference sensor is defined.
-	if (angleCorrect) {
-		//this->angleCorrect(&raw);
+	// Check if raw data is requested.
+	if (raw) {
+		//this->angleCorrect(&rawPoint);
 	}
+	// Check if a reference sensor is defined.
 	else if (refSensorPort > -1) {
 		refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
-		referenceCorrect(&refMatrix, &raw);
+		referenceCorrect(&refMatrix, &rawPoint);
 	}
 
-	return raw;
+	return rawPoint;
 }
 
-int DataAcq::findPortNum(int sensorSerial)
+int DataAcq::findPortNum(int serialNumber)
 {
+	// Initialize to an irrealistic number.
 	int portNum = -1;
 
     for (int i = 0; i < mSerialBuff.size(); i++) {
-        if(mSerialBuff[i] == sensorSerial) {
+        if(mSerialBuff[i] == serialNumber) {
 			portNum = mPortNumBuff[i];
-            break;  
+            break;	// Break if serial number has been found.  
         }
     }
 
+	// Throw an error if the serial number cannot be found.
 	if (portNum == -1) {
 		throw ex_acq("Could not find requested sensor serial number.", __func__, __FILE__);
 	}
@@ -203,17 +208,19 @@ int DataAcq::findPortNum(int sensorSerial)
     return portNum;
 }
 
-int DataAcq::findBuffNum(int sensorSerial)
+int DataAcq::findBuffNum(int serialNumber)
 {
+	// Initialize to an irrealistic number.
 	int bufNum = -1;
 
     for (int i = 0; i < mSerialBuff.size(); i++) {
-        if(mSerialBuff[i] == sensorSerial) {
+        if(mSerialBuff[i] == serialNumber) {
 			bufNum = i;
-            break;  
+            break; // Break if serial number has been found.
         }
     }
 
+	// Throw an error if the serial number cannot be found.
 	if (bufNum == -1) {
 		throw ex_acq("Could not find requested sensor serial number.", __func__, __FILE__);
 	}
@@ -228,6 +235,7 @@ void DataAcq::DataAcquisition()
 	auto startSampling = std::chrono::steady_clock::now();
 	std::chrono::time_point<std::chrono::steady_clock> endSampleTime = startSampling;
 
+	// Create empty reference point for later use.
 	Point3Ref refMatrix;
 
 	while (mRunning) {

@@ -1,6 +1,5 @@
-// This is the main smart scan library class
-// It makes use of the Filtering, TrackStarController, Trigger and CSVExport sub-classes
-//
+// This is the main smart scan library class.
+// It provides the interface with which the SmartScan device is controlled. 
 // Applications using SmartScan software should use this class and not the other classes directly.
 
 #pragma once
@@ -20,120 +19,101 @@ namespace SmartScan
 	class SmartScanService
 	{
 	public:
-		/// <summary>
-		/// Cosntructor. Creates a SmartScanService object that handles all the functionality. 
-		///	When debugging and the TrakSTAR device is unnavailable, set "useMockData" to "true". Otherwise,
-		///	the TrakStarController will fail to initialise and throw errors.
-		/// </summary>
-		/// <param name="useMockData"> - When set to "true", a mock trakSTAR device is used.</param>
+		// Constructor. Creates a SmartScanService object that handles everything SmartScan related.
+		// Arguments:
+		// - useMockData : When set to "true", a mock trakSTAR device is used. It will try to use the real thing otherwise.
 		SmartScanService(bool useMockData = false);
+
+		// Destructor. Is here to make sure the data is cleaned up if the SmartScan object is removed.
 		~SmartScanService();
 
-		/// <summary>
-		/// Initialise the Smart Scan service, Trak star device etc. Call this after the TrakStar system is pluged-in
-		/// </summary>
+		// Initialise the SmartScan data acquisition. Call this before starting scans.
+		// Arguments:
+		// - acquistionConfig : Configuration struct that specifies the settings with which the TrakStar device is initalized. 
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
 
+		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
+		// Arguments:
+		// - serialNumber : Serial number of the sensor where the offset will be changed.
+		// - offset : Offset of the Z axis that will be added to the Z coordinate of this sensor.
 		void SetZOffset(int serialNumber, double offset);
 
-		/// <summary>
-		/// Creates a new scan with the default scan configuration settings.
-		/// </summary>
+		// Creates a new scan and adds it to the scan list.
+		// Arguments:
+		// - config : Configuration struct that specifies the settings of this particular scan.
 		void NewScan(ScanConfig config);
 
-		/// <summary>
-		/// Deletes the latest scan.
-		/// </summary>
+		// Deletes scans in the scan list.
+		// Arguments:
+		// - id : The id of the scan that needs to be deleted.
 		void DeleteScan();
-		/// <summary>
-		/// Deletes the scan with the specified id.
-		/// </summary>
-		/// <param name="id"> - The id of the scan to be deleted</param>
 		void DeleteScan(int id);
 
-		/// <summary>
-		/// Start the latest scan using only the specified sensors. If no scan exists, it will create a new one.
-		/// </summary>
+		// Start the data acquistion and all the scans in the scan list. 
 		void StartScan();
-		/// <summary>
-		/// Start the scan with the specified ID.
-		/// </summary>
-		/// <param name="scanId"> - id of the scan to start</param>
-		void StartScan(int scanId);
 
+		// Clear all previous recorded data.
 		void ClearData();
-		Point3 GetSingleSample(int sensorSerial, bool angleCorrect = false);
 
-		/// <summary>
-		/// Stop the latest scan
-		/// </summary>
+		// Acquire a single sample from a specific sensor.
+		// Returns a Point3 object.
+		// Arguments :
+		// - sensorNumber : Serial number of the sensor to get sample from.
+		// - raw : When set to "True", the acquired sample will not be corrected for the reference sensor.
+		Point3 GetSingleSample(int serialNumber, bool raw = false);
+
+		// Stop the data acquisition and with that all the scans. The scans will conitnue to filter until caught up with data acquisition.
 		void StopScan();
-		void StopScan(int scanId);
 
-		/// <summary>
-		/// Get a pointer to the latest scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
-		/// </summary>
-		/// <returns> - The latest scan (could be one still in progress)</returns>
-		const std::shared_ptr<Scan> GetScan() const;
-
-		/// <summary>
-		/// Get a pointer to a specific scan object. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
-		/// </summary>
-		/// <param name="id"> - the id of the desired scan (id is different from index)</param>
-		/// <returns> - The scan with the given id (could be one still in progress)</returns>
-		const std::shared_ptr<Scan> GetScan(int id) const;
-
-		/// <summary>
-		/// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
-		/// </summary>
-		/// <returns> - A reference to the vector of Smart scan object pointers </returns>
+		// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
+		// Returns a vector containing Scan objects by reference.
 		const std::vector<std::shared_ptr<Scan>>& GetScansList() const;
 
+		// Returns the number of attached boards to this PC.
 		const int NumAttachedBoards() const;
+
+		// Returns the number of attached transmitters to the TrakStar device.
 		const int NumAttachedTransmitters() const;
+
+		// Returns the number of attached sensors to the TrakStar device.
+		// Arguments :
+		// - includeRef : When set to "True", the returned number will include the reference sensor.
 		const int NumAttachedSensors(bool includeRef) const;
 
-		/// <summary>
-		/// Export the Point3 array in a csv format. Contains rotation.
-		/// </summary>
-		/// <param name="filename"> - the name of the output file</param>
-		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		// Export the Point3 array in a csv format suited for the MATLAB Artificial intelligence scripts.
+		// Arguments :
+		// - filename : Name of the exported file.
+		// - scanId : Id of the scan that needs to be exported. (Does nothing if exporting raw data)
+		// - raw : When set to "True", the raw data (corrected for a reference sensor) will be exported instead.
 		void ExportCSV(const std::string filename, int scanId, const bool raw = false);
 
-		/// <summary>
-		/// Export the filtered Point3 array in a Point Cloud format (only x,y,z)
-		/// </summary>
-		/// <param name="filename"> - the name of the output file</param>
-		/// <param name="raw"> - when true, the outptu is the raw buffer. default = false</param>
+		// Export the Point3 array in a csv format suited for Cloudcompare.
+		// Arguments :
+		// - filename : Name of the exported file.
+		// - scanId : Id of the scan that needs to be exported. (Does nothing if exporting raw data)
+		// - raw : When set to "True", the raw data (corrected for a reference sensor) will be exported instead.
 		void ExportPointCloud(const std::string filename, int scanId, const bool raw = false);
 
-		/// <summary>
-		/// Register a new callback function to be called whenever new raw data is available.
-		/// The raw data vector is provided through a reference as a parameter of the callback function.
-		/// </summary>
-		/// <param name="callback"></param>
+		// Register a new callback function to be called whenever new raw data is available.
+		// Arguments :
+		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
-		const bool mUseMockData;
+		const bool mUseMockData;						// Boolean indicating if Mock data is used.	
 
-		DataAcq mDataAck;								// Data acquisition obj
-		std::vector<std::shared_ptr<Scan>> scans;       // This vector stores the current scan objects. 
-		CSVExport csvExport;                            // CSVexport obj
+		DataAcq mDataAcq;								// Data acquisition obj.
+		std::vector<std::shared_ptr<Scan>> scans;       // Vector containing all the scans. 
 
-		std::function<void(const std::vector<Point3>&)> mRawCallback; // Needed to print raw data in console
+		CSVExport csvExport;                           	// CSVexport obj
 
-		/// <summary>
-		/// Looks at the scans and returns the first unused id;
-		/// </summary>
-		/// <returns> - unique, unused, id</returns>
+		// Looks at the scan list and returns the first unused id.
+		// Returns a unique, unused, id.
 		const int FindNewScanId() const ;
 
-		/// <summary>
-		/// check if a scan with the same id already exists
-		/// </summary>
-		/// <param name="scanId"> - the id we are checking for</param>
-		/// <returns> - true if a scan with the same id exists</returns>
+		// Returns a boolean indicating if a scan with the same Id already exists.
+		// Arguments :
+		// - scanId : Id that needs to be checked.
 		const bool IdExists(const int scanId) const;
 	};
 }
