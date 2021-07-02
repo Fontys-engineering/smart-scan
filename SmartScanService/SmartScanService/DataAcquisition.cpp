@@ -86,7 +86,7 @@ void DataAcq::Init(DataAcqConfig acquisitionConfig)
 void DataAcq::CorrectZOffset(int serialNumber)
 {
     Point3 rawSample = this->getSingleSample(serialNumber, true);
-    Point3 zOnly = Point3(0.0, 0.0, zCaseOffset + rawSample.z, rawSample.r);
+    Point3 zOnly = Point3(0.0, 0.0, zCaseOffset - rawSample.z, rawSample.r);
 
     this->angleCorrect(&zOnly);
 

@@ -106,7 +106,7 @@ namespace SmartScan
 		std::function<void(const std::vector<Point3>&)>mRawDataCallback;    // Callback for printing raw data in real time.
 
 		const double toRad = 3.14159265/180;								// Store degree to rad constant for easier acces later.
-        const double zCaseOffset = -45.72;                                  // Distance from bottom face of the transmitter to zero point.
+        const double zCaseOffset = 45.72;                                   // Distance from bottom face of the transmitter to zero point.
 
 		// Return the port number of a sensor based on its serial number. 
 		// Arguments :
