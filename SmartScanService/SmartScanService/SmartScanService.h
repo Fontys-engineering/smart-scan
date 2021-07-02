@@ -35,9 +35,8 @@ namespace SmartScan
 
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:
-		// - serialNumber : Serial number of the sensor where the offset will be changed.
-		// - offset : Offset of the Z axis that will be added to the Z coordinate of this sensor.
-		void SetZOffset(int serialNumber, double offset);
+		// - serialNumber : Serial number of the sensor where the Z offset will be changed.
+		void CorrectZOffset(int serialNumber);
 
 		// Creates a new scan and adds it to the scan list.
 		// Arguments:

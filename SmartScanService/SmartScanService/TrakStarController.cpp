@@ -98,9 +98,9 @@ void TrakStarController::SetReferenceFrame(short int id, double angles[3])
 	record.e = angles[1];
 	record.r = angles[2];
 
-	int errorCode = SetTransmitterParameter(id, XYZ_REFERENCE_FRAME, &record, sizeof(record));
+	int errorCode = SetTransmitterParameter(id, REFERENCE_FRAME, &record, sizeof(record));
 	ErrorHandler(errorCode);
-	errorCode = SetTransmitterParameter(id, REFERENCE_FRAME, &isTrue, sizeof(isTrue));
+	errorCode = SetTransmitterParameter(id, XYZ_REFERENCE_FRAME, &isTrue, sizeof(isTrue));
 	ErrorHandler(errorCode);
 }
 
@@ -120,13 +120,13 @@ void TrakStarController::SetRefSensorFormat(int id)
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetSensorZOffset(int id, double offset)
+void TrakStarController::SetSensorOffset(int id, Point3 offset)
 {
 	DOUBLE_POSITION_RECORD record;
 
-	record.x = 0.0;
-	record.y = 0.0;
-	record.z = offset * toInch;
+	record.x = offset.x * toInch;
+	record.y = offset.y * toInch;
+	record.z = offset.z * toInch;
 
 	int errorCode = SetSensorParameter(id, SENSOR_OFFSET, &record, sizeof(record));
 	ErrorHandler(errorCode);

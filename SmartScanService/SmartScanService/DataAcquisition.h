@@ -51,7 +51,7 @@ namespace SmartScan
 		// Arguments:
 		// - serialNumber : Serial number of the sensor where the offset will be changed.
 		// - offset : Offset of the Z axis that will be added to the Z coordinate of this sensor.
-		void SetZOffset(int serialNumber, double offset);
+		void CorrectZOffset(int serialNumber);
 
         // Start a DataAcquisition thread that will continuously record values into a buffer.
 		void Start();

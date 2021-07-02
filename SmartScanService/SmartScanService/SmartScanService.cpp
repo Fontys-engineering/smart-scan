@@ -30,12 +30,12 @@ void SmartScanService::Init(DataAcqConfig acquisitionConfig)
 	mDataAcq.Init(acquisitionConfig);
 }
 
-void SmartScanService::SetZOffset(int serialNumber, double offset)
+void SmartScanService::CorrectZOffset(int serialNumber)
 {
 	if (mUseMockData) {
 		return;
 	}
-	mDataAcq.SetZOffset(serialNumber, offset);
+	mDataAcq.CorrectZOffset(serialNumber);
 }
 
 void SmartScanService::NewScan(ScanConfig config)

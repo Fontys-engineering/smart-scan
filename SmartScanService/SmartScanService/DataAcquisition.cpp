@@ -83,9 +83,14 @@ void DataAcq::Init(DataAcqConfig acquisitionConfig)
 	this->Init();
 }
 
-void DataAcq::SetZOffset(int serialNumber, double offset)
+void DataAcq::CorrectZOffset(int serialNumber)
 {
-	mTSCtrl.SetSensorZOffset(findPortNum(serialNumber), offset);
+    Point3 rawSample = this->getSingleSample(serialNumber, true);
+    Point3 zOnly = Point3(0.0, 0.0, rawSample.z, rawSample.r);
+
+    this->angleCorrect(&zOnly);
+
+	mTSCtrl.SetSensorOffset(findPortNum(serialNumber), zOnly);
 }
 
 void DataAcq::Start()
@@ -288,16 +293,19 @@ void DataAcq::DataAcquisition()
 void DataAcq::angleCorrect(Point3* sensorPoint)
 {
 	// Use the azimuth to calculate the rotation around the z-axis.
-	double x_new = sensorPoint->x * cos(sensorPoint->r.z * toRad) + sensorPoint->y * sin(sensorPoint->r.z * toRad);
-	double y_new = sensorPoint->y * cos(sensorPoint->r.z * toRad) - sensorPoint->x * sin(sensorPoint->r.z * toRad);
+	//double x_new = sensorPoint->x * cos(sensorPoint->r.z * toRad) + sensorPoint->y * sin(sensorPoint->r.z * toRad);
+	//double y_new = sensorPoint->y * cos(sensorPoint->r.z * toRad) - sensorPoint->x * sin(sensorPoint->r.z * toRad);
 
 	// Use the elevation to calculate the rotation around the y-axis.
-	sensorPoint->x = x_new * cos(sensorPoint->r.y * toRad) - sensorPoint->z * sin(sensorPoint->r.y * toRad);
-	double z_new = sensorPoint->z * cos(sensorPoint->r.y * toRad) + x_new * sin(sensorPoint->r.y * toRad);
+	//sensorPoint->x = x_new * cos(sensorPoint->r.y * toRad) - sensorPoint->z * sin(sensorPoint->r.y * toRad);
+	//double z_new = sensorPoint->z * cos(sensorPoint->r.y * toRad) + x_new * sin(sensorPoint->r.y * toRad);
 
 	// Use the roll difference to calculate the rotation around the x-axis.
-	sensorPoint->y = y_new * cos(sensorPoint->r.x * toRad) + z_new * sin(sensorPoint->r.x * toRad);
-	sensorPoint->z = z_new * cos(sensorPoint->r.x * toRad) - y_new * sin(sensorPoint->r.x * toRad);
+	double y_new = sensorPoint->y * cos(sensorPoint->r.x * toRad) + sensorPoint->z * sin(sensorPoint->r.x * toRad);
+	double z_new = sensorPoint->z * cos(sensorPoint->r.x * toRad) - sensorPoint->y * sin(sensorPoint->r.x * toRad);
+
+    sensorPoint->y = y_new;
+    sensorPoint->z = z_new;
 }
 
 void DataAcq::referenceCorrect(Point3Ref* refPoint, Point3* sensorPoint)

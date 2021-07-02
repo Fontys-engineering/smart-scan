@@ -65,7 +65,7 @@ namespace SmartScan
 
 		void SetSensorFormat();
 		void SetRefSensorFormat(int id);
-		void SetSensorZOffset(int id, double offset);
+		void SetSensorOffset(int id, Point3 offset);
 
         /// <summary>
         /// Get the port numbers of the attached sensors.

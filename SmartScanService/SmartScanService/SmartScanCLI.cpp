@@ -192,18 +192,11 @@ int main()
 				std::cout << "Put your hand on the table of the transmitter and press enter when ready." << std::flush;
 				std::cin.ignore();
 
-				Point3 thumbPoint = s3.GetSingleSample(rThumbSerial);
-				Point3 indexPoint = s3.GetSingleSample(rIndexSerial);
-				Point3 middlePoint = s3.GetSingleSample(rMiddleSerial);
+				s3.CorrectZOffset(rThumbSerial);
+				s3.CorrectZOffset(rIndexSerial);
+				s3.CorrectZOffset(rMiddleSerial);
 
-				// Offset would only be in the Z direction.
-				s3.SetZOffset(rThumbSerial, thumbPoint.z);
-				s3.SetZOffset(rIndexSerial, indexPoint.z);
-				s3.SetZOffset(rMiddleSerial, middlePoint.z);
-
-				std::cout << "Set thumb to have a Z offset of: " << thumbPoint.z << " ." << std::endl;
-				std::cout << "Set index finger to have a Z offset of: " << indexPoint.z << " ." << std::endl;
-				std::cout << "Set middle finger to have a Z offset of: " << middlePoint.z << " ." << std::endl;
+				std::cout << "New offset calculated succesfully!" << std::endl;
             }
             catch (ex_trakStar e) {
 				std::cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << std::endl;
