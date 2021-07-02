@@ -126,6 +126,7 @@ void DataAcq::Stop(bool clearData)
 
     if (clearData) {
 		for (int i = 0; i < mRawBuff.size(); i++) {
+			button_obj.ClearMyButton();
 			mRawBuff.at(i).clear();
 		}
 	}

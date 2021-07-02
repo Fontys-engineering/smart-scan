@@ -7,7 +7,10 @@ button_state Trigger::GetButtonState()
 	// Return current button state
 	return this->buttonState;
 }
-
+void Trigger::ClearMyButton()
+{
+	buttonState = button_state::INVALID;
+}
 void Trigger::UpdateButtonState(unsigned short buttonBit)
 {
 	static unsigned short lastButtonBit = 0;

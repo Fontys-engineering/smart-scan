@@ -16,6 +16,7 @@ namespace SmartScan
 		/// </summary>
 		button_state GetButtonState();
 
+		void ClearMyButton();
 		/// <summary>
 		/// Update current button state. 
 		/// </summary>
