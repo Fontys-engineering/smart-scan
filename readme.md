@@ -34,7 +34,7 @@ This repository contains the source code for the Fontys project "Smart Scan".
 # System architecture
 
 ## Measurement pipeline
-![Image of pipeline](readme_img/pipeline.png?raw=true)
+![Image of pipeline](Img/pipeline.png?raw=true)
 
 ## UML
-![Image of architecture](readme_img/software_architecture.png?raw=true)
+![Image of architecture](Img/architecture.png?raw=true)
