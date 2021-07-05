@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmartScanService", "SmartScanService\SmartScanService.vcxproj", "{F6E2B994-60F4-4414-A02D-0DF7E4DA2442}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmartScanCli", "SmartScanCli\SmartScanCli.vcxproj", "{E086A7B4-F077-4DAE-AAB8-FF5757FAD1C4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F6E2B994-60F4-4414-A02D-0DF7E4DA2442} = {F6E2B994-60F4-4414-A02D-0DF7E4DA2442}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmartScanService", "SmartScanService\SmartScanService.vcxproj", "{F6E2B994-60F4-4414-A02D-0DF7E4DA2442}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
