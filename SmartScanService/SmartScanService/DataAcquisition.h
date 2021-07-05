@@ -38,7 +38,7 @@ namespace SmartScan
 		// - useMockData : When set to "true", a mock trakSTAR device is used. It will try to use the real thing otherwise.
 		DataAcq(bool useMockData);
 
-		// Destructor. Is here to make sure the data is cleaned up if the SmartScan object is removed.
+		// Destructor. Is here to make sure the data is cleaned up if the DataAcquisition object is removed.
 		~DataAcq();
 
 		// Initialise the SmartScan data acquisition. Call this before starting scans.
@@ -50,29 +50,28 @@ namespace SmartScan
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:
 		// - serialNumber : Serial number of the sensor where the offset will be changed.
-		// - offset : Offset of the Z axis that will be added to the Z coordinate of this sensor.
 		void CorrectZOffset(int serialNumber);
 
         // Start a DataAcquisition thread that will continuously record values into a buffer.
 		void Start();
 
         // Stop the DataAcquisition thread.
-        // Arguments : 
+        // Arguments: 
 		// - clearData : When set to "True", it will erase all recorded data after stopping the thread.
 		void Stop(bool clearData = false);
 
         // Returns a boolean indicating if the DataAcquisition thread is running.
 		const bool IsRunning() const;
 
+        // Returns a pointer to the raw data buffer, for read-only access.
+		const std::vector<std::vector<Point3>>* GetRawBuffer();
+
 		// Acquire a single sample from a specific sensor.
 		// Returns a Point3 object.
-		// Arguments :
+		// Arguments: 
 		// - sensorNumber : Serial number of the sensor to get sample from.
 		// - raw : When set to "True", the acquired sample will not be corrected for the reference sensor.
-		Point3 getSingleSample(int serialNumber, bool raw);
-
-        // Returns a pointer to the raw data buffer, for read-only access.
-		const std::vector<std::vector<Point3>>* getRawBuffer();
+		Point3 GetSingleSample(int serialNumber, bool raw);
 
 		// Returns the number of attached boards to this PC.
 		const int NumAttachedBoards() const;
@@ -84,7 +83,7 @@ namespace SmartScan
 		const int NumAttachedSensors(bool includeRef) const;
 
 		// Register a new callback function to be called whenever new raw data is available.
-		// Arguments :
+		// Arguments:
 		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
@@ -109,28 +108,28 @@ namespace SmartScan
         const double zCaseOffset = 45.72;                                   // Distance from bottom face of the transmitter to zero point.
 
 		// Return the port number of a sensor based on its serial number. 
-		// Arguments :
+		// Arguments:
 		// - serialNumber : Serial number of the sensor of which the port number is desired.
-		int findPortNum(int serialNumber);
+		int FindPortNum(int serialNumber);
 
 		// Return the raw buffer index of a sensor based on its serial number. 
-		// Arguments :
+		// Arguments:
 		// - serialNumber : Serial number of the sensor of which the raw buffer index is desired.
-		int findBuffNum(int serialNumber);
+		int FindBuffNum(int serialNumber);
 
 		// Function that gathers all sensor data and corrects it for the reference sensor if specified.
 		// This function is run in a seperate thread.
 		void DataAcquisition();
 
 		// Correct a point for the rotation of a refernce sensor.
-		// Arguments :
+		// Arguments:
 		// - refPoint : Pointer to the Point3Ref containing the position and rotation of the reference sensor.
 		// - sensorPoint : Pointer to the Point3 containing the position and rotation of the sensor that needs correcting.
-		void referenceCorrect(Point3Ref* refPoint, Point3* sensorPoint);
+		void ReferenceCorrect(Point3Ref* refPoint, Point3* sensorPoint);
 
 		// Rotate a point along itself. (Experimental function, only used in ZOffset calibration)
-		// Arguments :
+		// Arguments:
 		// - sensorPoint : Pointer to the Point3 of the sample that needs to be rotated.
-		void angleCorrect(Point3* sensorPoint);
+		void AngleCorrect(Point3* sensorPoint);
 	};
 }

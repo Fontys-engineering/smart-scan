@@ -22,35 +22,42 @@ TrakStarController::~TrakStarController()
 
 void TrakStarController::Init()
 {
+	// Do nothing if mock data is used.
 	if (mUseMockData) {
 		return;
 	}
 
+	// Initialize the system.
 	int errorCode = InitializeBIRDSystem();
 	ErrorHandler(errorCode);
 
+	// Retrieve system configuration.
 	errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
 	ErrorHandler(errorCode);
 
-	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
-		pSensor.push_back(CSensor());
-		errorCode = GetSensorConfiguration(i, &pSensor[i].m_config);
-		ErrorHandler(errorCode);
-	}
-
+	// Retrieve transmitter configuration.
 	for (int i = 0; i < ATC3DG.m_config.numberTransmitters; i++) {
 		pXmtr.push_back(CXmtr());
 		errorCode = GetTransmitterConfiguration(i, &pXmtr[i].m_config);
+		ErrorHandler(errorCode);
+	}
+
+	// Retrieve sensor configuration.
+	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++) {
+		pSensor.push_back(CSensor());
+		errorCode = GetSensorConfiguration(i, &pSensor[i].m_config);
 		ErrorHandler(errorCode);
 	}
 }
 
 void TrakStarController::StopTransmit()
 {
+	// Do nothing if mock data is used.
 	if (mUseMockData) {
 		return;
 	}
 
+	// Setting transmitter id to -1 turns it off.
 	short int id = -1;
 	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	ErrorHandler(errorCode);
@@ -94,10 +101,12 @@ void TrakStarController::SetReferenceFrame(short int id, double angles[3])
 	BOOL isTrue = true;
 	DOUBLE_ANGLES_RECORD record;
 
+	// Copy angles into DOUBLE_ANGLES_RECORD.
 	record.a = angles[0];
 	record.e = angles[1];
 	record.r = angles[2];
 
+	// Set the reference frame angles and enable it. (2 seperate API calls).
 	int errorCode = SetTransmitterParameter(id, REFERENCE_FRAME, &record, sizeof(record));
 	ErrorHandler(errorCode);
 	errorCode = SetTransmitterParameter(id, XYZ_REFERENCE_FRAME, &isTrue, sizeof(isTrue));
@@ -106,6 +115,7 @@ void TrakStarController::SetReferenceFrame(short int id, double angles[3])
 
 void TrakStarController::SetSensorFormat()
 {
+	// Loop through all sensors.
 	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)	{
 		DATA_FORMAT_TYPE type = DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON;
 		int errorCode = SetSensorParameter(i, DATA_FORMAT, &type, sizeof(type));
@@ -124,6 +134,7 @@ void TrakStarController::SetSensorOffset(int id, Point3 offset)
 {
 	DOUBLE_POSITION_RECORD record;
 
+	// Copy offsets from Point3 to DOUBLE_POSITION_RECORD and convert them to inches.
 	record.x = offset.x * toInch;
 	record.y = offset.y * toInch;
 	record.z = offset.z * toInch;
@@ -134,6 +145,7 @@ void TrakStarController::SetSensorOffset(int id, Point3 offset)
 
 const int TrakStarController::NumAttachedBoards() const
 {
+	// Return 1 if mock data is used.
 	if (mUseMockData) {
 		return 1;
 	}
@@ -143,6 +155,7 @@ const int TrakStarController::NumAttachedBoards() const
 
 const int TrakStarController::NumAttachedTransmitters() const
 {
+	// Return 1 if mock data is used.
 	if (mUseMockData) {
 		return 1;
 	}
@@ -161,6 +174,7 @@ std::vector<int> TrakStarController::GetAttachedPorts() const
     	    }
     	}
 	}
+	// Return 0, 1, 2 if mock data is used. (3 sensors for 3 mock data files)
 	else {
 		for (int i = 0; i < 3; i++) {
 			attachedSensors.push_back(i);
@@ -181,6 +195,7 @@ std::vector<int> TrakStarController::GetAttachedSerials() const
     	    }
     	}
 	}
+	// Return 0, 1, 2 if mock data is used. (3 sensors for 3 mock data files)
 	else {
 		for (int i = 0; i < 3; i++) {
 			attachedSensors.push_back(i);
@@ -190,12 +205,11 @@ std::vector<int> TrakStarController::GetAttachedSerials() const
 	return attachedSensors;
 }
 
-/* Measurements: 235*/
 Point3 TrakStarController::GetRecord(int id)
 {
-	// When in mock mode, return a random value on a sphere.
+	// When in mock mode, return a value from one of the mockdata files.
 	if (mUseMockData) {
-		//return GetMockRecord();
+		//return GetMockRecord(); // Return a random point on a sphere.
 		return GetMockRecordFromFile(id);
 	}
 
@@ -204,10 +218,12 @@ Point3 TrakStarController::GetRecord(int id)
 	unsigned int status = GetSensorStatus(id);
 	static int lastDeviceStatus;
 
+	// Check device status.
 	try	{
 		DeviceStatusHandler(status);
 	}
 	catch (ex_trakStar e) {
+		// Only print the error once to prevent flodding the command prompt window.
 		if (status != lastDeviceStatus)	{
 			std::cerr << e.what() << std::endl;
 		}
@@ -215,14 +231,17 @@ Point3 TrakStarController::GetRecord(int id)
 		return Point3();
 	}
     
+	// Acquire a sample.
 	DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD record;
 	int errorCode = GetAsynchronousRecord(id, &record, sizeof(record));
 	static int lastErrorCode;
 
+	// Check errorCode.
 	try	{
 		ErrorHandler(errorCode);
 	}
 	catch (ex_trakStar e) {
+		// Only print the error once to prevent flodding the command prompt window.
 		if (errorCode != lastErrorCode)	{
 			std::cerr << e.what() << std::endl;
 		}
@@ -246,10 +265,12 @@ Point3Ref TrakStarController::GetRefRecord(int id)
 	unsigned int status = GetSensorStatus(id);
 	static int lastDeviceStatus;
 
+	// Check device status.
 	try	{
 		DeviceStatusHandler(status);
 	}
 	catch (ex_trakStar e) {
+		// Only print the error once to prevent flodding the command prompt window.
 		if (status != lastDeviceStatus)	{
 			std::cerr << e.what() << std::endl;
 		}
@@ -257,14 +278,17 @@ Point3Ref TrakStarController::GetRefRecord(int id)
 		return Point3Ref();
 	}
     
+	// Acquire a sample.
 	DOUBLE_POSITION_MATRIX_RECORD record;
 	int errorCode = GetAsynchronousRecord(id, &record, sizeof(record));
 	static int lastErrorCode;
 
+	// Check errorCode.
 	try	{
 		ErrorHandler(errorCode);
 	}
 	catch (ex_trakStar e) {
+		// Only print the error once to prevent flodding the command prompt window.
 		if (errorCode != lastErrorCode)	{
 			std::cerr << e.what() << std::endl;
 		}
@@ -377,7 +401,7 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 
 void TrakStarController::DeviceStatusHandler(int deviceStatus)
 {
-	switch (deviceStatus & ~GLOBAL_ERROR) {
+	switch (deviceStatus & ~GLOBAL_ERROR) { // Get rid of the GLOBAL_ERROR bit
 		case NOT_ATTACHED:
 			throw ex_trakStar("[WARNING] No physical device attached to this device channel", __func__, __FILE__);
 			break;

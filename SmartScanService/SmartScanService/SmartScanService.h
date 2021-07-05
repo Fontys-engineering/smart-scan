@@ -57,7 +57,7 @@ namespace SmartScan
 
 		// Acquire a single sample from a specific sensor.
 		// Returns a Point3 object.
-		// Arguments :
+		// Arguments:
 		// - sensorNumber : Serial number of the sensor to get sample from.
 		// - raw : When set to "True", the acquired sample will not be corrected for the reference sensor.
 		Point3 GetSingleSample(int serialNumber, bool raw = false);
@@ -76,26 +76,26 @@ namespace SmartScan
 		const int NumAttachedTransmitters() const;
 
 		// Returns the number of attached sensors to the TrakStar device.
-		// Arguments :
+		// Arguments:
 		// - includeRef : When set to "True", the returned number will include the reference sensor.
 		const int NumAttachedSensors(bool includeRef) const;
 
 		// Export the Point3 array in a csv format suited for the MATLAB Artificial intelligence scripts.
-		// Arguments :
+		// Arguments:
 		// - filename : Name of the exported file.
 		// - scanId : Id of the scan that needs to be exported. (Does nothing if exporting raw data)
 		// - raw : When set to "True", the raw data (corrected for a reference sensor) will be exported instead.
 		void ExportCSV(const std::string filename, int scanId, const bool raw = false);
 
 		// Export the Point3 array in a csv format suited for Cloudcompare.
-		// Arguments :
+		// Arguments:
 		// - filename : Name of the exported file.
 		// - scanId : Id of the scan that needs to be exported. (Does nothing if exporting raw data)
 		// - raw : When set to "True", the raw data (corrected for a reference sensor) will be exported instead.
 		void ExportPointCloud(const std::string filename, int scanId, const bool raw = false);
 
 		// Register a new callback function to be called whenever new raw data is available.
-		// Arguments :
+		// Arguments:
 		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
@@ -111,7 +111,7 @@ namespace SmartScan
 		const int FindNewScanId() const ;
 
 		// Returns a boolean indicating if a scan with the same Id already exists.
-		// Arguments :
+		// Arguments:
 		// - scanId : Id that needs to be checked.
 		const bool IdExists(const int scanId) const;
 	};

@@ -1,9 +1,10 @@
 #include "Point3.h"
-#include <iostream>
+
 using namespace SmartScan;
 
 Rotation3::Rotation3()
 {
+	// Initialize x, y and z rotations to be 0.
 	this->x = this->y = this->z = 0;
 }
 
@@ -15,8 +16,9 @@ Rotation3::Rotation3(double x, double y, double z)
 
 Spherical3::Spherical3()
 {
+	// Initialze radius to be the max value it can be and phi and theta to be 0.
 	this->r = DBL_MAX;
-	this->phi = this->theta = 0;
+	this->theta = this->phi = 0;
 }
 
 Spherical3::Spherical3(double r, double theta, double phi)
@@ -27,6 +29,7 @@ Spherical3::Spherical3(double r, double theta, double phi)
 
 Point3::Point3()
 {
+	// Initialize x, y, z, quality and button to be 0.
 	this->time = this->x = this->y = this->z = this->quality = this->button = 0;
 }
 
@@ -74,8 +77,10 @@ Point3::Point3(double x, double y, double z, double rx, double ry, double rz, un
 
 Point3Ref::Point3Ref()
 {
+	// Initialize x, y and z to be 0.
 	this->x = this->y = this->z = 0;
 
+	// Initialize rotation matrix with no rotation.
     for (int i = 0; i < 3; i++) {
         for (int k = 0; k < 3; k++) {
 			if (k == i) {
@@ -90,9 +95,15 @@ Point3Ref::Point3Ref()
 
 Point3Ref::Point3Ref(double x, double y, double z) : x { x }, y { y }, z { z }
 {
+	// Initialize rotation matrix with no rotation.
     for (int i = 0; i < 3; i++) {
         for (int k = 0; k < 3; k++) {
-            this->m[i][k] = 0;
+			if (k == i) {
+				this->m[i][k] = 1;
+			}
+			else {
+				this->m[i][k] = 0;
+			}
         }
 	}
 }

@@ -1,4 +1,3 @@
-
 // SmartScanService.cpp : This file contains the 'main' function. Program execution begins and ends here.
 // This provides an interface for the SmartScanServices.
 
