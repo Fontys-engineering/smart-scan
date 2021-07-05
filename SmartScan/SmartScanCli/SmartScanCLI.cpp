@@ -308,7 +308,7 @@ void Usage()
 	std::cout << "\tstart [id]\t\t\tStart the measurement. Leave id blank to start all scans." << std::endl;
 	std::cout << "\tstop [id]\t\t\tStop the measurement. Leave id blank to stop all scans." << std::endl;
 	std::cout << "\tnew\t\t\t\tCreate a new measurement." << std::endl;
-	std::cout << "\tcalibrate\t\t\t\tCalibrate the sensor offsets with respect to finger t h i c c n e s s." << std::endl;
+	std::cout << "\tcalibrate\t\t\tCalibrate the sensor offsets with respect to finger t h i c c n e s s." << std::endl;
 	std::cout << "\tclear\t\t\t\tClear all recorded data." << std::endl;
 	std::cout << "\tdelete [id]\t\t\tDelete a measurement. Leave id blank to delete all scans" << std::endl << "\t\t\t\t\t" << "and clear the raw data." << std::endl;
 	std::cout << "\tlist\t\t\t\tPrint all the existing Scans to the console." << std::endl;

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "SmartScanService.h"
-#include "Point3.h"
 
 #define __MOCK true 							// Use this to set the application in mock mode or not.
 

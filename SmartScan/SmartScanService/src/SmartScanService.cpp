@@ -45,7 +45,7 @@ void SmartScanService::NewScan(ScanConfig config)
 		throw ex_smartScan("180 is not a multiple of the filtering precision", __func__, __FILE__);
 	}
 	// Give raw data buffer to the scan.
-	config.inBuff = mDataAcq.getRawBuffer();
+	config.inBuff = mDataAcq.GetRawBuffer();
 	this->scans.emplace_back(std::make_shared<Scan>(FindNewScanId(), config));
 }
 
@@ -106,7 +106,7 @@ void SmartScanService::ClearData()
 
 Point3 SmartScanService::GetSingleSample(int sensorSerial, bool raw)
 {
-	return mDataAcq.getSingleSample(sensorSerial, raw);
+	return mDataAcq.GetSingleSample(sensorSerial, raw);
 }
 
 void SmartScanService::StopScan()
@@ -142,7 +142,7 @@ void SmartScanService::ExportCSV(const std::string filename, int scanId, const b
 {
 	try {
 		if (raw) {
-			csvExport.ExportPoint3Raw(mDataAcq.getRawBuffer(), filename);
+			csvExport.ExportPoint3Raw(mDataAcq.GetRawBuffer(), filename);
 		}
 		else {
 			// Copy the scan buffer into a temporary vector and export that.
@@ -164,7 +164,7 @@ void SmartScanService::ExportPointCloud(const std::string filename, int scanId, 
 {
 	try {
 		if (raw) {
-			csvExport.ExportPoint3RawCloud(mDataAcq.getRawBuffer(), filename);
+			csvExport.ExportPoint3RawCloud(mDataAcq.GetRawBuffer(), filename);
 		}
 		else {
 			// Copy the scan buffer into a temporary vector and export that.

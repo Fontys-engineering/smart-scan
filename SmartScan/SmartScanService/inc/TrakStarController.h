@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Point3.h"
-#include "NDI/ATC3DG.h"
+#include "ATC3DG.h"
 
 namespace SmartScan
 {
