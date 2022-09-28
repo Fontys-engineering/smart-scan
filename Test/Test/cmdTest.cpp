@@ -5,8 +5,8 @@
 
 #include "StdAfx.h"
 #include "TestPlugIn.h"
-#include "../../smart-scan/SmartScanService/inc/SmartScanService.h"
-#include "../../smart-scan/SmartScanService/inc/Point3.h"
+#include "../smart-scan/SmartScanService/inc/SmartScanService.h"
+#include "../smart-scan/SmartScanService/inc/Point3.h"
 
 
 #include <iostream>
@@ -85,8 +85,10 @@ CRhinoCommand::result CCommandBeginscan::RunCommand(const CRhinoCommandContext& 
 	ON_wString str;
 
 	obj.Init();
-	obj.RegisterNewDataCallback(TestUICallback);
-	obj.StartScan(sensorsUsed);
+
+	/*Check older version of smart-scan for RegisterNewDataCallback*/
+	//obj.RegisterNewDataCallback(TestUICallback);
+	obj.StartScan();//sensorsUsed);
 
 
 	
