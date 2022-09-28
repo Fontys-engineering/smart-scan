@@ -354,3 +354,4 @@ SmartScanService/SmartScanService/*.csv
 
 # VSCODE files
 .vscode/
+smart-scan/SmartScanCli/ed_meeting.csv
