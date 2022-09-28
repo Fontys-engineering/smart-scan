@@ -100,9 +100,9 @@ void DataAcq::CorrectZOffset(int serialNumber)
 void DataAcq::Start()
 {
 	// Check whether trak star controller has been initialised.
-	if (!mRawBuff.size()) {
-		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
-	}
+//	if (!mRawBuff.size()) {
+//		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
+//	}
 
 	// Check if the DataAcquisition thread is already running.
 	if (this->mRunning)	{
