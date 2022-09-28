@@ -5,8 +5,8 @@
 
 #include "StdAfx.h"
 #include "TestPlugIn.h"
-#include "../../smart-scan/SmartScanService/SmartScanService/SmartScanService.h"
-#include "../../smart-scan/SmartScanService/SmartScanService/Point3.h"
+#include "../../smart-scan/SmartScanService/inc/SmartScanService.h"
+#include "../../smart-scan/SmartScanService/inc/Point3.h"
 
 
 #include <iostream>
