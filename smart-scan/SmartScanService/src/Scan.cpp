@@ -7,12 +7,18 @@
 
 using namespace SmartScan;
 
+<<<<<<< HEAD
 Scan::Scan(const int id, ScanConfig config)
 	: mId { id }, mConfig { config } {
+=======
+Scan::Scan(const int id, ScanConfig config)	: mId { id }, mConfig { config } {
+>>>>>>> 9ce3d1fdb460e7ede01ee6501d6be9dfa44bba7e
 	// Resize the sorted buffer to be a 3d vector with the indices being [numRefpoints][thetaRange][phiRange]
 	mSortedBuff.resize(this->NumRefPoints());
+
 	for (int i = 0; i < mSortedBuff.size(); i++) {
-		mSortedBuff[i].resize(360/mConfig.filteringPrecision);			// Theta has a default range of 0-360 degrees.
+		mSortedBuff[i].resize(360/mConfig.filteringPrecision);		// Theta has a default range of 0-360 degrees.
+		
 		for (int k = 0; k < mSortedBuff[i].size(); k++) {
 			mSortedBuff[i][k].resize(180/mConfig.filteringPrecision);	// Phi has a default range of 0-180 degrees.
 		}
@@ -110,6 +116,7 @@ void Scan::DataFiltering() {
 		// Look at the last sensor of the input buffer since if this is higher, then all the other sensors before it also have a sample.
 		// +1 is here for the same reason as explained above, just the opposite way.
 		if (mConfig.inBuff->back().size() > mLastFilteredSample + 1) {
+			
 			// Loop through all the sensors.
 			for (int i = 0; i < mConfig.inBuff->size(); i++) {
 				Point3 point = mConfig.inBuff->at(i).at(mLastFilteredSample);	// Temporarily store the sample of a single sensor at the current index.
@@ -143,6 +150,7 @@ int Scan::CalcNearestRef(Point3* point) {
 	for (int i = 0; i < mConfig.refPoints.size(); i++) {
 		// Calulate radius and if it is smaller than the previous calculated one.
 		temp = sqrt(pow(point->x - mConfig.refPoints[i].x, 2) + pow(point->y - mConfig.refPoints[i].y, 2) + pow(point->z - mConfig.refPoints[i].z, 2));
+		
 		if (temp < radius) {
 			radius = temp;
 			index = i;
@@ -153,7 +161,11 @@ int Scan::CalcNearestRef(Point3* point) {
 	return index;
 }
 
+<<<<<<< HEAD
 void Scan::CalcAngle(Point3 refPoint, Point3* point) {
+=======
+void Scan::CalcAngle(Point3 refPoint, Point3* point){
+>>>>>>> 9ce3d1fdb460e7ede01ee6501d6be9dfa44bba7e
 	point->s.theta = (atan2(point->y - refPoint.y, point->x - refPoint.x) * toAngle) + 180;
 	point->s.phi = acos((point->z - refPoint.z)/point->s.r) * toAngle;
 }
