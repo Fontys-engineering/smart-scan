@@ -10,8 +10,7 @@
 #include "Exceptions.h"
 #include "Point3.h"
 
-namespace SmartScan
-{
+namespace SmartScan {
 	class CSVExport
 	{
 	public:

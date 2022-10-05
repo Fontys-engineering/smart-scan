@@ -9,8 +9,7 @@
 namespace SmartScan
 {
     // Enum containing all the possible button classifications.
-    enum class button_state
-    {
+    enum class button_state {
         INVALID,                            // Error point classification. (is not really used).
         BAD,                                // Not on the surface of the foot classification.
         REFERENCE,                          // On the surface of the foot classification.
@@ -18,8 +17,7 @@ namespace SmartScan
     };
 
     // Class containing the euler angles of the sensor.
-    class Rotation3
-    {
+    class Rotation3 {
     public:
         double x, y, z;                     // X, Y and Z rotations (Roll, Elevation and Azimuth).
 
@@ -33,8 +31,7 @@ namespace SmartScan
     };
 
     // Class containing the sensor position in spherical notation.
-    class Spherical3
-    {
+    class Spherical3 {
     public:
         double r, phi, theta;               // Radius, phi and theta.
 
@@ -48,8 +45,7 @@ namespace SmartScan
     };
 
     // Class containing all the needed information for a sample.
-    class Point3
-    {
+    class Point3 {
     public:
         double x, y, z, time;               // X, Y, Z and time.
         unsigned short quality;             // Indicates magnetic interference.
@@ -86,8 +82,7 @@ namespace SmartScan
     };
 
     // Class similar to Point3 but only contains the information needed for the reference sensor.
-    class Point3Ref
-    {
+    class Point3Ref {
     public:
         double x, y, z;                         // X, Y and Z coordinates.
         double m[3][3];                         // Rotation matrix.

@@ -7,8 +7,7 @@
 // See TestPlugIn.cpp for the implementation of this class
 //
 
-class CTestPlugIn : public CRhinoUtilityPlugIn
-{
+class CTestPlugIn : public CRhinoUtilityPlugIn {
 public:
   // CTestPlugIn constructor. The constructor is called when the
   // plug-in is loaded and "thePlugIn" is constructed. Once the plug-in

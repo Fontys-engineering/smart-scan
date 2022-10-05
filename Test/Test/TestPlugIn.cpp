@@ -59,14 +59,12 @@ static class CTestPlugIn thePlugIn;
 /////////////////////////////////////////////////////////////////////////////
 // CTestPlugIn definition
 
-CTestPlugIn& TestPlugIn()
-{
+CTestPlugIn& TestPlugIn() {
   // Return a reference to the one and only CTestPlugIn object
   return thePlugIn;
 }
 
-CTestPlugIn::CTestPlugIn()
-{
+CTestPlugIn::CTestPlugIn() {
   // Description:
   //   CTestPlugIn constructor. The constructor is called when the
   //   plug-in is loaded and "thePlugIn" is constructed. Once the plug-in
@@ -81,8 +79,7 @@ CTestPlugIn::CTestPlugIn()
 /////////////////////////////////////////////////////////////////////////////
 // Required overrides
 
-const wchar_t* CTestPlugIn::PlugInName() const
-{
+const wchar_t* CTestPlugIn::PlugInName() const {
   // Description:
   //   Plug-in name display string.  This name is displayed by Rhino when
   //   loading the plug-in, in the plug-in help menu, and in the Rhino
@@ -92,8 +89,7 @@ const wchar_t* CTestPlugIn::PlugInName() const
   return RhinoPlugInName();
 }
 
-const wchar_t* CTestPlugIn::PlugInVersion() const
-{
+const wchar_t* CTestPlugIn::PlugInVersion() const {
   // Description:
   //   Plug-in version display string. This name is displayed by Rhino
   //   when loading the plug-in and in the Rhino interface for managing
@@ -103,8 +99,7 @@ const wchar_t* CTestPlugIn::PlugInVersion() const
   return m_plugin_version;
 }
 
-GUID CTestPlugIn::PlugInID() const
-{
+GUID CTestPlugIn::PlugInID() const {
   // Description:
   //   Plug-in unique identifier. The identifier is used by Rhino to
   //   manage the plug-ins.
@@ -117,8 +112,7 @@ GUID CTestPlugIn::PlugInID() const
 /////////////////////////////////////////////////////////////////////////////
 // Additional overrides
 
-BOOL CTestPlugIn::OnLoadPlugIn()
-{
+BOOL CTestPlugIn::OnLoadPlugIn() {
   // Description:
   //   Called after the plug-in is loaded and the constructor has been
   //   run. This is a good place to perform any significant initialization,
@@ -137,8 +131,7 @@ BOOL CTestPlugIn::OnLoadPlugIn()
   return TRUE;
 }
 
-void CTestPlugIn::OnUnloadPlugIn()
-{
+void CTestPlugIn::OnUnloadPlugIn() {
   // Description:
   //    Called one time when plug-in is about to be unloaded. By this time,
   //    Rhino's mainframe window has been destroyed, and some of the SDK

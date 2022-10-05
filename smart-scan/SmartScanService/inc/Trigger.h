@@ -11,8 +11,7 @@
 
 namespace SmartScan
 {
-	class Trigger
-	{
+	class Trigger {
 	public:
 		// Returns the current button state.
 		button_state GetButtonState();

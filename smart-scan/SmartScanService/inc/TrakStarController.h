@@ -14,28 +14,24 @@
 namespace SmartScan
 {
 	// Class containing the system configuration.
-	class CSystem
-	{
+	class CSystem {
 	public:
 		SYSTEM_CONFIGURATION	m_config;
 	};
 
 	// Class containing the transmitter configuration.
-	class CXmtr
-	{
+	class CXmtr {
 	public:
 		TRANSMITTER_CONFIGURATION	m_config;
 	};
 
 	// Class containing the sensor configuration.
-	class CSensor
-	{
+	class CSensor {
 	public:
 		SENSOR_CONFIGURATION	m_config;
 	};
 
-	class TrakStarController
-	{
+	class TrakStarController {
 	public:
 		// Constructor. Creates a TrakStarController object that handles communication with the TrakStar device.
 		// Arguments:

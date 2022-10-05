@@ -1,22 +1,19 @@
 #include <iostream>
 
-#include "Trigger.h"
+#include "../inc/Trigger.h"
 
 using namespace SmartScan;
 
-button_state Trigger::GetButtonState()
-{
+button_state Trigger::GetButtonState() {
 	// Return current button state.
 	return this->buttonState;
 }
 
-void Trigger::ClearMyButton()
-{
+void Trigger::ClearMyButton() {
 	buttonState = button_state::INVALID;
 }
 
-void Trigger::UpdateButtonState(unsigned short buttonBit)
-{
+void Trigger::UpdateButtonState(unsigned short buttonBit) {
 	static unsigned short lastButtonBit = 0;
 	static int risingEdge = 0;
 
@@ -28,8 +25,7 @@ void Trigger::UpdateButtonState(unsigned short buttonBit)
 
 	// Keep track of current time.
 	// After buttonDelayTime it change the current button state.
-	if (elapsedTime.count() >= buttonDelayTime && risingEdge == 1)
-	{
+	if (elapsedTime.count() >= buttonDelayTime && risingEdge == 1) {
 		buttonBuffer = (buttonBuffer + stateNum) % 4;
 		buttonState = static_cast<button_state>(buttonBuffer);
 		//std::cout << "The current state: " << buttonBuffer << std::endl;
@@ -37,8 +33,7 @@ void Trigger::UpdateButtonState(unsigned short buttonBit)
 		buttonBuffer = 0;
 	}
 	// Detect rising edge and store its time.
-	if (buttonBit != lastButtonBit && buttonBit == 1)
-	{
+	if (buttonBit != lastButtonBit && buttonBit == 1) {
 		lastRiseTime = currentTime;
 		buttonBuffer = buttonBuffer + 1;
 		risingEdge = 1;

@@ -2,37 +2,32 @@
 #include <ctime>
 #include <cstdio>
 
-#include "DataAcquisition.h"
-#include "Exceptions.h"
+#include "../inc/DataAcquisition.h"
+#include "../inc/Exceptions.h"
 
 using namespace SmartScan;
 
-DataAcqConfig::DataAcqConfig() 
-{
+DataAcqConfig::DataAcqConfig() {
 
 }
 
 DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3])
-	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }, refSensorSerial { refSensorSerial }
-{
+	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }, refSensorSerial { refSensorSerial } {
 	for (int i = 0; i < 3; i ++) {
 		this->frameRotations[i] = frameRotations[i]; // Copy the array.
 	}
 }
 
-DataAcq::DataAcq(bool useMockData) : mUseMockData { useMockData }, mTSCtrl(useMockData)
-{
+DataAcq::DataAcq(bool useMockData) : mUseMockData { useMockData }, mTSCtrl(useMockData) {
 
 }
 
-DataAcq::~DataAcq()
-{
+DataAcq::~DataAcq() {
     // Delete all raw data when this object is removed.
 	this->Stop(true);
 }
 
-void DataAcq::Init()
-{
+void DataAcq::Init() {
 	// Skip initalization of the TrakStar device when in Mock mode.
 	if (!mUseMockData) {
 		mTSCtrl.Init();
@@ -77,15 +72,13 @@ void DataAcq::Init()
 	}
 }
 
-void DataAcq::Init(DataAcqConfig acquisitionConfig)
-{
+void DataAcq::Init(DataAcqConfig acquisitionConfig) {
 	// Copy config and run init.
 	this->mConfig = acquisitionConfig;
 	this->Init();
 }
 
-void DataAcq::CorrectZOffset(int serialNumber)
-{
+void DataAcq::CorrectZOffset(int serialNumber) {
 	// Get a raw Z coordinate sample and take the height of the transmitter casing into account.
     Point3 rawSample = this->GetSingleSample(serialNumber, true);
     Point3 zOnly = Point3(0.0, 0.0, zCaseOffset - rawSample.z, rawSample.r);
@@ -97,8 +90,7 @@ void DataAcq::CorrectZOffset(int serialNumber)
 	mTSCtrl.SetSensorOffset(FindPortNum(serialNumber), zOnly);
 }
 
-void DataAcq::Start()
-{
+void DataAcq::Start() {
 	// Check whether trak star controller has been initialised.
 //	if (!mRawBuff.size()) {
 //		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
@@ -123,8 +115,7 @@ void DataAcq::Start()
 	mRunning = true;
 }
 
-void DataAcq::Stop(bool clearData)
-{
+void DataAcq::Stop(bool clearData) {
 	// Wait a bit for the other threads to finish.
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -139,18 +130,15 @@ void DataAcq::Stop(bool clearData)
 	mRunning = false;
 }
 
-const bool DataAcq::IsRunning() const
-{
+const bool DataAcq::IsRunning() const {
 	return mRunning;
 }
 
-const std::vector<std::vector<Point3>>* DataAcq::GetRawBuffer()
-{
+const std::vector<std::vector<Point3>>* DataAcq::GetRawBuffer() {
 	return &mRawBuff;
 }
 
-Point3 DataAcq::GetSingleSample(int sensorSerial, bool raw)
-{
+Point3 DataAcq::GetSingleSample(int sensorSerial, bool raw) {
 	// Check whether trak star controller has been initialised.
 	if (!mRawBuff.size()) {
 		throw ex_acq("Data acquisition is not initialized.", __func__, __FILE__);
@@ -175,18 +163,15 @@ Point3 DataAcq::GetSingleSample(int sensorSerial, bool raw)
 	return rawPoint;
 }
 
-const int DataAcq::NumAttachedBoards() const
-{
+const int DataAcq::NumAttachedBoards() const {
 	return mTSCtrl.NumAttachedBoards();
 } 
 
-const int DataAcq::NumAttachedTransmitters() const
-{
+const int DataAcq::NumAttachedTransmitters() const {
 	return mTSCtrl.NumAttachedTransmitters();
 } 
 
-const int DataAcq::NumAttachedSensors(bool includeRef) const
-{
+const int DataAcq::NumAttachedSensors(bool includeRef) const {
 	// Add + 1 since the reference sensor is removed from the sensor list.
 	if (includeRef && refSensorPort > -1) {
 		return mPortNumBuff.size() + 1;
@@ -194,13 +179,11 @@ const int DataAcq::NumAttachedSensors(bool includeRef) const
 	return mPortNumBuff.size();
 } 
 
-void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)
-{
+void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback) {
 	mRawDataCallback = callback;
 }
 
-int DataAcq::FindPortNum(int serialNumber)
-{
+int DataAcq::FindPortNum(int serialNumber) {
 	// Initialize to an irrealistic number.
 	int portNum = -1;
 
@@ -219,8 +202,7 @@ int DataAcq::FindPortNum(int serialNumber)
     return portNum;
 }
 
-int DataAcq::FindBuffNum(int serialNumber)
-{
+int DataAcq::FindBuffNum(int serialNumber) {
 	// Initialize to an irrealistic number.
 	int bufNum = -1;
 
@@ -239,8 +221,7 @@ int DataAcq::FindBuffNum(int serialNumber)
     return bufNum;
 }
 
-void DataAcq::DataAcquisition()
-{
+void DataAcq::DataAcquisition() {
     // Store the current time.
 	double time = 0;
 	auto startSampling = std::chrono::steady_clock::now();
@@ -296,8 +277,7 @@ void DataAcq::DataAcquisition()
     }
 }
 
-void DataAcq::ReferenceCorrect(Point3Ref* refPoint, Point3* sensorPoint)
-{
+void DataAcq::ReferenceCorrect(Point3Ref* refPoint, Point3* sensorPoint) {
 	// Check the orientation of the current point.
 	sensorPoint->x = sensorPoint->x - refPoint->x;
 	sensorPoint->y = sensorPoint->y - refPoint->y;
@@ -314,8 +294,7 @@ void DataAcq::ReferenceCorrect(Point3Ref* refPoint, Point3* sensorPoint)
 	sensorPoint->z = z_new;
 }
 
-void DataAcq::AngleCorrect(Point3* sensorPoint)
-{
+void DataAcq::AngleCorrect(Point3* sensorPoint) {
 	// Use the azimuth to calculate the rotation around the z-axis.
 	//double x_new = sensorPoint->x * cos(sensorPoint->r.z * toRad) + sensorPoint->y * sin(sensorPoint->r.z * toRad);
 	//double y_new = sensorPoint->y * cos(sensorPoint->r.z * toRad) - sensorPoint->x * sin(sensorPoint->r.z * toRad);

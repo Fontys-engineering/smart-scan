@@ -13,8 +13,7 @@
 // See TestApp.cpp for the implementation of this class
 //
 
-class CTestApp : public CWinApp
-{
+class CTestApp : public CWinApp {
 public:
   // CRITICAL: DO NOT CALL RHINO SDK FUNCTIONS HERE!
   // Only standard MFC DLL instance construction belongs here. 

@@ -15,10 +15,8 @@
 #include "TrakStarController.h"
 #include "Trigger.h"
 
-namespace SmartScan
-{
-    struct DataAcqConfig
-    {
+namespace SmartScan {
+    struct DataAcqConfig {
         short int transmitterID = 0;                    // Port of the transmitter, is usually 0 with one trakStar device.
         double measurementRate = 255;                   // Between 20.0 and 255.0.
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0.
@@ -30,8 +28,7 @@ namespace SmartScan
 		DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3]);
     };
 
-	class DataAcq 
-	{
+	class DataAcq {
 	public:
 		// Constructor. Creates a DataAcquisition object that handles data storage and a TrakStarController abstraction layer.
 		// Arguments:

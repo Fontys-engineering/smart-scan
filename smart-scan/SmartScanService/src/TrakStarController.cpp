@@ -2,26 +2,23 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "Exceptions.h"
-#include "TrakStarController.h"
+#include "../inc/Exceptions.h"
+#include "../inc/TrakStarController.h"
 
 using namespace SmartScan;
 
-TrakStarController::TrakStarController(bool useMockData) : mUseMockData { useMockData }
-{
+TrakStarController::TrakStarController(bool useMockData) : mUseMockData { useMockData } {
 	if (mUseMockData) {
 		// Initialize random seed.
 		srand(time(NULL));
 	}
 }
 
-TrakStarController::~TrakStarController()
-{
+TrakStarController::~TrakStarController() {
 	this->StopTransmit();
 }
 
-void TrakStarController::Init()
-{
+void TrakStarController::Init() {
 	// Do nothing if mock data is used.
 	if (mUseMockData) {
 		return;
@@ -50,8 +47,7 @@ void TrakStarController::Init()
 	}
 }
 
-void TrakStarController::StopTransmit()
-{
+void TrakStarController::StopTransmit() {
 	// Do nothing if mock data is used.
 	if (mUseMockData) {
 		return;
@@ -63,41 +59,35 @@ void TrakStarController::StopTransmit()
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SelectTransmitter(short int id)
-{
+void TrakStarController::SelectTransmitter(short int id) {
 	int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
 	ErrorHandler(errorCode);
 	errorCode = GetTransmitterStatus(id);
 	DeviceStatusHandler(errorCode);
 }
 
-void TrakStarController::SetPowerlineFrequency(double freq)
-{
+void TrakStarController::SetPowerlineFrequency(double freq) {
 	int errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, &freq, sizeof(freq));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetMeasurementRate(double freq)
-{
+void TrakStarController::SetMeasurementRate(double freq) {
 	int errorCode = SetSystemParameter(MEASUREMENT_RATE, &freq, sizeof(freq));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetMaxRange(double range)
-{
+void TrakStarController::SetMaxRange(double range) {
 	int errorCode = SetSystemParameter(MAXIMUM_RANGE, &range, sizeof(range));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetMetric()
-{
+void TrakStarController::SetMetric() {
 	BOOL isTrue = true;
 	int errorCode = SetSystemParameter(METRIC, &isTrue, sizeof(isTrue));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetReferenceFrame(short int id, double angles[3])
-{
+void TrakStarController::SetReferenceFrame(short int id, double angles[3]) {
 	BOOL isTrue = true;
 	DOUBLE_ANGLES_RECORD record;
 
@@ -113,8 +103,7 @@ void TrakStarController::SetReferenceFrame(short int id, double angles[3])
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetSensorFormat()
-{
+void TrakStarController::SetSensorFormat() {
 	// Loop through all sensors.
 	for (int i = 0; i < ATC3DG.m_config.numberSensors; i++)	{
 		DATA_FORMAT_TYPE type = DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON;
@@ -123,15 +112,13 @@ void TrakStarController::SetSensorFormat()
 	}
 }
 
-void TrakStarController::SetRefSensorFormat(int id)
-{
+void TrakStarController::SetRefSensorFormat(int id) {
 	DATA_FORMAT_TYPE type = DOUBLE_POSITION_MATRIX;
 	int errorCode = SetSensorParameter(id, DATA_FORMAT, &type, sizeof(type));
 	ErrorHandler(errorCode);
 }
 
-void TrakStarController::SetSensorOffset(int id, Point3 offset)
-{
+void TrakStarController::SetSensorOffset(int id, Point3 offset) {
 	DOUBLE_POSITION_RECORD record;
 
 	// Copy offsets from Point3 to DOUBLE_POSITION_RECORD and convert them to inches.
@@ -143,8 +130,7 @@ void TrakStarController::SetSensorOffset(int id, Point3 offset)
 	ErrorHandler(errorCode);
 }
 
-const int TrakStarController::NumAttachedBoards() const
-{
+const int TrakStarController::NumAttachedBoards() const {
 	// Return 1 if mock data is used.
 	if (mUseMockData) {
 		return 1;
@@ -153,8 +139,7 @@ const int TrakStarController::NumAttachedBoards() const
 	return ATC3DG.m_config.numberBoards;
 }
 
-const int TrakStarController::NumAttachedTransmitters() const
-{
+const int TrakStarController::NumAttachedTransmitters() const {
 	// Return 1 if mock data is used.
 	if (mUseMockData) {
 		return 1;
@@ -163,8 +148,7 @@ const int TrakStarController::NumAttachedTransmitters() const
 	return pXmtr.size();
 }
 
-std::vector<int> TrakStarController::GetAttachedPorts() const
-{
+std::vector<int> TrakStarController::GetAttachedPorts() const {
 	std::vector<int> attachedSensors;
 
 	if (!mUseMockData) {
@@ -184,8 +168,7 @@ std::vector<int> TrakStarController::GetAttachedPorts() const
 	return attachedSensors;
 }
 
-std::vector<int> TrakStarController::GetAttachedSerials() const
-{
+std::vector<int> TrakStarController::GetAttachedSerials() const {
 	std::vector<int> attachedSensors;
 
 	if (!mUseMockData) {
@@ -205,8 +188,7 @@ std::vector<int> TrakStarController::GetAttachedSerials() const
 	return attachedSensors;
 }
 
-Point3 TrakStarController::GetRecord(int id)
-{
+Point3 TrakStarController::GetRecord(int id) {
 	// When in mock mode, return a value from one of the mockdata files.
 	if (mUseMockData) {
 		//return GetMockRecord(); // Return a random point on a sphere.
@@ -252,8 +234,7 @@ Point3 TrakStarController::GetRecord(int id)
 	return Point3(record.x, record.y, record.z, record.r, record.e, record.a, record.quality, record.button);
 }
 
-Point3Ref TrakStarController::GetRefRecord(int id)
-{
+Point3Ref TrakStarController::GetRefRecord(int id) {
 	// When in mock mode, return a random value on a sphere.
 	if (mUseMockData) {
 		//return GetMockRecord();
@@ -299,8 +280,7 @@ Point3Ref TrakStarController::GetRefRecord(int id)
 	return Point3Ref(record.x, record.y, record.z, record.s);
 }
 
-Point3 TrakStarController::GetMockRecord()
-{
+Point3 TrakStarController::GetMockRecord() {
 	double radius = 100;
 	int randomMax = 10;
 	double randomMaxRadius = 200;
@@ -319,8 +299,7 @@ Point3 TrakStarController::GetMockRecord()
 	}
 }
 
-Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
-{
+Point3 TrakStarController::GetMockRecordFromFile(int sensorId) {
 	// Open the file if not already open.
 	if (!s0MockDataFile.is_open()) {
 		s0MockDataFile.open(s0MockDataFilePath, std::ifstream::in);
@@ -399,8 +378,7 @@ Point3 TrakStarController::GetMockRecordFromFile(int sensorId)
 	return newPoint;
 }
 
-void TrakStarController::DeviceStatusHandler(int deviceStatus)
-{
+void TrakStarController::DeviceStatusHandler(int deviceStatus) {
 	switch (deviceStatus & ~GLOBAL_ERROR) { // Get rid of the GLOBAL_ERROR bit
 		case NOT_ATTACHED:
 			throw ex_trakStar("[WARNING] No physical device attached to this device channel", __func__, __FILE__);
@@ -446,8 +424,7 @@ void TrakStarController::DeviceStatusHandler(int deviceStatus)
 	}
 }
 
-void TrakStarController::ErrorHandler(int error)
-{
+void TrakStarController::ErrorHandler(int error) {
 	char			buffer[1024];
 	char* pBuffer = &buffer[0];
 	int				numberBytes;
@@ -462,8 +439,7 @@ void TrakStarController::ErrorHandler(int error)
 	}
 }
 
-const std::string TrakStarController::GetErrorString(int error)
-{
+const std::string TrakStarController::GetErrorString(int error) {
 	char			buffer[1024];
 	std::string errorString;
 

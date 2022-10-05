@@ -14,10 +14,8 @@
 #include "DataAcquisition.h"
 #include "CSVExport.h"
 
-namespace SmartScan
-{
-	class SmartScanService
-	{
+namespace SmartScan {
+	class SmartScanService {
 	public:
 		// Constructor. Creates a SmartScanService object that handles everything SmartScan related.
 		// Arguments:

@@ -1,17 +1,15 @@
 #include <iostream>
 #include <chrono>
 
-#include "CSVExport.h"
+#include "../inc/CSVExport.h"
 
 using namespace SmartScan;
 
-CSVExport::CSVExport()
-{
+CSVExport::CSVExport() {
 
 }
 
-void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string filename)
-{
+void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string filename) {
 	csvFile.open(filename);
 
 	// Print the amount of rows on the top row.
@@ -29,8 +27,7 @@ void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string 
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::string filename)
-{
+void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::string filename) {
 	csvFile.open(filename);
 
 	// Print the column names on the top row.
@@ -48,8 +45,7 @@ void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::st
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename)
-{
+void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename) {
 	csvFile.open(filename);
 
 	// Print the amount of rows and the amount of sensors used (excluding reference sensor) on the top row.
@@ -71,8 +67,7 @@ void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, co
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename)
-{
+void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename) {
 	csvFile.open(filename);
 
 	// Print the column names on the top row.
