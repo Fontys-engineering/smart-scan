@@ -41,6 +41,7 @@ namespace SmartScan {
 		// - data : constant pointer to the raw data buffer (Read only). 
 		// - filename : constant string containing the name of the exported file. 
 		void ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename);
+	
 	private:
 		std::ofstream csvFile;				// Output file object.
 	};

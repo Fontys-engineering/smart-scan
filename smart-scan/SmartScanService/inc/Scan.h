@@ -65,6 +65,7 @@ namespace SmartScan {
 
 		// Returns the outlier threshold parameter defined in the configuration options.
 		const double GetOutlierThreshold() const;
+
 	private:
 		const double pi = 3.141592653589793238463;					// Approximation of PI.
 		const float toAngle = 180/pi;								// Radian to Degree conversion.
