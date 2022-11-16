@@ -6,27 +6,34 @@
 #include <exception>
 #include <string>
 
-namespace SmartScan  {
+namespace SmartScan 
+{
     // Custom exceptions for the Smart Scan Service class.
-	class ex_smartScan : public std::exception {
+	class ex_smartScan : public std::exception 
+    {
 	public:
 		// Constructor. Creates an ex_smartscan exception.
-		ex_smartScan(const char* what_arg, const char* function, const char* file) : what_arg{ what_arg }, function{ function }, file{ file } {
+		ex_smartScan(const char* what_arg, const char* function, const char* file) 
+			: what_arg{ what_arg }, function{ function }, file{ file }
+		{
 
 		}
 
 		// Returns a character array containing why the exception was thrown.
-		const char* what() {
+		const char* what() 
+		{
 			return this->what_arg;
 		}
 
 		// Returns a character array containing in which function the exception was thrown.
-		const char* get_function() {
+		const char* get_function() 
+		{
 			return this->function;
 		}
 
 		// Returns a character array containing in which file the exception was thrown.
-		const char* get_file() {
+		const char* get_file() 
+		{
 			return this->file;
 		}
 	private:
@@ -36,26 +43,31 @@ namespace SmartScan  {
 	};
 
     // Custom exceptions for the Data acquisition class.
-	class ex_acq : public std::exception  {
+	class ex_acq : public std::exception 
+    {
 	public:
 		// Constructor. Creates an ex_acq exception.
 		ex_acq(const char* what_arg, const char* function, const char* file)
-			: what_arg{ what_arg }, function{ function }, file{ file } {
+			: what_arg{ what_arg }, function{ function }, file{ file }
+		{
 
 		}
 
 		// Returns a character array containing why the exception was thrown.
-		const char* what() {
+		const char* what() 
+		{
 			return this->what_arg;
 		}
 
 		// Returns a character array containing in which function the exception was thrown.
-		const char* get_function() {
+		const char* get_function() 
+		{
 			return this->function;
 		}
 
 		// Returns a character array containing in which file the exception was thrown.
-		const char* get_file() {
+		const char* get_file() 
+		{
 			return this->file;
 		}
 	private:
@@ -65,26 +77,31 @@ namespace SmartScan  {
 	};
 	
     // Custom exception for the Scan class.
-	class ex_scan : public std::exception  {
+	class ex_scan : public std::exception 
+    {
 	public:
 		// Constructor. Creates an ex_scan exception.
 		ex_scan(const char* what_arg, const char* function, const char* file)
-			: what_arg{ what_arg }, function{ function }, file{ file } {
+			: what_arg{ what_arg }, function{ function }, file{ file }
+		{
 
 		}
 
 		// Returns a character array containing why the exception was thrown.
-		const char* what() {
+		const char* what() 
+		{
 			return this->what_arg;
 		}
 
 		// Returns a character array containing in which function the exception was thrown.
-		const char* get_function() {
+		const char* get_function() 
+		{
 			return this->function;
 		}
 
 		// Returns a character array containing in which file the exception was thrown.
-		const char* get_file() {
+		const char* get_file() 
+		{
 			return this->file;
 		}
 	private:
@@ -94,26 +111,31 @@ namespace SmartScan  {
 	};
 
     // Custom exceptions for the Trackstar class.
-	class ex_trakStar : public std::exception  {
+	class ex_trakStar : public std::exception 
+    {
 	public:
 		// Constructor. Creates an ex_trakStar exception.
 		ex_trakStar(const char* what_arg, const char* function, const char* file)
-			: what_arg{ what_arg }, function{ function }, file{ file } {
+			: what_arg{ what_arg }, function{ function }, file{ file }
+		{
 
 		}
 
 		// Returns a character array containing why the exception was thrown.
-		const char* what()  {
+		const char* what() 
+		{
 			return this->what_arg;
 		}
 
 		// Returns a character array containing in which function the exception was thrown.
-		const char* get_function()  {
+		const char* get_function() 
+		{
 			return this->function;
 		}
 
 		// Returns a character array containing in which file the exception was thrown.
-		const char* get_file()  {
+		const char* get_file() 
+		{
 			return this->file;
 		}
 	private:
@@ -123,26 +145,31 @@ namespace SmartScan  {
 	};
 
 	// Custom exception for the CSVexport class.
-	class ex_export : public std::exception  {
+	class ex_export : public std::exception 
+    {
 	public:
 		// Constructor. Creates an ex_export exception.
 		ex_export(const char* what_arg, const char* function, const char* file)
-			: what_arg{ what_arg }, function{ function }, file{ file } {
+			: what_arg{ what_arg }, function{ function }, file{ file }
+		{
 
 		}
 
 		// Returns a character array containing why the exception was thrown.
-		const char* what() {
+		const char* what() 
+		{
 			return this->what_arg;
 		}
 
 		// Returns a character array containing in which function the exception was thrown.
-		const char* get_function() {
+		const char* get_function() 
+		{
 			return this->function;
 		}
 
 		// Returns a character array containing in which file the exception was thrown.
-		const char* get_file() {
+		const char* get_file() 
+		{
 			return this->file;
 		}
 

@@ -13,8 +13,10 @@
 
 #include "Point3.h"
 
-namespace SmartScan {
-    struct ScanConfig {
+namespace SmartScan
+{
+    struct ScanConfig
+    {
 		const std::vector<std::vector<Point3>>* inBuff;    			// Raw data vector.
 		std::vector<Point3> refPoints;              				// Reference point vector.
 		int filteringPrecision;										// Filtering precision.
@@ -22,7 +24,8 @@ namespace SmartScan {
 		float outlierThreshold;										// Do not store points if their distance from the reference points are larger than this value.
     };
 
-	class Scan {
+	class Scan
+	{
 	public:
 		const int mId;                                  			// Scan identifier.
 
@@ -65,7 +68,6 @@ namespace SmartScan {
 
 		// Returns the outlier threshold parameter defined in the configuration options.
 		const double GetOutlierThreshold() const;
-
 	private:
 		const double pi = 3.141592653589793238463;					// Approximation of PI.
 		const float toAngle = 180/pi;								// Radian to Degree conversion.

@@ -21,9 +21,10 @@ void Usage();
 void RawPrintCallback(const std::vector<SmartScan::Point3>& record);
 
 // Create SmartScanService object
-SmartScanService s3(mockMode);
+SmartScanService s3(measuredData);
 
-int main() {
+int main()
+{
 	// Print welcome screen.
 	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	std::cout << "                /$$$$$$                                      /$$      /$$$$$$                               " << std::endl;
@@ -57,7 +58,7 @@ int main() {
 	}
 
 	// Print general info.
-	std::cout << "\t\tApplication " << (mockMode ? "" : "not ") << "in mockmode" << std::endl;
+	//std::cout << "\t\tApplication " << (mockMode ? "" : "not ") << "in mockmode" << std::endl;
 	std::cout << "\t\tFound " << s3.NumAttachedBoards() << " attached board(s)" << std::endl; 
 	std::cout << "\t\tFound " << s3.NumAttachedTransmitters() << " attached transmitter(s)" << std::endl; 
 	std::cout << "\t\tFound " << s3.NumAttachedSensors(true) << " attached sensor(s)" << std::endl << std::endl << std::endl;
@@ -300,7 +301,8 @@ int main() {
 }
 
 // Help menu.
-void Usage() {
+void Usage()
+{
 	std::cout << std::endl;
 	std::cout << "Command" << "\t\t\t\t" << "Description" << std::endl;
 	std::cout << "\tstart [id]\t\t\tStart the measurement. Leave id blank to start all scans." << std::endl;
@@ -318,7 +320,8 @@ void Usage() {
 }
 
 // Function that is called everytime a new set of samples has been collected.
-void RawPrintCallback(const std::vector<SmartScan::Point3>& record) {
+void RawPrintCallback(const std::vector<SmartScan::Point3>& record)
+{
 	std::cout << '\r'; // Set cursor to the beginning of the line to prevent messy couts.
 	// All data is casted to an int so that the amount of characters that are going to be printed are predictable and concise.
 	// This is important since you can only rewrite over the current line, so all sensor data needs to be printed on one line.

@@ -80,7 +80,8 @@
 //      Code - is the status code as enumerated in BIRD_ERROR_CODES 
 //
 //*****************************************************************************
-enum BIRD_ERROR_CODES {
+enum BIRD_ERROR_CODES
+{
 											//	ERROR CODE DISPOSITION
 											//    |		(Some error codes have been retired.
 											//    |      The column below describes which codes 
@@ -208,12 +209,14 @@ enum BIRD_ERROR_CODES {
 #define	TRUE	1
 #define	FALSE	0
 
-enum MESSAGE_TYPE {	
+enum MESSAGE_TYPE
+{	
 	SIMPLE_MESSAGE,							// short string describing error code
 	VERBOSE_MESSAGE,							// long string describing error code
 };
 
-enum TRANSMITTER_PARAMETER_TYPE {
+enum TRANSMITTER_PARAMETER_TYPE
+{
 	SERIAL_NUMBER_TX,		// attached transmitter's serial number
 	REFERENCE_FRAME,		// structure of type DOUBLE_ANGLES_RECORD
 	XYZ_REFERENCE_FRAME,	// boolean value to select/deselect mode
@@ -223,7 +226,8 @@ enum TRANSMITTER_PARAMETER_TYPE {
 	END_OF_TX_LIST
 };
 
-enum SENSOR_PARAMETER_TYPE {							
+enum SENSOR_PARAMETER_TYPE
+{							
 	DATA_FORMAT,			// enumerated constant of type DATA_FORMAT_TYPE
 	ANGLE_ALIGN,			// structure of type DOUBLE_ANGLES_RECORD
 	HEMISPHERE,				// enumerated constant of type HEMISPHERE_TYPE
@@ -245,7 +249,8 @@ enum SENSOR_PARAMETER_TYPE {
 	END_OF_RX_LIST
 };
 
-enum BOARD_PARAMETER_TYPE {
+enum BOARD_PARAMETER_TYPE
+{
 	SERIAL_NUMBER_PCB,		// installed board's serial number
 	BOARD_SOFTWARE_REVISIONS,	// BOARD_REVISIONS structure
 	POST_ERROR_PCB,			// board POST_ERROR_PARAMETER
@@ -256,7 +261,8 @@ enum BOARD_PARAMETER_TYPE {
 	END_OF_PCB_LIST_BRD
 };
 
-enum SYSTEM_PARAMETER_TYPE {
+enum SYSTEM_PARAMETER_TYPE
+{
 	SELECT_TRANSMITTER,		// short int equal to transmitterID of selected transmitter
 	POWER_LINE_FREQUENCY,	// double value (range is hardware dependent)
 	AGC_MODE,				// enumerated constant of type AGC_MODE_TYPE
@@ -276,18 +282,21 @@ enum SYSTEM_PARAMETER_TYPE {
 	END_OF_LIST				// end of list place holder
 };
 
-enum COMMUNICATIONS_MEDIA_TYPE {
+enum COMMUNICATIONS_MEDIA_TYPE
+{
 	USB,					// Auto select USB driver
 	RS232,					// Force to RS232
 	TCPIP					// Force to TCP/IP
 };
 
-enum FILTER_OPTION {
+enum FILTER_OPTION
+{
 	NO_FILTER,
 	DEFAULT_FLOCK_FILTER
 };
 
-enum HEMISPHERE_TYPE {
+enum HEMISPHERE_TYPE
+{
 	FRONT,
 	BACK,
 	TOP,
@@ -296,24 +305,28 @@ enum HEMISPHERE_TYPE {
 	RIGHT
 };
 
-enum AGC_MODE_TYPE {
+enum AGC_MODE_TYPE
+{
 	TRANSMITTER_AND_SENSOR_AGC,		// Old style normal addressing mode
 	SENSOR_AGC_ONLY					// Old style extended addressing mode
 };
 
-enum PORT_CONFIGURATION_TYPE {
+enum PORT_CONFIGURATION_TYPE
+{
 	DOF_NOT_ACTIVE,					// No sensor associated with this ID, e.g. ID 5 on a 6DOF port
 	DOF_6_XYZ_AER,					// 6 degrees of freedom
 	DOF_5_XYZ_AE,					// 5 degrees of freedom, no roll
 };
 
-enum AUXILIARY_PORT_TYPE {
+enum AUXILIARY_PORT_TYPE
+{
 	AUX_PORT_NOT_SUPPORTED,			// There is no auxiliary port associated with this sensor port
 	AUX_PORT_NOT_SELECTED,			// The auxiliary port is not selected.
 	AUX_PORT_SELECTED,				// The auxiliary port is selected.
 };
 
-enum DATA_FORMAT_TYPE {
+enum DATA_FORMAT_TYPE
+{
 	NO_FORMAT_SELECTED=0,
 
 	// SHORT (integer) formats
@@ -371,7 +384,8 @@ enum DATA_FORMAT_TYPE {
 	MAXIMUM_FORMAT_CODE
 };
 
-enum BOARD_TYPES {	
+enum BOARD_TYPES
+{	
 	ATC3DG_MEDSAFE,					// Standalone, DSP, 4 sensor
 	PCIBIRD_STD1,					// single standard sensor
 	PCIBIRD_STD2,					// dual standard sensor
@@ -387,7 +401,8 @@ enum BOARD_TYPES {
 	ATC3DG_BB						// BayBird
 };
 
-enum DEVICE_TYPES {
+enum DEVICE_TYPES
+{
 	STANDARD_SENSOR,				// 25mm standard sensor
 	TYPE_800_SENSOR,				// 8mm sensor
 	STANDARD_TRANSMITTER,			// TX for 25mm sensor
@@ -438,7 +453,8 @@ typedef unsigned long   DWORD;
 							STRUCTURE DEFINITIONS
  *****************************************************************************/
 
-typedef struct tagTRANSMITTER_CONFIGURATION {
+typedef struct tagTRANSMITTER_CONFIGURATION
+{
 	ULONG				serialNumber;
 	USHORT				boardNumber;
 	USHORT				channelNumber;
@@ -446,7 +462,8 @@ typedef struct tagTRANSMITTER_CONFIGURATION {
 	BOOL				attached;
 } TRANSMITTER_CONFIGURATION;
 
-typedef struct tagSENSOR_CONFIGURATION {
+typedef struct tagSENSOR_CONFIGURATION
+{
 	ULONG				serialNumber;
 	USHORT				boardNumber;
 	USHORT				channelNumber;
@@ -454,7 +471,8 @@ typedef struct tagSENSOR_CONFIGURATION {
 	BOOL				attached;
 } SENSOR_CONFIGURATION;
 
-typedef struct tagBOARD_CONFIGURATION {
+typedef struct tagBOARD_CONFIGURATION
+{
 	ULONG				serialNumber;
 	enum BOARD_TYPES	type;
 	USHORT				revision;
@@ -466,7 +484,8 @@ typedef struct tagBOARD_CONFIGURATION {
 
 } BOARD_CONFIGURATION;
 
-typedef struct tagSYSTEM_CONFIGURATION {
+typedef struct tagSYSTEM_CONFIGURATION
+{
 	double				measurementRate;
 	double				powerLineFrequency;
 	double				maximumRange;
@@ -478,7 +497,8 @@ typedef struct tagSYSTEM_CONFIGURATION {
 	BOOL				metric;
 } SYSTEM_CONFIGURATION;
 
-typedef struct tagCOMMUNICATIONS_MEDIA_PARAMETERS {
+typedef struct tagCOMMUNICATIONS_MEDIA_PARAMETERS
+{
 	COMMUNICATIONS_MEDIA_TYPE	mediaType;
 	union
 	{
@@ -494,14 +514,16 @@ typedef struct tagCOMMUNICATIONS_MEDIA_PARAMETERS {
 	};
 } COMMUNICATIONS_MEDIA_PARAMETERS;
 
-typedef struct tagADAPTIVE_PARAMETERS {
+typedef struct tagADAPTIVE_PARAMETERS
+{
 	USHORT				alphaMin[7];
 	USHORT				alphaMax[7];
 	USHORT				vm[7];
 	BOOL				alphaOn;
 } ADAPTIVE_PARAMETERS;
 
-typedef struct tagQUALITY_PARAMETERS {
+typedef struct tagQUALITY_PARAMETERS
+{
 	SHORT				error_slope;
 	SHORT				error_offset;
 	USHORT				error_sensitivity;
@@ -509,19 +531,22 @@ typedef struct tagQUALITY_PARAMETERS {
 } QUALITY_PARAMETERS;
 
 // New Drivebay system parameter structure(s)
-typedef struct tagVPD_COMMAND_PARAMETER {
+typedef struct tagVPD_COMMAND_PARAMETER
+{
 	USHORT				address;
 	UCHAR				value;
 } VPD_COMMAND_PARAMETER;
 
-typedef struct tagPOST_ERROR_PARAMETER {
+typedef struct tagPOST_ERROR_PARAMETER
+{
 	USHORT				error;
 	UCHAR				channel;
 	UCHAR				fatal;
 	UCHAR				moreErrors;
 } POST_ERROR_PARAMETER;
 
-typedef struct tagDIAGNOSTIC_TEST_PARAMETER {
+typedef struct tagDIAGNOSTIC_TEST_PARAMETER
+{
 	UCHAR				suite;		// User sets this, 0 - All Suites
 	UCHAR				test;		// User sets this, 0 - All Tests
 
@@ -535,7 +560,8 @@ typedef struct tagDIAGNOSTIC_TEST_PARAMETER {
 	USHORT				diagError;	// set only, result of diagnostic execution
 } DIAGNOSTIC_TEST_PARAMETER;
 
-typedef struct tagBOARD_REVISIONS {
+typedef struct tagBOARD_REVISIONS
+{
 	USHORT	boot_loader_sw_number;		// example 3.1 -> revision is 3, number is 1
 	USHORT	boot_loader_sw_revision;
 	USHORT	mdsp_sw_number;
@@ -550,34 +576,40 @@ typedef struct tagBOARD_REVISIONS {
 	USHORT	dipole_sw_revision;
 } BOARD_REVISIONS;
 
-typedef struct tagAUXILIARY_PORT_PARAMETERS {
+typedef struct tagAUXILIARY_PORT_PARAMETERS
+{
 	AUXILIARY_PORT_TYPE auxstate[4];  // one state for each sensor port
 } AUXILIARY_PORT_PARAMETERS;
 
 //
 // Data formatting structures
 //
-typedef struct tagSHORT_POSITION {
+typedef struct tagSHORT_POSITION
+{
 	short	x;
 	short	y;
 	short	z;
 } SHORT_POSITION_RECORD;
 
-typedef struct tagSHORT_ANGLES {
+typedef struct tagSHORT_ANGLES
+{
 	short	a;			// azimuth
 	short	e;			// elevation
 	short	r;			// roll
 } SHORT_ANGLES_RECORD;
 
-typedef struct tagSHORT_MATRIX {
+typedef struct tagSHORT_MATRIX
+{
 	short	s[3][3];
 } SHORT_MATRIX_RECORD;
 
-typedef struct tagSHORT_QUATERNIONS {
+typedef struct tagSHORT_QUATERNIONS
+{
 	short	q[4];
 } SHORT_QUATERNIONS_RECORD;
 
-typedef struct tagSHORT_POSITION_ANGLES {
+typedef struct tagSHORT_POSITION_ANGLES
+{
 	short	x;
 	short	y;
 	short	z;
@@ -586,14 +618,16 @@ typedef struct tagSHORT_POSITION_ANGLES {
 	short	r;
 } SHORT_POSITION_ANGLES_RECORD;
 
-typedef struct tagSHORT_POSITION_MATRIX {
+typedef struct tagSHORT_POSITION_MATRIX
+{
 	short	x;
 	short	y;
 	short	z;
 	short	s[3][3];
 } SHORT_POSITION_MATRIX_RECORD;
 
-typedef struct tagSHORT_POSITION_QUATERNION {
+typedef struct tagSHORT_POSITION_QUATERNION
+{
 	short	x;
 	short	y;
 	short	z;
@@ -607,27 +641,32 @@ typedef struct tagSHORT_POSITION_QUATERNION {
 
 
 
-typedef struct tagDOUBLE_POSITION {
+typedef struct tagDOUBLE_POSITION
+{
 	double	x;
 	double	y;
 	double	z;
 } DOUBLE_POSITION_RECORD;
 
-typedef struct tagDOUBLE_ANGLES {
+typedef struct tagDOUBLE_ANGLES
+{
 	double	a;			// azimuth
 	double	e;			// elevation
 	double	r;			// roll
 } DOUBLE_ANGLES_RECORD;
 
-typedef struct tagDOUBLE_MATRIX {
+typedef struct tagDOUBLE_MATRIX
+{
 	double	s[3][3];
 } DOUBLE_MATRIX_RECORD;
 
-typedef struct tagDOUBLE_QUATERNIONS {
+typedef struct tagDOUBLE_QUATERNIONS
+{
 	double	q[4];
 } DOUBLE_QUATERNIONS_RECORD;
 
-typedef struct tagDOUBLE_POSITION_ANGLES {
+typedef struct tagDOUBLE_POSITION_ANGLES
+{
 	double	x;
 	double	y;
 	double	z;
@@ -636,14 +675,16 @@ typedef struct tagDOUBLE_POSITION_ANGLES {
 	double	r;
 } DOUBLE_POSITION_ANGLES_RECORD;
 
-typedef struct tagDOUBLE_POSITION_MATRIX {
+typedef struct tagDOUBLE_POSITION_MATRIX
+{
 	double	x;
 	double	y;
 	double	z;
 	double	s[3][3];
 } DOUBLE_POSITION_MATRIX_RECORD;
 
-typedef struct tagDOUBLE_POSITION_QUATERNION {
+typedef struct tagDOUBLE_POSITION_QUATERNION
+{
 	double	x;
 	double	y;
 	double	z;
@@ -657,31 +698,36 @@ typedef struct tagDOUBLE_POSITION_QUATERNION {
 
 
 
-typedef struct tagDOUBLE_POSITION_TIME_STAMP {
+typedef struct tagDOUBLE_POSITION_TIME_STAMP
+{
 	double	x;
 	double	y;
 	double	z;
 	double	time;
 } DOUBLE_POSITION_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_ANGLES_TIME_STAMP {
+typedef struct tagDOUBLE_ANGLES_TIME_STAMP
+{
 	double	a;			// azimuth
 	double	e;			// elevation
 	double	r;			// roll
 	double	time;
 } DOUBLE_ANGLES_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_MATRIX_TIME_STAMP {
+typedef struct tagDOUBLE_MATRIX_TIME_STAMP
+{
 	double	s[3][3];
 	double	time;
 } DOUBLE_MATRIX_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_QUATERNIONS_TIME_STAMP {
+typedef struct tagDOUBLE_QUATERNIONS_TIME_STAMP
+{
 	double	q[4];
 	double	time;
 } DOUBLE_QUATERNIONS_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_POSITION_ANGLES_TIME_STAMP {
+typedef struct tagDOUBLE_POSITION_ANGLES_TIME_STAMP
+{
 	double	x;
 	double	y;
 	double	z;
@@ -691,7 +737,8 @@ typedef struct tagDOUBLE_POSITION_ANGLES_TIME_STAMP {
 	double	time;
 } DOUBLE_POSITION_ANGLES_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_POSITION_MATRIX_STAMP_RECORD {
+typedef struct tagDOUBLE_POSITION_MATRIX_STAMP_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -699,7 +746,8 @@ typedef struct tagDOUBLE_POSITION_MATRIX_STAMP_RECORD {
 	double	time;
 } DOUBLE_POSITION_MATRIX_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_POSITION_QUATERNION_STAMP_RECORD {
+typedef struct tagDOUBLE_POSITION_QUATERNION_STAMP_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -716,7 +764,8 @@ typedef struct tagDOUBLE_POSITION_QUATERNION_STAMP_RECORD {
 
 
 
-typedef struct tagDOUBLE_POSITION_TIME_Q {
+typedef struct tagDOUBLE_POSITION_TIME_Q
+{
 	double	x;
 	double	y;
 	double	z;
@@ -724,7 +773,8 @@ typedef struct tagDOUBLE_POSITION_TIME_Q {
 	USHORT	quality;		
 } DOUBLE_POSITION_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_ANGLES_TIME_Q {
+typedef struct tagDOUBLE_ANGLES_TIME_Q
+{
 	double	a;			// azimuth
 	double	e;			// elevation
 	double	r;			// roll
@@ -732,19 +782,22 @@ typedef struct tagDOUBLE_ANGLES_TIME_Q {
 	USHORT	quality;		
 } DOUBLE_ANGLES_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_MATRIX_TIME_Q {
+typedef struct tagDOUBLE_MATRIX_TIME_Q
+{
 	double	s[3][3];
 	double	time;
 	USHORT	quality;		
 } DOUBLE_MATRIX_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_QUATERNIONS_TIME_Q {
+typedef struct tagDOUBLE_QUATERNIONS_TIME_Q
+{
 	double	q[4];
 	double	time;
 	USHORT	quality;		
 } DOUBLE_QUATERNIONS_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD {
+typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -755,7 +808,8 @@ typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_RECORD {
 	USHORT	quality;		
 } DOUBLE_POSITION_ANGLES_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD {
+typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -764,7 +818,8 @@ typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_RECORD {
 	USHORT	quality;		
 } DOUBLE_POSITION_MATRIX_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_RECORD {
+typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -773,7 +828,8 @@ typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_RECORD {
 	USHORT	quality;		
 } DOUBLE_POSITION_QUATERNION_TIME_Q_RECORD;
 
-typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD {
+typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -785,7 +841,8 @@ typedef struct tagDOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD {
 	USHORT	button;
 } DOUBLE_POSITION_ANGLES_TIME_Q_BUTTON_RECORD;
 
-typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD {
+typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -795,7 +852,8 @@ typedef struct tagDOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD {
 	USHORT	button;
 } DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD;
 
-typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD {
+typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -805,7 +863,8 @@ typedef struct tagDOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD {
 	USHORT	button;
 } DOUBLE_POSITION_QUATERNION_TIME_Q_BUTTON_RECORD;
 
-typedef struct tagDOUBLE_POSITION_ANGLES_MATRIX_QUATERNION_TIME_Q_BUTTON_RECORD {
+typedef struct tagDOUBLE_POSITION_ANGLES_MATRIX_QUATERNION_TIME_Q_BUTTON_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -819,7 +878,8 @@ typedef struct tagDOUBLE_POSITION_ANGLES_MATRIX_QUATERNION_TIME_Q_BUTTON_RECORD 
 	USHORT	button;
 } DOUBLE_POSITION_ANGLES_MATRIX_QUATERNION_TIME_Q_BUTTON_RECORD;
 
-typedef struct tagSHORT_ALL_RECORD {
+typedef struct tagSHORT_ALL_RECORD
+{
 	short	x;
 	short	y;
 	short	z;
@@ -830,7 +890,8 @@ typedef struct tagSHORT_ALL_RECORD {
 	short	q[4];
 }SHORT_ALL_RECORD;
 
-typedef struct tagDOUBLE_ALL_RECORD {
+typedef struct tagDOUBLE_ALL_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -841,7 +902,8 @@ typedef struct tagDOUBLE_ALL_RECORD {
 	double	q[4];
 }DOUBLE_ALL_RECORD;
 
-typedef struct tagDOUBLE_ALL_TIME_STAMP_RECORD {
+typedef struct tagDOUBLE_ALL_TIME_STAMP_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -853,7 +915,8 @@ typedef struct tagDOUBLE_ALL_TIME_STAMP_RECORD {
 	double	time;
 }DOUBLE_ALL_TIME_STAMP_RECORD;
 
-typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RECORD {
+typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RECORD
+{
 	double	x;
 	double	y;
 	double	z;
@@ -866,7 +929,8 @@ typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RECORD {
 	USHORT	quality;		
 }DOUBLE_ALL_TIME_STAMP_Q_RECORD;
 
-typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD {
+typedef struct tagDOUBLE_ALL_TIME_STAMP_Q_RAW_RECORD
+{
 	double	x;
 	double	y;
 	double	z;

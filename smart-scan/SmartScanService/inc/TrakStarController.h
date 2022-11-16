@@ -14,24 +14,28 @@
 namespace SmartScan
 {
 	// Class containing the system configuration.
-	class CSystem {
+	class CSystem
+	{
 	public:
 		SYSTEM_CONFIGURATION	m_config;
 	};
 
 	// Class containing the transmitter configuration.
-	class CXmtr {
+	class CXmtr
+	{
 	public:
 		TRANSMITTER_CONFIGURATION	m_config;
 	};
 
 	// Class containing the sensor configuration.
-	class CSensor {
+	class CSensor
+	{
 	public:
 		SENSOR_CONFIGURATION	m_config;
 	};
 
-	class TrakStarController {
+	class TrakStarController
+	{
 	public:
 		// Constructor. Creates a TrakStarController object that handles communication with the TrakStar device.
 		// Arguments:
@@ -132,7 +136,7 @@ namespace SmartScan
 		long mockDataFileNOfLines;								// Total number of mock data file lines.
 
 		// Keep track of the last mock record so that the movement is realistic.
-		Point3 mPrevMockRecord;
+		Point3 mPrevRecord;
 
 		// Validate a device status and check which error has occurred if not valid.
 		// Arguments:
@@ -150,11 +154,11 @@ namespace SmartScan
 		const std::string GetErrorString(int error);
 		
 		// Randomly returns a point on the edge of a sphere at a reasonable distance from the previous point.
-		Point3 GetMockRecord();
+		Point3 GetRecord();
 
 		// Goes through the specified file and returns consecutive samples as Point3.
 		// Arguments:
 		// -sensorId : Mock sensor port number.
-		Point3 GetMockRecordFromFile(int sensorId = 0);
+		Point3 GetRecordFromFile(int sensorId = 0);
 	};
 }

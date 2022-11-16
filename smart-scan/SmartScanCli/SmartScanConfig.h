@@ -9,11 +9,11 @@
 
 #include "SmartScanService.h"
 
-#define __MOCK false 							// Use this to set the application in mock mode or not.
+#define __DATA false 							// Use this to set the application in mock mode or not.
 
-const bool mockMode = __MOCK; 
+const bool measuredData = __DATA;
 
-#if __MOCK == true
+#if __DATA == true
 
 // Glove setup
 int rThumbSerial = 1;							// Only used for setting reference points and ZOffsets calibration.

@@ -1,19 +1,18 @@
 #include <iostream>
 #include <chrono>
 
-#include "../inc/CSVExport.h"
+#include "CSVExport.h"
 
 using namespace SmartScan;
 
-CSVExport::CSVExport() {
+CSVExport::CSVExport()
+{
 
 }
 
-void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string filename) {
+void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string filename)
+{
 	csvFile.open(filename);
-
-	// Print the separator sign to the csv
-	csvFile << "sep=," << std::endl;
 
 	// Print the amount of rows on the top row.
 	csvFile << data->size() << std::endl;
@@ -30,11 +29,9 @@ void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string 
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::string filename) {
+void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::string filename)
+{
 	csvFile.open(filename);
-
-	// Print the separator sign to the csv
-	csvFile << "sep=," << std::endl;
 
 	// Print the column names on the top row.
 	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << std::endl;
@@ -51,11 +48,9 @@ void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::st
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename) {
+void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, const std::string filename)
+{
 	csvFile.open(filename);
-
-	// Print the separator sign to the csv
-	csvFile << "sep=," << std::endl;
 
 	// Print the amount of rows and the amount of sensors used (excluding reference sensor) on the top row.
 	csvFile << data->at(0).size() << "," << data->size() << std::endl;
@@ -76,11 +71,9 @@ void CSVExport::ExportPoint3Raw(const std::vector<std::vector<Point3>>* data, co
 	csvFile.close();
 }
 
-void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename) {
+void CSVExport::ExportPoint3RawCloud(const std::vector<std::vector<Point3>>* data, const std::string filename)
+{
 	csvFile.open(filename);
-
-	// Print the separator sign to the csv
-	csvFile << "sep=," << std::endl;
 
 	// Print the column names on the top row.
 	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << std::endl;
