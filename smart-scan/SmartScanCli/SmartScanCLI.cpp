@@ -21,7 +21,7 @@ void Usage();
 void RawPrintCallback(const std::vector<SmartScan::Point3>& record);
 
 // Create SmartScanService object
-SmartScanService s3(measuredData);
+SmartScanService s3;
 
 int main()
 {

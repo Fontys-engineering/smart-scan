@@ -20,7 +20,7 @@ DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, do
 	}
 }
 
-DataAcq::DataAcq(bool useMeasuredData) : mUseMeasuredData{ useMeasuredData }, mTSCtrl(useMeasuredData)
+DataAcq::DataAcq() :  mTSCtrl()
 {
 
 }
@@ -33,17 +33,15 @@ DataAcq::~DataAcq()
 
 void DataAcq::Init()
 {
-	// Skip initalization of the TrakStar device when in Mock mode.
-	if {
-		mTSCtrl.Init();
-		mTSCtrl.SelectTransmitter(mConfig.transmitterID);
-		mTSCtrl.SetPowerlineFrequency(mConfig.powerLineFrequency);
-		mTSCtrl.SetMeasurementRate(mConfig.measurementRate);
-		mTSCtrl.SetMaxRange(mConfig.maximumRange);
-		mTSCtrl.SetMetric();
-		mTSCtrl.SetReferenceFrame(mConfig.transmitterID, mConfig.frameRotations);
-		mTSCtrl.SetSensorFormat();
-	}
+	mTSCtrl.Init();
+	mTSCtrl.SelectTransmitter(mConfig.transmitterID);
+	mTSCtrl.SetPowerlineFrequency(mConfig.powerLineFrequency);
+	mTSCtrl.SetMeasurementRate(mConfig.measurementRate);
+	mTSCtrl.SetMaxRange(mConfig.maximumRange);
+	mTSCtrl.SetMetric();
+	mTSCtrl.SetReferenceFrame(mConfig.transmitterID, mConfig.frameRotations);
+	mTSCtrl.SetSensorFormat();
+
 
 	// Get sensor info from TrakStar object.
 	mPortNumBuff = mTSCtrl.GetAttachedPorts();
@@ -66,9 +64,7 @@ void DataAcq::Init()
 			throw ex_acq("Could not find the reference sensor specified.", __func__, __FILE__);
 		}
 		// Set the reference sensor to use rotation matrices instead of Euler angles.
-		if (mUseMeasuredData) {
-			mTSCtrl.SetRefSensorFormat(refSensorPort);
-		}
+		mTSCtrl.SetRefSensorFormat(refSensorPort);
 	}
 
     // Initialize raw data buffer.

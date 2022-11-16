@@ -21,8 +21,7 @@ namespace SmartScan
 	public:
 		// Constructor. Creates a SmartScanService object that handles everything SmartScan related.
 		// Arguments:
-		// - useMockData : When set to "true", a mock trakSTAR device is used. It will try to use the real thing otherwise.
-		SmartScanService(bool l= false);
+		SmartScanService();
 
 		// Destructor. Is here to make sure the data is cleaned up if the SmartScan object is removed.
 		~SmartScanService();
@@ -99,7 +98,6 @@ namespace SmartScan
 		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
-		//const bool mUseMockData;						// Boolean indicating if Mock data is used.	
 
 		DataAcq mDataAcq;								// Data acquisition obj.
 		std::vector<std::shared_ptr<Scan>> scans;       // Vector containing all the scans. 

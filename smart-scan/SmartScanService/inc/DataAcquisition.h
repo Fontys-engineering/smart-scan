@@ -36,7 +36,7 @@ namespace SmartScan
 		// Constructor. Creates a DataAcquisition object that handles data storage and a TrakStarController abstraction layer.
 		// Arguments:
 		// - useMockData : When set to "true", a mock trakSTAR device is used. It will try to use the real thing otherwise.
-		DataAcq(bool useData);
+		DataAcq();
 
 		// Destructor. Is here to make sure the data is cleaned up if the DataAcquisition object is removed.
 		~DataAcq();
@@ -87,7 +87,6 @@ namespace SmartScan
 		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
 		void RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback);
 	private:
-		//const bool mUseMockData;											// Boolean indicating if Mock data is used.
 		DataAcqConfig mConfig;                    							// DataAcquisition configuration obj.
 
 		bool mRunning = false;                          					// Boolean indicating if the DataAcquisition thread is running.

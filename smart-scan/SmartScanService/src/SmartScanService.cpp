@@ -7,8 +7,7 @@
 
 using namespace SmartScan;
 
-SmartScanService::SmartScanService(bool useMockData)
-	: mUseMockData{ useMockData }, mDataAcq(useMockData) // Initializer list needed to initialize member classes and values.
+SmartScanService::SmartScanService():  mDataAcq() // Initializer list needed to initialize member classes and values.
 {
 
 }
