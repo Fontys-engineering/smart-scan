@@ -68,6 +68,10 @@ namespace SmartScan
 
 		// Returns the outlier threshold parameter defined in the configuration options.
 		const double GetOutlierThreshold() const;
+
+		// Filters out artifacts created when the point cloud is not dense enough
+		void OutlierFiltering(void);
+
 	private:
 		const double pi = 3.141592653589793238463;					// Approximation of PI.
 		const float toAngle = 180/pi;								// Radian to Degree conversion.

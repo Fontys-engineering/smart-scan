@@ -123,21 +123,20 @@ void Scan::DataFiltering()
 		if (mConfig.inBuff->back().size() > mLastFilteredSample + 1) {
 			// Loop through all the sensors.
 			for (int i = 0; i < mConfig.inBuff->size(); i++) {
-				Point3 point = mConfig.inBuff->at(i).at(mLastFilteredSample);	// Temporarily store the sample of a single sensor at the current index.
-				nearestRef = this->CalcNearestRef(&point);	// Calculate radius and find nearest reference point.
+				Point3 point = mConfig.inBuff->at(i).at(mLastFilteredSample);				// Temporarily store the sample of a single sensor at the current index.
+				nearestRef = this->CalcNearestRef(&point);									// Calculate radius and find nearest reference point.
 
-				if (point.s.r < mConfig.outlierThreshold) {	// Do not store the point if radius is too large.
-					CalcAngle(mConfig.refPoints.at(nearestRef), &point); // Calculate theta and phi.
+				//if (point.s.r < mConfig.outlierThreshold) {								// Do not store the point if radius is too large.
+				CalcAngle(mConfig.refPoints.at(nearestRef), &point);						// Calculate theta and phi.
 
-					// Calculate the indexes for the sorted buffer.
-					nearestTheta = (int)(point.s.theta/mConfig.filteringPrecision);
-					nearestPhi = (int)(point.s.phi/mConfig.filteringPrecision);
-					
-					// Do not store point if the radius is larger than the one already stored.
-					if (point.s.r < mSortedBuff[nearestRef][nearestTheta][nearestPhi].s.r) {
-						mSortedBuff[nearestRef][nearestTheta][nearestPhi] = point;
-					}
+				nearestTheta = (int)(point.s.theta/mConfig.filteringPrecision);				// Calculate the indexes for the sorted buffer.
+				nearestPhi = (int)(point.s.phi/mConfig.filteringPrecision);	
+
+				if (point.s.r < mSortedBuff[nearestRef][nearestTheta][nearestPhi].s.r) {	// Do not store point if the radius is larger than the one already stored.
+					mSortedBuff[nearestRef][nearestTheta][nearestPhi] = point;
+					mSortedBuff[nearestRef][nearestTheta][nearestPhi].empty = false;
 				}
+				//}
 			}
 			mLastFilteredSample++;
 		}
@@ -146,8 +145,110 @@ void Scan::DataFiltering()
 	mRunning = false;
 }
 
-int Scan::CalcNearestRef(Point3* point)
-{
+void Scan::OutlierFiltering(void) {
+	double localAverage = 0;
+	uint8_t numberOfPoints = 0;
+	uint16_t maxThetaIndex = 0;
+	uint16_t maxPhiIndex = 0;
+
+	for (uint32_t crntRefPoint = 0; crntRefPoint < mConfig.refPoints.size(); crntRefPoint++) {
+		maxThetaIndex = mSortedBuff[crntRefPoint].size();
+
+		for (uint16_t crntTheta = 0; crntTheta < maxThetaIndex; crntTheta++) {
+			maxPhiIndex = mSortedBuff[crntRefPoint][crntTheta].size();
+
+			for (uint16_t crntPhi = 0; crntPhi < maxPhiIndex; crntPhi++) {
+				bool found = false;
+				int16_t crntOffset = 1;
+				localAverage = 0;
+				uint16_t stepsTaken = 0;
+
+				uint16_t maxSteps = 20;
+
+				do {
+					if (mSortedBuff[crntRefPoint][(crntTheta + crntOffset)][crntPhi].empty == false) {
+						localAverage += mSortedBuff[crntRefPoint][(crntTheta + crntOffset)][crntPhi].s.r;
+						found = true;
+						numberOfPoints++;
+					}
+					else if ((crntTheta + crntOffset) < (maxThetaIndex - 1)) {
+						crntOffset++;
+					}
+					else {
+						crntOffset = -crntTheta;
+					}
+					stepsTaken++;
+				} while (!found && stepsTaken < maxSteps);
+
+				found = false;
+				crntOffset = 1;
+				stepsTaken = 0;
+
+				/*do {
+					if (mSortedBuff[crntRefPoint][(crntTheta - crntOffset)][crntPhi].empty == false) {
+						localAverage += mSortedBuff[crntRefPoint][(crntTheta - crntOffset)][crntPhi].s.r;
+						found = true;
+						numberOfPoints++;
+					}
+					else if ((crntTheta - crntOffset) > 0) {
+						crntOffset--;
+					}
+					else {
+						crntOffset = - (maxThetaIndex - crntTheta) + 1;
+					}
+					stepsTaken++;
+				} while (!found && stepsTaken < maxSteps);
+
+				found = false;
+				crntOffset = 1;
+				stepsTaken = 0;
+
+				do {
+					if (mSortedBuff[crntRefPoint][crntTheta][(crntPhi + crntOffset)].empty == false) {
+						localAverage += mSortedBuff[crntRefPoint][crntTheta][(crntPhi + crntOffset)].s.r;
+						found = true;
+						numberOfPoints++;
+					}
+					else if ((crntPhi + crntOffset) < (maxPhiIndex - 1)) {
+						crntOffset++;
+					}
+					else {
+						crntOffset = -crntPhi;
+					}
+					stepsTaken++;
+				} while (!found && stepsTaken < maxSteps);
+
+				found = false;
+				crntOffset = 1;
+				stepsTaken = 0;
+
+				do {
+					if (mSortedBuff[crntRefPoint][crntTheta][(crntPhi - crntOffset)].empty == false) {
+						localAverage += mSortedBuff[crntRefPoint][crntTheta][(crntPhi - crntOffset)].s.r;
+						found = true;
+						numberOfPoints++;
+					}
+					else if ((crntPhi - crntOffset) > 0) {
+						crntOffset--;
+					}
+					else {
+						crntOffset = -(maxPhiIndex - crntPhi) + 1;
+					}
+					stepsTaken++;
+				} while (!found && stepsTaken < maxSteps);
+
+				localAverage = localAverage / numberOfPoints;*/
+
+				if (mSortedBuff[crntRefPoint][crntTheta][crntPhi].s.r > (localAverage + mConfig.outlierThreshold) || mSortedBuff[crntRefPoint][crntTheta][crntPhi].empty) {
+					mSortedBuff[crntRefPoint][crntTheta][crntPhi].s.r = localAverage;
+					mSortedBuff[crntRefPoint][crntTheta][crntPhi].artificial = true;
+				}
+			}
+		}
+	}
+}
+
+int Scan::CalcNearestRef(Point3* point) {
 	int index = 0;
 	float radius = DBL_MAX, temp = 0; // Set radius to be an irrealistic value.
 

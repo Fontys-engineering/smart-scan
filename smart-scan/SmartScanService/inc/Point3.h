@@ -54,6 +54,8 @@ namespace SmartScan
         double x, y, z, time;               // X, Y, Z and time.
         unsigned short quality;             // Indicates magnetic interference.
         unsigned short button;              // Indicates a button press.
+        bool empty = true;                  // Indicates if the point has been assigned a real value
+        bool artificial = false;
 
         Rotation3 r;                        // Roation object.
         Spherical3 s;                       // Spherical object.

@@ -123,7 +123,7 @@ void DataAcq::Stop(bool clearData)
 {
 	// Wait a bit for the other threads to finish.
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
+		
 	// Clear button state and raw buffer.
     if (clearData) {
 		for (int i = 0; i < mRawBuff.size(); i++) {

@@ -95,7 +95,7 @@ void SmartScanService::StartScan()
 void SmartScanService::ClearData()
 {
 	mDataAcq.Stop(true);
-
+	
 	for (int i = 0; i < scans.size(); i++) {
 		scans.at(i)->Stop(true);
 	}
@@ -112,6 +112,8 @@ void SmartScanService::StopScan()
 
 	for (int i = 0; i < scans.size(); i++) {
 		scans.at(i)->Stop();
+		/*CURRENTLY BEING TESTED, NOT READY FOR USE*/
+		//scans.at(i)->OutlierFiltering();
 	}
 }
 
