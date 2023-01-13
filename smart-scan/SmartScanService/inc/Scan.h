@@ -20,8 +20,8 @@ namespace SmartScan
 		const std::vector<std::vector<Point3>>* inBuff;    			// Raw data vector.
 		std::vector<Point3> refPoints;              				// Reference point vector.
 		int filteringPrecision;										// Filtering precision.
-		int stopAtSample;											// Stop scanning after a certain sample is reached.
-		float outlierThreshold;										// Do not store points if their distance from the reference points are larger than this value.
+		int stopAtSample = -1;										// Stop scanning after a certain sample is reached.
+		float outlierThreshold = 1000000;							// Do not store points if their distance from lower data points are larger than this value.
     };
 
 	class Scan
@@ -66,11 +66,15 @@ namespace SmartScan
 		// Returns the stopAtSample parameter defined in the configuration options.
 		const int GetStopAtSample() const;
 
+		// Returns the stopAtSample parameter defined in the configuration options.
+		void SetStopAtSample(int newStopSample);
+
 		// Returns the outlier threshold parameter defined in the configuration options.
 		const double GetOutlierThreshold() const;
 
+		//BROKEN FILTERING, MIGHT DATA OVERFLOW, ISSUE: FILTERS ALL POINTS TO REF POINT
 		// Filters out artifacts created when the point cloud is not dense enough
-		void OutlierFiltering(void);
+		//void OutlierFiltering(void);
 
 	private:
 		const double pi = 3.141592653589793238463;					// Approximation of PI.
@@ -78,7 +82,7 @@ namespace SmartScan
 
 		bool mRunning = false;										// Boolean indicating if the scan thread is running.
 
-		const ScanConfig mConfig;									// Scan configuration object.
+		ScanConfig mConfig;									// Scan configuration object.
 
 		std::vector<std::vector<std::vector<Point3>>> mSortedBuff;	// Vector containing ther sorted points.
 
