@@ -140,12 +140,6 @@ const int TrakStarController::NumAttachedTransmitters() const
 	return pXmtr.size();
 }
 
-const int TrakStarController::NumAttachedSensors() const
-{
-	return ATC3DG.m_config.numberSensors;
-}
-
-
 std::vector<int> TrakStarController::GetAttachedPorts() const
 {
 	std::vector<int> attachedSensors;

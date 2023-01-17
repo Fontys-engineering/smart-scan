@@ -1,4 +1,4 @@
-// This is the SmartScan data acquisition class.
+// This is the SmartSCan data acquisition class.
 // It provides an abstraction layer for gathering and storing sensor data from the TrakStar device.
 
 #pragma once
@@ -24,14 +24,10 @@ namespace SmartScan
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0.
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
 		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
-		int indexSensorSerial = -1;						// Serial number of the index sensor, set as -1 when no reference sensor is used.
-		int thumbSensorSerial = -1;						// Serial number of the thumb sensor, set as -1 when no reference sensor is used.
-		int middleSensorSerial = -1;					// Serial number of the middle sensor, set as -1 when no reference sensor is used.
-
 		double frameRotations[3] = {0, 0, 0};			// Set the rotation of the measurement frame, azimuth, elevation and roll. (0, 0, 0) is default.
 
 		DataAcqConfig();
-		DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, double frameRotations[3]);
+		DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3]);
     };
 
 	class DataAcq 
@@ -50,14 +46,6 @@ namespace SmartScan
 		// - acquistionConfig : Configuration struct that specifies the settings with which the TrakStar device is initalized. 
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
-
-		// Initialise the SmartScan sensors. Call this before starting scans.
-		// Arguments:
-		// - acquistionConfig : Configuration struct that specifies the settings with which the TrakStar device is initalized. 
-		void SensorInit(int thumbSensorNum, int indexSensorNum, int middleSensorNum, int refSensorNum);
-
-		// Check which sensor is higher than any others
-		int HighestInTheRoom(void);
 
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:

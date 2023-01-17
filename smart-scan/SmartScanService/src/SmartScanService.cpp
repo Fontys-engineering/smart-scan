@@ -29,34 +29,10 @@ void SmartScanService::Init(DataAcqConfig acquisitionConfig)
 	mDataAcq.Init(acquisitionConfig);
 }
 
-void SmartScanService::InitSensors(int refSensId, int indexSensId, int thumbSensId, int middleSensId) {
-	mDataAcq.SensorInit(refSensId, indexSensId, thumbSensId, middleSensId);
-}
-
 void SmartScanService::CorrectZOffset(int serialNumber)
 {
+	
 	mDataAcq.CorrectZOffset(serialNumber);
-}
-
-void SmartScanService::SetStopSample(int newStopSample, int id) {
-	ScanConfig config;
-	config.stopAtSample = newStopSample;
-	bool ok = false;
-	// Find the scan with the specified id and replace it with new sample.
-	for (int s = 0; s < scans.size(); s++) {
-		if (scans[s]->mId == id) {
-			this->scans.at(s)->SetStopAtSample(newStopSample);
-			ok = true;
-			break;
-		}
-	}
-	if (!ok) {
-		throw ex_smartScan("Scan id not found", __func__, __FILE__);
-	}
-}
-
-int SmartScanService::HighestSensor(void) {
-	return mDataAcq.HighestInTheRoom();
 }
 
 void SmartScanService::NewScan(ScanConfig config)

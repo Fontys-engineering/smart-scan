@@ -12,8 +12,8 @@ DataAcqConfig::DataAcqConfig()
 
 }
 
-DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, double frameRotations[3])
-	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }
+DataAcqConfig::DataAcqConfig(short int transmitterID, double measurementRate, double powerLineFrequency, double maximumRange, int refSensorSerial, double frameRotations[3])
+	: transmitterID { transmitterID }, measurementRate { measurementRate }, powerLineFrequency { powerLineFrequency }, maximumRange { maximumRange }, refSensorSerial { refSensorSerial }
 {
 	for (int i = 0; i < 3; i ++) {
 		this->frameRotations[i] = frameRotations[i]; // Copy the array.
@@ -46,28 +46,20 @@ void DataAcq::Init()
 	// Get sensor info from TrakStar object.
 	mPortNumBuff = mTSCtrl.GetAttachedPorts();
 	mSerialBuff = mTSCtrl.GetAttachedSerials();
-}
 
-
-void DataAcq::SensorInit(int thumbSensorNum, int indexSensorNum, int middleSensorNum, int refSensorNum) {
-	mConfig.refSensorSerial = refSensorNum;
-	mConfig.indexSensorSerial = indexSensorNum;
-	mConfig.thumbSensorSerial = thumbSensorNum;
-	mConfig.middleSensorSerial = middleSensorNum;
-
-	// Remove reference sensor from sensor vector, because it is special.
+    // Remove reference sensor from sensor vector, because it is special.
 	if (mConfig.refSensorSerial >= 0) {
 		bool foundSensor = false;
-		for (int i = 0; i < mSerialBuff.size(); i++) {
+		for(int i = 0; i < mSerialBuff.size(); i++) {
 			if (mSerialBuff[i] == mConfig.refSensorSerial) {
 				refSensorPort = mPortNumBuff[i];
-				mSerialBuff.erase(mSerialBuff.cbegin() + i);
-				mPortNumBuff.erase(mPortNumBuff.cbegin() + i);
+				mSerialBuff.erase(mSerialBuff.cbegin()+i);
+				mPortNumBuff.erase(mPortNumBuff.cbegin()+i);
 				foundSensor = true;
 			}
 		}
 
-		// Throw an error if the user specified a reference sensor Num number that is not attached.
+		// Throw an error if the user specified a reference sensor serial number that is not attached.
 		if (!foundSensor) {
 			throw ex_acq("Could not find the reference sensor specified.", __func__, __FILE__);
 		}
@@ -75,29 +67,10 @@ void DataAcq::SensorInit(int thumbSensorNum, int indexSensorNum, int middleSenso
 		mTSCtrl.SetRefSensorFormat(refSensorPort);
 	}
 
-	// Initialize raw data buffer.
+    // Initialize raw data buffer.
 	for (int i = 0; i < mPortNumBuff.size(); i++) {
 		mRawBuff.push_back(std::vector<Point3>());
 	}
-}
-
-int DataAcq::HighestInTheRoom(void) {
-	// Get all available sensors
-	std::vector<int> anonSerials = mTSCtrl.GetAttachedSerials();
-	std::vector<Point3> testPoints;
-	int highestSensorIndex = 0;
-
-	// Read the location of each sensor
-	for (int i = 0; i < mTSCtrl.NumAttachedSensors(); i++) {
-		testPoints.at(i) = this->GetSingleSample(anonSerials.at(i), true);
-
-		// Save the first measurment or check if current sensor is higher than the previous one
-		if (i == 0 || testPoints.at(highestSensorIndex).z < testPoints.at(i).z) {
-			highestSensorIndex = i;
-		}
-	}
-	
-	return anonSerials.at(highestSensorIndex);
 }
 
 void DataAcq::Init(DataAcqConfig acquisitionConfig)
@@ -186,7 +159,11 @@ Point3 DataAcq::GetSingleSample(int sensorSerial, bool raw)
 	Point3 rawPoint = mTSCtrl.GetRecord(FindPortNum(sensorSerial)); 
 
 	// Check if raw data is requested.
-	if (!raw && refSensorPort > -1) {
+	if (raw) {
+		//this->angleCorrect(&rawPoint);
+	}
+	// Check if a reference sensor is defined.
+	else if (refSensorPort > -1) {
 		refMatrix = mTSCtrl.GetRefRecord(refSensorPort);
 		ReferenceCorrect(&refMatrix, &rawPoint);
 	}
@@ -208,9 +185,9 @@ const int DataAcq::NumAttachedSensors(bool includeRef) const
 {
 	// Add + 1 since the reference sensor is removed from the sensor list.
 	if (includeRef && refSensorPort > -1) {
-		return mTSCtrl.NumAttachedSensors();
+		return mPortNumBuff.size() + 1;
 	}
-	return (mTSCtrl.NumAttachedSensors() - 1);
+	return mPortNumBuff.size();
 } 
 
 void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)

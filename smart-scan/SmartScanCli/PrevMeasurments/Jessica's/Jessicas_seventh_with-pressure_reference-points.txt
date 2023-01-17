@@ -1,3 +1,0 @@
-Reference point number 0 set at (-127.625,31.8554,-1.42141).
-Reference point number 1 set at (-72.5514,6.85273,37.7074).
-Reference point number 2 set at (81.3465,-95.358,17.9666).
