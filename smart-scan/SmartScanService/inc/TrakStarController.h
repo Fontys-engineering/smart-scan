@@ -100,6 +100,8 @@ namespace SmartScan
 		// Return the number of attached transmitters.
 		const int NumAttachedTransmitters() const;
 
+		// Return the number of attached sensors.
+		const int NumAttachedSensors() const;
 		// Return a vector containing the sensor ports where an actual sensor is attached.
 		std::vector<int> GetAttachedPorts() const;
 

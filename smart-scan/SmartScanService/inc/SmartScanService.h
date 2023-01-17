@@ -37,6 +37,12 @@ namespace SmartScan
 		// - serialNumber : Serial number of the sensor where the Z offset will be changed.
 		void CorrectZOffset(int serialNumber);
 
+		// Set the stop sample amount
+		// Arguments:
+		// - newStopSample : New value at which simple a scan should stop
+		// - id : id of scan which needs to be update
+		void SetStopSample(int newStopSample, int id);
+
 		// Creates a new scan and adds it to the scan list.
 		// Arguments:
 		// - config : Configuration struct that specifies the settings of this particular scan.
