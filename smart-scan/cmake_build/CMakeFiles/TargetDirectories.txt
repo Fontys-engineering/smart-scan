@@ -1,0 +1,2 @@
+D:/Smart_Glove_Project/GitHub/cmake_build/CMakeFiles/ALL_BUILD.dir
+D:/Smart_Glove_Project/GitHub/cmake_build/CMakeFiles/ZERO_CHECK.dir
