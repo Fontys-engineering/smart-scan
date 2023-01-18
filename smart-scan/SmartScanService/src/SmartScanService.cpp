@@ -51,8 +51,7 @@ void SmartScanService::SetStopSample(int newStopSample, int id) {
 	}
 }
 
-void SmartScanService::NewScan(ScanConfig config)
-{
+void SmartScanService::NewScan(ScanConfig config) {
 	// Check if the filtering precision has no remainder with 180. This is needed to make sure an array can be created with integer indexes in the Scan class.
 	if (180%config.filteringPrecision != 0) {
 		throw ex_smartScan("180 is not a multiple of the filtering precision", __func__, __FILE__);
@@ -67,8 +66,7 @@ void SmartScanService::DeleteScan()
 	this->scans.clear();
 }
 
-void SmartScanService::DeleteScan(int id)
-{
+void SmartScanService::DeleteScan(int id) {
 	bool ok = false;
 	// Find the scan with the specified id and erase it.
 	for (int s = 0; s < scans.size(); s++) {
@@ -83,8 +81,7 @@ void SmartScanService::DeleteScan(int id)
 	}
 }
 
-void SmartScanService::StartScan()
-{
+void SmartScanService::StartScan() {
 	char arg[51];
 	const char startString[] = "Cannot start scan ";
 	const char endString[] = " due to reference points set.";
@@ -108,8 +105,43 @@ void SmartScanService::StartScan()
 	}
 }
 
-void SmartScanService::ClearData()
-{
+void SmartScanService::StartScan(int id) {
+	bool ok = false;
+	char arg[51];
+	const char startString[] = "Cannot start scan ";
+	const char endString[] = " due to reference points set.";
+	char scan[3];
+	
+	for (int i = 0; i < scans.size(); i++) {
+		//Check if current scan is the scan which is requested
+		if (this->scans.at(i)->mId == id) {
+			// Start data acquisition if not running yet
+			if (!mDataAcq.IsRunning()) {
+				mDataAcq.Start();
+			}
+
+			// Check if reference points have been set;
+			if (!this->scans.at(i)->NumRefPoints() && !this->scans.at(i)->NumUsedSensors()) {
+				// Ugly stuff to put a number into an error string. This can probalby be done easier.
+				sprintf_s(scan, "%d", i);
+				strcpy_s(arg, startString);
+				strcat_s(arg, scan);
+				strcat_s(arg, endString);
+				throw ex_smartScan(arg, __func__, __FILE__);
+			}
+			else {
+				ok = true;
+				this->scans.at(i)->Run();
+			}
+		}
+	}
+
+	if (!ok) {
+		throw ex_smartScan("Scan id not found", __func__, __FILE__);
+	}
+}
+
+void SmartScanService::ClearData() {
 	mDataAcq.Stop(true);
 	
 	for (int i = 0; i < scans.size(); i++) {
@@ -117,13 +149,11 @@ void SmartScanService::ClearData()
 	}
 }
 
-Point3 SmartScanService::GetSingleSample(int sensorSerial, bool raw)
-{
+Point3 SmartScanService::GetSingleSample(int sensorSerial, bool raw) {
 	return mDataAcq.GetSingleSample(sensorSerial, raw);
 }
 
-void SmartScanService::StopScan()
-{
+void SmartScanService::StopScan() {
 	mDataAcq.Stop();
 
 	for (int i = 0; i < scans.size(); i++) {
@@ -133,28 +163,63 @@ void SmartScanService::StopScan()
 	}
 }
 
-const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const
-{
+bool SmartScanService::StopScan(int id) {
+	//Check if there is another scan still running
+	int i = 0;
+	bool scanRunning = false;
+	bool ok = false;
+	char arg[51];
+	const char startString[] = "Cannot start scan ";
+	const char endString[] = " due to reference points set.";
+	char scan[3];
+
+	// Find the scan with the specified id and erase it.
+	for (int s = 0; s < scans.size(); s++) {
+		do {
+			if (this->scans.at(i)->IsRunning() && this->scans.at(i)->mId != id) {
+				scanRunning = true;
+			}
+			i++;
+		} while (i < this->scans.size() && !scanRunning);
+
+		//Only stop the data acquisition if no other scans are using it
+
+		if (this->scans.at(s)->mId == id) {
+			if (!scanRunning) {
+				mDataAcq.Stop();
+			}
+
+			this->scans.at(s)->Stop();
+			ok = true;
+			/*CURRENTLY BEING TESTED, NOT READY FOR USE*/
+			//scans.at(i)->OutlierFiltering();
+			break;
+		}
+	}
+	return ok;
+}
+
+const std::vector<std::shared_ptr<Scan>>& SmartScanService::GetScansList() const {
 	return scans;
 }
 
-const int SmartScanService::NumAttachedBoards() const
-{
+const int SmartScanService::NumAttachedBoards() const {
 	return mDataAcq.NumAttachedBoards();
 }
 
-const int SmartScanService::NumAttachedTransmitters() const
-{
+const int SmartScanService::NumAttachedTransmitters() const {
 	return mDataAcq.NumAttachedTransmitters();
 }
 
-const int SmartScanService::NumAttachedSensors(bool includeRef) const
-{
+const int SmartScanService::NumAttachedSensors(bool includeRef) const {
 	return mDataAcq.NumAttachedSensors(includeRef);
 }
 
-void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw)
-{
+int SmartScanService::NumOfScans(void) {
+	return this->scans.size();
+}
+
+void SmartScanService::ExportCSV(const std::string filename, int scanId, const bool raw) {
 	try {
 		if (raw) {
 			csvExport.ExportPoint3Raw(mDataAcq.GetRawBuffer(), filename);
@@ -175,8 +240,7 @@ void SmartScanService::ExportCSV(const std::string filename, int scanId, const b
 	}
 }
 
-void SmartScanService::ExportPointCloud(const std::string filename, int scanId, const bool raw)
-{
+void SmartScanService::ExportPointCloud(const std::string filename, int scanId, const bool raw) {
 	try {
 		if (raw) {
 			csvExport.ExportPoint3RawCloud(mDataAcq.GetRawBuffer(), filename);
@@ -197,13 +261,11 @@ void SmartScanService::ExportPointCloud(const std::string filename, int scanId, 
 	}
 }
 
-void SmartScanService::RegisterRawDataCallback(std::function<void(const std::vector<SmartScan::Point3>&)> callback)
-{
+void SmartScanService::RegisterRawDataCallback(std::function<void(const std::vector<SmartScan::Point3>&)> callback) {
 	mDataAcq.RegisterRawDataCallback(callback);
 }
 
-const int SmartScanService::FindNewScanId() const
-{
+const int SmartScanService::FindNewScanId() const {
 	int newId = 0;
 	for (int scn = 0; scn < scans.size(); scn++) {
 		if (newId == scans[scn]->mId) {
@@ -214,8 +276,7 @@ const int SmartScanService::FindNewScanId() const
 	return newId;
 }
 
-const bool SmartScanService::IdExists(const int scanId) const
-{
+const bool SmartScanService::IdExists(const int scanId) const {
 	for (int scn = 0; scn < scans.size(); scn++) {
 		if (scanId == scans[scn]->mId) {
 			return true;

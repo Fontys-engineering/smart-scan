@@ -119,6 +119,7 @@ namespace SmartScan
 		Point3Ref GetRefRecord(int id);
 	private:
 		const double toInch = 0.03937008;						// Constant for converting millimetres to inches.
+		const double toCentimeter = 0.01;						// Constant for converting millimetres to centimeters.
 
 		const bool mUseMockData;								// Boolean indicating if Mock data is used.	
 

@@ -56,6 +56,7 @@ namespace SmartScan
 
 		// Start the data acquistion and all the scans in the scan list. 
 		void StartScan();
+		void StartScan(int id);
 
 		// Clear all previous recorded data.
 		void ClearData();
@@ -69,6 +70,8 @@ namespace SmartScan
 
 		// Stop the data acquisition and with that all the scans. The scans will conitnue to filter until caught up with data acquisition.
 		void StopScan();
+		// Returns if the stop was succesfull
+		bool StopScan(int id);
 
 		// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		// Returns a vector containing Scan objects by reference.
@@ -84,6 +87,9 @@ namespace SmartScan
 		// Arguments:
 		// - includeRef : When set to "True", the returned number will include the reference sensor.
 		const int NumAttachedSensors(bool includeRef) const;
+
+		// Returns how many scans exist
+		int NumOfScans(void);
 
 		// Export the Point3 array in a csv format suited for the MATLAB Artificial intelligence scripts.
 		// Arguments:
