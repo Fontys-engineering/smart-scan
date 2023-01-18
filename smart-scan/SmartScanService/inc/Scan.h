@@ -13,6 +13,10 @@
 
 #include "Point3.h"
 
+#define F_PI	3.14159265358979323846264338327950288
+#define TO_RAD	180 / F_PI
+
+
 namespace SmartScan
 {
     struct ScanConfig
@@ -77,8 +81,6 @@ namespace SmartScan
 		//void OutlierFiltering(void);
 
 	private:
-		const double pi = 3.141592653589793238463;					// Approximation of PI.
-		const float toAngle = 180/pi;								// Radian to Degree conversion.
 
 		bool mRunning = false;										// Boolean indicating if the scan thread is running.
 

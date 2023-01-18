@@ -5,6 +5,8 @@
 #include "Scan.h"
 #include "Exceptions.h"
 
+#define _USE_MATH_DEFINES
+
 using namespace SmartScan;
 
 Scan::Scan(const int id, ScanConfig config)
@@ -138,9 +140,8 @@ void Scan::DataFiltering()
 
 				if (point.s.r < mSortedBuff[nearestRef][nearestTheta][nearestPhi].s.r) {	// Do not store point if the radius is larger than the one already stored.
 					mSortedBuff[nearestRef][nearestTheta][nearestPhi] = point;
-					mSortedBuff[nearestRef][nearestTheta][nearestPhi].empty = false;
+					//mSortedBuff[nearestRef][nearestTheta][nearestPhi].empty = false;
 				}
-				//}
 			}
 			mLastFilteredSample++;
 		}
@@ -271,8 +272,7 @@ int Scan::CalcNearestRef(Point3* point) {
 	return index;
 }
 
-void Scan::CalcAngle(Point3 refPoint, Point3* point)
-{
-	point->s.theta = (atan2(point->y - refPoint.y, point->x - refPoint.x) * toAngle) + 180;
-	point->s.phi = acos((point->z - refPoint.z)/point->s.r) * toAngle;
+void Scan::CalcAngle(Point3 refPoint, Point3* point) {
+	point->s.theta = (atan2(point->y - refPoint.y, point->x - refPoint.x) * TO_RAD) + 180;
+	point->s.phi = acos((point->z - refPoint.z)/point->s.r) * TO_RAD;
 }

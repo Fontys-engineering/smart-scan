@@ -47,7 +47,26 @@ void DataAcq::Init()
 	mPortNumBuff = mTSCtrl.GetAttachedPorts();
 	mSerialBuff = mTSCtrl.GetAttachedSerials();
 
-    // Remove reference sensor from sensor vector, because it is special.
+    // Initialize raw data buffer.
+	for (int i = 0; i < mPortNumBuff.size(); i++) {
+		mRawBuff.push_back(std::vector<Point3>());
+	}
+}
+
+void DataAcq::Init(DataAcqConfig acquisitionConfig)
+{
+	// Copy config and run init.
+	this->mConfig = acquisitionConfig;
+	this->Init();
+}
+
+void DataAcq::SensorConfig(int refer, int thumb, int index, int middle) {
+	mConfig.refSensorSerial = refer;
+	mConfig.thumbSensorSerial = thumb;
+	mConfig.indexSensorSerial = index;
+	mConfig.middleSensorSerial = middle;
+
+	// Remove reference sensor from sensor vector, because it is special.
 	if (mConfig.refSensorSerial >= 0) {
 		bool foundSensor = false;
 		for(int i = 0; i < mSerialBuff.size(); i++) {
@@ -55,6 +74,7 @@ void DataAcq::Init()
 				refSensorPort = mPortNumBuff[i];
 				mSerialBuff.erase(mSerialBuff.cbegin()+i);
 				mPortNumBuff.erase(mPortNumBuff.cbegin()+i);
+				mRawBuff.pop_back();
 				foundSensor = true;
 			}
 		}
@@ -67,17 +87,6 @@ void DataAcq::Init()
 		mTSCtrl.SetRefSensorFormat(refSensorPort);
 	}
 
-    // Initialize raw data buffer.
-	for (int i = 0; i < mPortNumBuff.size(); i++) {
-		mRawBuff.push_back(std::vector<Point3>());
-	}
-}
-
-void DataAcq::Init(DataAcqConfig acquisitionConfig)
-{
-	// Copy config and run init.
-	this->mConfig = acquisitionConfig;
-	this->Init();
 }
 
 void DataAcq::CorrectZOffset(int serialNumber)
@@ -189,6 +198,10 @@ const int DataAcq::NumAttachedSensors(bool includeRef) const
 	}
 	return mPortNumBuff.size();
 } 
+
+const std::vector<int> DataAcq::GetSerialNumbers(void) {
+	return mSerialBuff;
+}
 
 void DataAcq::RegisterRawDataCallback(std::function<void(const std::vector<Point3>&)> callback)
 {

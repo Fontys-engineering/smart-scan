@@ -32,6 +32,14 @@ namespace SmartScan
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
 
+		// Assign the connected sensor IDs 
+		// Arguments:
+		// - ref : reference sensor IDs
+		// - tmb : thumb sensor IDs
+		// - ind : index finger sensor IDs
+		// - mid : middle finger sensor IDs
+		void SensorSetup(int ref, int tmb, int ind, int mid);
+
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:
 		// - serialNumber : Serial number of the sensor where the Z offset will be changed.
@@ -42,6 +50,9 @@ namespace SmartScan
 		// - newStopSample : New value at which simple a scan should stop
 		// - id : id of scan which needs to be update
 		void SetStopSample(int newStopSample, int id);
+
+		// Return the sensor ID of which is the highest compared to the others
+		int HighestSensor(void);
 
 		// Creates a new scan and adds it to the scan list.
 		// Arguments:
@@ -56,6 +67,7 @@ namespace SmartScan
 
 		// Start the data acquistion and all the scans in the scan list. 
 		void StartScan();
+		void StartScan(int id);
 
 		// Clear all previous recorded data.
 		void ClearData();
@@ -69,6 +81,8 @@ namespace SmartScan
 
 		// Stop the data acquisition and with that all the scans. The scans will conitnue to filter until caught up with data acquisition.
 		void StopScan();
+		// Returns if the stop was succesfull
+		bool StopScan(int id);
 
 		// Get a list of all the scan objects. Returned as const so no changes can be made to it. This is meant mostly for accessing the data.
 		// Returns a vector containing Scan objects by reference.
@@ -84,6 +98,9 @@ namespace SmartScan
 		// Arguments:
 		// - includeRef : When set to "True", the returned number will include the reference sensor.
 		const int NumAttachedSensors(bool includeRef) const;
+
+		// Returns how many scans exist
+		int NumOfScans(void);
 
 		// Export the Point3 array in a csv format suited for the MATLAB Artificial intelligence scripts.
 		// Arguments:

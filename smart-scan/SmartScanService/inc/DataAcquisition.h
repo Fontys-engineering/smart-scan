@@ -24,6 +24,9 @@ namespace SmartScan
         double powerLineFrequency = 50.0;               // Either 50.0 or 60.0.
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
 		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
+		int thumbSensorSerial = -1;
+		int middleSensorSerial = -1;
+		int indexSensorSerial = -1;
 		double frameRotations[3] = {0, 0, 0};			// Set the rotation of the measurement frame, azimuth, elevation and roll. (0, 0, 0) is default.
 
 		DataAcqConfig();
@@ -46,6 +49,14 @@ namespace SmartScan
 		// - acquistionConfig : Configuration struct that specifies the settings with which the TrakStar device is initalized. 
 		void Init();
 		void Init(DataAcqConfig acquisitionConfig);
+
+		// Assign the connected sensor IDs 
+		// Arguments:
+		// - refer : reference sensor IDs
+		// - thumb : thumb sensor IDs
+		// - index : index finger sensor IDs
+		// - middle : middle finger sensor IDs
+		void SensorConfig(int refer, int thumb, int index, int middle);
 
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:
@@ -82,6 +93,9 @@ namespace SmartScan
 		// Returns the number of attached transmitters to the TrakStar device.
 		const int NumAttachedSensors(bool includeRef) const;
 
+		// Returns all connected serial numbers
+		const std::vector<int> GetSerialNumbers(void);
+
 		// Register a new callback function to be called whenever new raw data is available.
 		// Arguments:
 		// - callback : Contains the function that is executed. The function should take a vector of points as an argument.
@@ -95,6 +109,9 @@ namespace SmartScan
 		Trigger button_obj;													// Trigger obj.
 
 		int refSensorPort = -1;												// Port number of the reference sensor.
+		int thumbSensorPort = -1;											// Port number of the thumb sensor.
+		int middleSensorPort = -1;											// Port number of the middle finger sensor.
+		int indexSensorPort = -1;											// Port number of the index sensor.
 		std::vector<int> mPortNumBuff;										// Vector containing the sensor port numbers.
 		std::vector<int> mSerialBuff;										// Vector containing sensor serial numbers.
 		std::vector<std::vector<Point3>> mRawBuff;      					// Raw data vector.

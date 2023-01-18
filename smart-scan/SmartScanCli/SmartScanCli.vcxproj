@@ -148,9 +148,6 @@
   <ItemGroup>
     <ClCompile Include="SmartScanCLI.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="SmartScanConfig.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

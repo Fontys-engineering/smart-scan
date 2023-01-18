@@ -122,9 +122,9 @@ void TrakStarController::SetSensorOffset(int id, Point3 offset)
 	DOUBLE_POSITION_RECORD record;
 
 	// Copy offsets from Point3 to DOUBLE_POSITION_RECORD and convert them to inches.
-	record.x = offset.x * toInch;
-	record.y = offset.y * toInch;
-	record.z = offset.z * toInch;
+	record.x = (const double)offset.x * toCentimeter;
+	record.y = (const double)offset.y * toCentimeter;
+	record.z = (const double)offset.z * toCentimeter;
 
 	int errorCode = SetSensorParameter(id, SENSOR_OFFSET, &record, sizeof(record));
 	ErrorHandler(errorCode);
