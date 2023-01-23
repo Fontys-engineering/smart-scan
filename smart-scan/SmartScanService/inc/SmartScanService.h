@@ -13,6 +13,7 @@
 #include "Scan.h"
 #include "DataAcquisition.h"
 #include "CSVExport.h"
+#include "DirDef.h"
 
 namespace SmartScan
 {
@@ -34,11 +35,8 @@ namespace SmartScan
 
 		// Assign the connected sensor IDs 
 		// Arguments:
-		// - ref : reference sensor IDs
-		// - tmb : thumb sensor IDs
-		// - ind : index finger sensor IDs
-		// - mid : middle finger sensor IDs
-		void SensorSetup(int ref, int tmb, int ind, int mid);
+		// - acquisitionConfig : Configuration struct that specifies the settings with which the TrakStar device is initalized. 
+		void SensorSetup(DataAcqConfig acquisitionConfig);
 
 		// Set the Z offset of a specifc sensor. This is needed to compensate for the sensor being put on top of the fingers.
 		// Arguments:
@@ -78,6 +76,11 @@ namespace SmartScan
 		// - sensorNumber : Serial number of the sensor to get sample from.
 		// - raw : When set to "True", the acquired sample will not be corrected for the reference sensor.
 		Point3 GetSingleSample(int serialNumber, bool raw = false);
+
+		// Check if a serial number is connected
+		// Arguments:
+		// - sensorNumber : Serial number of the sensor to get sample from.
+		bool IsSerialConnected(int serialNumber);
 
 		// Stop the data acquisition and with that all the scans. The scans will conitnue to filter until caught up with data acquisition.
 		void StopScan();

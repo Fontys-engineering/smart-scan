@@ -28,8 +28,8 @@ void SmartScanService::Init(DataAcqConfig acquisitionConfig) {
 	mDataAcq.Init(acquisitionConfig);
 }
 
-void SmartScanService::SensorSetup(int ref, int tmb, int ind, int mid) {
-	mDataAcq.SensorConfig(ref, tmb, ind, mid);
+void SmartScanService::SensorSetup(DataAcqConfig acquisitionConfig) {
+	mDataAcq.SensorConfig(acquisitionConfig.refSensorSerial, acquisitionConfig.thumbSensorSerial, acquisitionConfig.indexSensorSerial, acquisitionConfig.middleSensorSerial);
 }
 
 void SmartScanService::CorrectZOffset(int serialNumber)
@@ -165,6 +165,21 @@ void SmartScanService::ClearData() {
 
 Point3 SmartScanService::GetSingleSample(int sensorSerial, bool raw) {
 	return mDataAcq.GetSingleSample(sensorSerial, raw);
+}
+
+bool SmartScanService::IsSerialConnected(int serialNumber) {
+	// Get all connected serial IDs
+	std::vector<int> serials = mDataAcq.GetSerialNumbers();
+
+	// Check if requested ID is present
+	for (int i = 0; i < serials.size(); i++) {
+		if (serials.at(i) == serialNumber) {
+			return true;
+		}
+	}
+	
+	// If no serials matched, return a false
+	return false;
 }
 
 void SmartScanService::StopScan() {

@@ -16,31 +16,27 @@
 #include <limits>
 #include <vector>
 #include "SmartScanService.h"
+#include "DirDef.h"
+#include "ini.h"
 
 using namespace std;
 using namespace SmartScan;
+namespace fs = std::filesystem;
 
 // Glove setup
-int rThumbSerial;								// Only used for setting reference points and ZOffsets calibration.
-int rIndexSerial;								// Only used for setting reference points and ZOffsets calibration.
-int rMiddleSerial;								// Only used for setting reference points and ZOffsets calibration.
-int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
-
-// Data-acquisition configuration
-short int transmitterID = 0;                    // Port of the transmitter, is usually 0 with one trakStar device.
-double measurementRate = 250;                   // Between 20.0 and 255.0
-double powerLineFrequency = 50.0;               // Either 50.0 or 60.0
-double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
-double frameRotations[3] = { 0, 0, 0 };			// Set the rotation of the measurement frame, azimuth, elevation and roll. (0, 0, 0) is default. 
+bool initDone = false;
 
 // Pre-define functions
 void Usage();
-void RawPrintCallback(const vector<SmartScan::Point3>& record);
-int SensorIdentification(const char* sensorName);
+void RawPrintCallback(const vector<Point3>& record);
+int SensorIdentification(const char* sensorParam);
+int GetSensorID(const char* parameter);
 
 // Create SmartScanService object
 SmartScanService s3;
-SmartScan::DataAcqConfig acquisitionConfig = { transmitterID, measurementRate, powerLineFrequency, maximumRange, refSensorSerial, frameRotations };
+DataAcqConfig acquisitionConfig;
+fs::path settingsPath(DIR_SETTINGS);
+ini::File iniFile;
 
 int main() {
 	// Print welcome screen.
@@ -55,6 +51,130 @@ int main() {
 	cout << "               \\______/ |__/ |__/ |__/ \\_______/|__/         \\___/   \\______/  \\_______/ \\_______/|__/  |__/" << endl;
 	cout << endl << "\t\t\t\t Changing orthopaedic footwear from an art to a science" << endl << endl << endl << endl;
 	cout << endl << "\t\tInitializing..." << endl;
+
+	// Setup directories
+	fs::create_directories(DIR_FILTER_PLUGINS);
+	fs::create_directories(DIR_CONFIG);
+	fs::create_directories(DIR_TEMP);
+	fs::create_directories(DIR_SCANS);
+
+	// Read system settings and save the settings to data-acquisition configuration
+	do {
+		if (fs::exists(DIR_SETTINGS)) {
+			// Setup ini file
+			iniFile = ini::open(DIR_SETTINGS);
+
+			// Setup system section
+			if (!iniFile.has_section(SECTION_SYSTEM)) {
+				iniFile.add_section(SECTION_SYSTEM);
+				iniFile.write(DIR_SETTINGS);
+				initDone = false;
+			}
+
+			if (iniFile.has_section(SECTION_SYSTEM)) {
+				// Setup transmitter ID parameter
+				if (!iniFile[SECTION_SYSTEM].has_key(PARAM_SYS_TRANS_ID)) {
+					iniFile[SECTION_SYSTEM].set<int>(PARAM_SYS_TRANS_ID, 0);
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.transmitterID = (short)iniFile[SECTION_SYSTEM].get<int>(PARAM_SYS_TRANS_ID);
+				cout << "\t\t\tTransmitter ID set to: " << acquisitionConfig.transmitterID << endl;
+
+				// Setup max range
+				if (!iniFile[SECTION_SYSTEM].has_key(PARAM_SYS_MAX_RANGE)) {
+					iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_MAX_RANGE, 36.0);
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.maximumRange = iniFile[SECTION_SYSTEM].get<double>(PARAM_SYS_MAX_RANGE);
+				cout << "\t\t\tMax range set to: " << acquisitionConfig.transmitterID * 2.54 << " cm" << endl;
+
+				// Setup measurement rate
+				if (!iniFile[SECTION_SYSTEM].has_key(PARAM_SYS_MEAS_RATE)) {
+					/*cout << "\t\tPlease enter the desired sample rate (between 20 and 255, default = 250) >" << flush;
+					while (!(cin >> acquisitionConfig.measurementRate)) { // Make sure the user can only input numbers.
+						cin.clear();
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
+						cout << "\t\t\tInvalid input. Try again: ";
+					}
+					cin.ignore();*/
+					acquisitionConfig.measurementRate = 250;
+
+					if (acquisitionConfig.measurementRate > 255) {
+						iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_MEAS_RATE, 255);
+					}
+					else if (acquisitionConfig.measurementRate < 20) {
+						iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_MEAS_RATE, 20);
+					}
+					else {
+						iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_MEAS_RATE, acquisitionConfig.measurementRate);
+					}
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.measurementRate = iniFile[SECTION_SYSTEM].get<double>(PARAM_SYS_MEAS_RATE);
+				cout << "\t\t\tMeasurement rate set to: " << acquisitionConfig.measurementRate << " Hz" << endl;
+
+				// Setup powerline frequency
+				if (!iniFile[SECTION_SYSTEM].has_key(PARAM_SYS_PWR_LINE_FREQ)) {
+					cout << "\t\tPlease enter the desired power line frequency (50 or 60) >" << flush;
+					while (!(cin >> acquisitionConfig.powerLineFrequency)) { // Make sure the user can only input numbers.
+						cin.clear();
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
+						cout << "\t\t\tInvalid input. Try again >";
+					}
+					cin.ignore();
+
+					if (acquisitionConfig.powerLineFrequency != 50 && acquisitionConfig.powerLineFrequency != 60) {
+						iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_PWR_LINE_FREQ, 60);
+					}
+					else {
+						iniFile[SECTION_SYSTEM].set<double>(PARAM_SYS_PWR_LINE_FREQ, acquisitionConfig.powerLineFrequency);
+					}
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.powerLineFrequency = iniFile[SECTION_SYSTEM].get<double>(PARAM_SYS_PWR_LINE_FREQ);
+				cout << "\t\t\tPower line frequency set to: " << acquisitionConfig.powerLineFrequency << " Hz" << endl;
+				initDone = true;
+			}
+
+			if (!iniFile.has_section(SECTION_SENSOR)) {
+				iniFile.add_section(SECTION_SENSOR);
+				iniFile.write(DIR_SETTINGS);
+				initDone = false;
+			}
+
+			if (iniFile.has_section(SECTION_SENSOR)) {
+				// Setup frame rotations
+				if (!iniFile[SECTION_SENSOR].has_key(PARAM_SNSR_AZIMUTH_OFFSET)) {
+					iniFile[SECTION_SENSOR].set<double>(PARAM_SNSR_AZIMUTH_OFFSET, 0);
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.frameRotations[0] = iniFile[SECTION_SENSOR].get<double>(PARAM_SNSR_AZIMUTH_OFFSET);
+				cout << "\t\t\tSensor's azimuth offset is set to " << acquisitionConfig.frameRotations[0] << " degrees" << endl;
+
+				if (!iniFile[SECTION_SENSOR].has_key(PARAM_SNSR_ELEVATION_OFFSET)) {
+					iniFile[SECTION_SENSOR].set<double>(PARAM_SNSR_ELEVATION_OFFSET, 0);
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.frameRotations[1] = iniFile[SECTION_SENSOR].get<double>(PARAM_SNSR_ELEVATION_OFFSET);
+				cout << "\t\t\tSensor's elevation offset is set to " << acquisitionConfig.frameRotations[1] << " degrees" << endl;
+
+				if (!iniFile[SECTION_SENSOR].has_key(PARAM_SNSR_ROLL_OFFSET)) {
+					iniFile[SECTION_SENSOR].set<double>(PARAM_SNSR_ROLL_OFFSET, 0);
+					iniFile.write(DIR_SETTINGS);
+				}
+				acquisitionConfig.frameRotations[2] = iniFile[SECTION_SENSOR].get<double>(PARAM_SNSR_ROLL_OFFSET);
+				cout << "\t\t\tSensor's roll offset is set to " << acquisitionConfig.frameRotations[2] << " degrees" << endl;
+				initDone = true;
+			}
+		}
+		else {
+			// Create settings INI
+			fstream settingsINI(DIR_SETTINGS);
+			settingsINI.open(DIR_SETTINGS, ios::in | ios::out | ios::trunc);
+			settingsINI.close();
+			initDone = false;
+		}
+	} while (!initDone);
 
 	// Initialise the service:
 	try {
@@ -76,37 +196,22 @@ int main() {
 	}
 
 	// Print general info.
-	//cout << "\t\tApplication " << (mockMode ? "" : "not ") << "in mockmode" << endl;
 	cout << "\t\tFound " << s3.NumAttachedBoards() << " attached board(s)" << endl; 
 	cout << "\t\tFound " << s3.NumAttachedTransmitters() << " attached transmitter(s)" << endl; 
-	cout << "\t\tFound " << s3.NumAttachedSensors(true) << " attached sensor(s)" << endl << endl << endl;
+	cout << "\t\tFound " << s3.NumAttachedSensors(true) << " attached sensor(s)" << endl;
+
+	acquisitionConfig.refSensorSerial = SensorIdentification(PARAM_SNSR_REF_SERIAL);
+	acquisitionConfig.thumbSensorSerial = SensorIdentification(PARAM_SNSR_THUMB_SERIAL);
+	acquisitionConfig.indexSensorSerial = SensorIdentification(PARAM_SNSR_INDEX_SERIAL);
+	acquisitionConfig.middleSensorSerial = SensorIdentification(PARAM_SNSR_MIDDLE_SERIAL);
+
+	s3.SensorSetup(acquisitionConfig);
 
 	// Print the help screen:
 	cout << "Welcome to the SmartScan command line application! (Type help to see a full list of commands)" << endl;
 
-	// Check if json files exist
-
-	// Read serial numbers and compared them to the connected serial numbers
-
-	// Run through sensor identification
-	/*
-	refSensorSerial = SensorIdentification("reference");
-	rThumbSerial = SensorIdentification("thumb");
-	rIndexSerial = SensorIdentification("index finger");
-	rMiddleSerial = SensorIdentification("middle finger");
-	*/
-
-	rThumbSerial = 55435;						// Only used for setting reference points and ZOffsets calibration.
-	rIndexSerial = 55429;						// Only used for setting reference points and ZOffsets calibration.
-	rMiddleSerial = 55430;						// Only used for setting reference points and ZOffsets calibration.
-	refSensorSerial = 55432;					// Serial number of the reference sensor, set as -1 when no reference sensor is used.
-
-	// Save serial numbers
-	s3.SensorSetup(refSensorSerial, rThumbSerial, rIndexSerial, rMiddleSerial);
-
 	char cmd[128];
 	do {
-
 		// Print prompt.
 		cout << "SmartScan>";
 
@@ -131,8 +236,8 @@ int main() {
 				cout << "Position the thumb and index finger around the reference point and press any key when ready.";
 				for (int i = 0; i < numRefPoints; i++) { // Collect the same amount of reference points as specified earlier.
 					cin.ignore();
-					Point3 PointThumb = s3.GetSingleSample(rThumbSerial);
-					Point3 PointIndex = s3.GetSingleSample(rIndexSerial);
+					Point3 PointThumb = s3.GetSingleSample(GetSensorID(PARAM_SNSR_THUMB_SERIAL));
+					Point3 PointIndex = s3.GetSingleSample(GetSensorID(PARAM_SNSR_INDEX_SERIAL));
 					Point3 refPoint;
 
 					// Average every coordinate to get the point in between the two fingers.
@@ -180,9 +285,9 @@ int main() {
 				cout << "Put your hand on the table of the transmitter and press enter when ready." << flush;
 				cin.ignore();
 
-				s3.CorrectZOffset(rThumbSerial);
-				s3.CorrectZOffset(rIndexSerial);
-				s3.CorrectZOffset(rMiddleSerial);
+				s3.CorrectZOffset(GetSensorID(PARAM_SNSR_THUMB_SERIAL));
+				s3.CorrectZOffset(GetSensorID(PARAM_SNSR_INDEX_SERIAL));
+				s3.CorrectZOffset(GetSensorID(PARAM_SNSR_MIDDLE_SERIAL));
 
 				cout << "New offset calculated succesfully!" << endl;
 			}
@@ -249,7 +354,7 @@ int main() {
 				string sCmd = cmd;
 
 				// Find the space in the string
-				uint32_t idIndex = sCmd.find(' ', 0);
+				size_t idIndex = sCmd.find(' ', 0);
 
 				//Convert the string between the spaces into a number
 				int id = atoi(sCmd.substr((idIndex + 1)).c_str());
@@ -283,7 +388,7 @@ int main() {
 				// Get the id from the comand:
 				string sCmd = cmd;
 				// Find the space in the string
-				uint32_t idIndex = sCmd.find(' ', 0);
+				size_t idIndex = sCmd.find(' ', 0);
 
 				//Convert the string between the spaces into a number
 				int id = atoi(sCmd.substr((idIndex + 1)).c_str());
@@ -301,8 +406,8 @@ int main() {
 				string sCmd = cmd;
 
 				// Find the space in the string
-				uint32_t idIndex = sCmd.find(' ', 0);
-				uint32_t sizeIndex = sCmd.find(' ', idIndex + 1);
+				size_t idIndex = sCmd.find(' ', 0);
+				size_t sizeIndex = sCmd.find(' ', idIndex + 1);
 
 				//Convert the string between the spaces into a number
 				int id = atoi(sCmd.substr((idIndex + 1), (sizeIndex - idIndex + 1)).c_str());
@@ -342,7 +447,7 @@ int main() {
 				// Get the id from the comand:
 				string sCmd = cmd;
 				// Find the space in the string
-				uint32_t idIndex = sCmd.find(' ', 0);
+				size_t idIndex = sCmd.find(' ', 0);
 
 				//Convert the string between the spaces into a number
 				int id = atoi(sCmd.substr((idIndex + 1)).c_str());
@@ -355,22 +460,22 @@ int main() {
 					cerr << e.what() << " thrown in function " << e.get_function() << " in file " << e.get_file() << endl;
 				}
 			}
-			// Export x,y,z of specific scan.
+			// Export x, y and z of specific scan.
 			else if (strlen(cmd) > 7 && !strncmp(cmd, "export ", 7)) {
 				// Get the id from the comand:
 				string sCmd = cmd;
 				sCmd.shrink_to_fit();
 
-				uint32_t idIndex = sCmd.find(' ', 0);
-				uint32_t nameIndex = sCmd.find(' ', idIndex + 1);
+				size_t idIndex = sCmd.find(' ', 0);
+				size_t nameIndex = sCmd.find(' ', idIndex + 1);
 				int id = atoi(sCmd.substr((idIndex + 1), (nameIndex - idIndex + 1)).c_str());
 
-				// Cut the filepath out:
-				string filepath = sCmd.substr((nameIndex + 1), sCmd.max_size());
-				cout << "exporting filtered data from scan: " << id << " into file: " << filepath << endl;
+				// Cut the filename out:
+				string filename = sCmd.substr((nameIndex + 1), sCmd.max_size());
+				cout << "exporting filtered data from scan: " << id << " into file: " << filename << endl;
 
 				try {
-					s3.ExportPointCloud(filepath + ".csv", id);
+					s3.ExportPointCloud(DIR_SCANS + filename + ".csv", id);
 					cout << "Done.\n";
 				}
 				catch (ex_export e) {
@@ -386,16 +491,16 @@ int main() {
 				string sCmd = cmd;
 				sCmd.shrink_to_fit();
 
-				uint32_t idIndex = sCmd.find(' ', 0);
-				uint32_t nameIndex = sCmd.find(' ', idIndex + 1);
+				size_t idIndex = sCmd.find(' ', 0);
+				size_t nameIndex = sCmd.find(' ', idIndex + 1);
 				int id = atoi(sCmd.substr((idIndex + 1), (nameIndex - idIndex + 1)).c_str());
 
-				// Cut the filepath out:
-				string filepath = sCmd.substr((nameIndex + 1), sCmd.max_size());
-				cout << "exporting raw data from scan: " << id << " into file: " << filepath << endl;
+				// Cut the filename out:
+				string filename = sCmd.substr((nameIndex + 1), sCmd.max_size());
+				cout << "exporting raw data from scan: " << id << " into file: " << filename << endl;
 
 				try {
-					s3.ExportCSV(filepath + ".csv", id);
+					s3.ExportCSV(DIR_SCANS + filename + ".csv", id);
 					cout << "Done.\n";
 				}
 				catch (ex_export e) {
@@ -411,14 +516,14 @@ int main() {
 				string sCmd = cmd;
 				sCmd.shrink_to_fit();
 
-				uint32_t nameIndex = sCmd.find(' ', 0);
+				size_t nameIndex = sCmd.find(' ', 0);
 
-				// Cut the filepath out:
-				string filepath = sCmd.substr((nameIndex + 1), sCmd.max_size());
-				cout << "Exporting raw data into file: " << filepath << endl;
+				// Cut the filename out:
+				string filename = sCmd.substr((nameIndex + 1), sCmd.max_size());
+				cout << "Exporting raw data into file: " << filename << endl;
 
 				try {
-					s3.ExportPointCloud(filepath + ".csv", 0, true);
+					s3.ExportPointCloud(DIR_SCANS + filename + ".csv", 0, true);
 					cout << "Done.\n";
 				}
 				catch (ex_export e) {
@@ -434,14 +539,14 @@ int main() {
 				string sCmd = cmd;
 				sCmd.shrink_to_fit();
 
-				uint32_t nameIndex = sCmd.find(' ', 0);
+				size_t nameIndex = sCmd.find(' ', 0);
 
-				// Cut the filepath out:
-				string filepath = sCmd.substr((nameIndex + 1), sCmd.max_size());
-				cout << "Exporting raw data into file: " << filepath << endl;
+				// Cut the filename out:
+				string filename = sCmd.substr((nameIndex + 1), sCmd.max_size());
+				cout << "Exporting raw data into file: " << filename << endl;
 
 				try {
-					s3.ExportCSV(filepath + ".csv", 0, true);
+					s3.ExportCSV(DIR_SCANS + filename + ".csv", 0, true);
 					cout << "Done.\n";
 				}
 				catch (ex_export e) {
@@ -484,7 +589,7 @@ void Usage()
 }
 
 // Function that is called everytime a new set of samples has been collected.
-void RawPrintCallback(const vector<SmartScan::Point3>& record)
+void RawPrintCallback(const vector<Point3>& record)
 {
 	cout << '\r'; // Set cursor to the beginning of the line to prevent messy couts.
 	// All data is casted to an int so that the amount of characters that are going to be printed are predictable and concise.
@@ -500,42 +605,60 @@ void RawPrintCallback(const vector<SmartScan::Point3>& record)
 	cout << ' ' << '\r' << flush;
 }
 
-int SensorIdentification(const char* sensorName) {
+// Identify a specific sensor serial ID
+int SensorIdentification(const char* sensorParam) {
 	char input[128];
 
-	cout << "Is there a " << sensorName << " sensor (y/n) > " << flush;
-	do {
-		cin.getline(input, 128);
-		if (strncmp(input, "y", 1) == 0 || strncmp(input, "Y", 1) == 0) {
-			cout << "Please hold up the " << sensorName << " sensor and hit enter when ready." << flush;
-			cin.ignore(10, '\n');
-			//Check which sensor is the highest
-			int serial = s3.HighestSensor();
-			cout << "Measured sensor ID " << serial << " which is: ";
-			switch (serial) {
-			case 55435:
-				cout << "thumb sensor" << endl;
-				break;
-			case 55429:
-				cout << "index sensor" << endl;
-				break;
-			case 55430:
-				cout << "middle sensor" << endl;
-				break;
-			case 55432:
-				cout << "reference sensor" << endl;
-				break;
-			default:
-				cout << "unknown" << endl;
-				break;
+	// Open and/or make INI file in case it has not been made
+	if (!fs::exists(DIR_SETTINGS)) {
+		// Create settings INI
+		fstream settingsINI(DIR_SETTINGS);
+		settingsINI.open(DIR_SETTINGS, ios::in | ios::out | ios::trunc);
+		settingsINI.close();
+	}
+
+	// Add sensor section incase it's not present
+	if (!iniFile.has_section(SECTION_SENSOR)) {
+		iniFile.add_section(SECTION_SENSOR);
+		iniFile.write(DIR_SETTINGS);
+	}
+
+	if (!iniFile[SECTION_SENSOR].has_key(sensorParam) || !s3.IsSerialConnected(iniFile[SECTION_SENSOR].get<int>(sensorParam))) {
+		cout << "\t\tIs there a " << sensorParam << " sensor (y/n) > " << flush;
+		do {
+			cin.getline(input, 128);
+
+			if (strncmp(input, "y", 1) == 0 || strncmp(input, "Y", 1) == 0) {
+				// Check which sensor is the highest
+				cout << "\t\t\tPlease hold up the " << sensorParam << " sensor and hit enter when ready." << flush;
+				cin.ignore(10, '\n');
+				iniFile[SECTION_SENSOR].set<int>(sensorParam, s3.HighestSensor());
+				iniFile.write(DIR_SETTINGS);
+				cout << "\t\t\t\t" << sensorParam << " set to: " << iniFile[SECTION_SENSOR].get<int>(sensorParam) << endl;
+				return iniFile[SECTION_SENSOR].get<int>(sensorParam);
 			}
-			return serial;
-		}
-		else if (strncmp(input, "n", 1) == 0 || strncmp(input, "N", 1) == 0) {
-			return -1;
-		}
-		else {
-			cout << "Incorrect input please try again." << flush;
-		}
-	} while (true);
+			else if (strncmp(input, "n", 1) == 0 || strncmp(input, "N", 1) == 0) {
+				cout << "\t\t\t\tSkipped: " << sensorParam << " sensor." << endl; 
+				iniFile[SECTION_SENSOR].set<int>(sensorParam, -1);
+				iniFile.write(DIR_SETTINGS);
+				return iniFile[SECTION_SENSOR].get<int>(sensorParam);
+			}
+			else {
+				cout << "\t\t\tIncorrect input please try again." << flush;
+			}
+		} while (true);
+	}
+	else {
+		return iniFile[SECTION_SENSOR].get<int>(sensorParam);
+	}
+}
+
+int GetSensorID(const char* parameter) {
+	if (iniFile[SECTION_SENSOR].has_key(parameter)) {
+		return iniFile[SECTION_SENSOR].get<int>(parameter);
+	}
+	else {
+		return -1;
+	}
+
 }

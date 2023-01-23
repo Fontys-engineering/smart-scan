@@ -20,13 +20,13 @@ namespace SmartScan
     struct DataAcqConfig
     {
         short int transmitterID = 0;                    // Port of the transmitter, is usually 0 with one trakStar device.
-        double measurementRate = 255;                   // Between 20.0 and 255.0.
-        double powerLineFrequency = 50.0;               // Either 50.0 or 60.0.
+        double measurementRate = 250;                   // Between 20.0 and 255.0.
+        double powerLineFrequency = 60.0;               // Either 50.0 or 60.0.
         double maximumRange = 36.0;                     // Either 36.0 (914,4 mm), 72.0 and 144.0.
 		int refSensorSerial = -1;						// Serial number of the reference sensor, set as -1 when no reference sensor is used.
-		int thumbSensorSerial = -1;
-		int middleSensorSerial = -1;
-		int indexSensorSerial = -1;
+		int thumbSensorSerial = -1;						// Serial number of the thumb sensor, set as -1 when no thumb sensor is used.
+		int middleSensorSerial = -1;					// Serial number of the middle sensor, set as -1 when no middle sensor is used.
+		int indexSensorSerial = -1;						// Serial number of the index sensor, set as -1 when no index sensor is used.
 		double frameRotations[3] = {0, 0, 0};			// Set the rotation of the measurement frame, azimuth, elevation and roll. (0, 0, 0) is default.
 
 		DataAcqConfig();

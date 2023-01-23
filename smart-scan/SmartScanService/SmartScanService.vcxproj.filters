@@ -65,5 +65,11 @@
     <ClInclude Include="inc\SmartScanService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\DirDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ini.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

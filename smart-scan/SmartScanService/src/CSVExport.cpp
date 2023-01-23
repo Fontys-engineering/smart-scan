@@ -19,7 +19,7 @@ void CSVExport::ExportPoint3(const std::vector<Point3>* data, const std::string 
 
 	// Loop through and Write data unless data is empty.
 	if (!data->empty())	{
-		for (int i = 0; i < data->size(); i = i++) {
+		for (int i = 0; i < data->size(); i++) {
 			csvFile << data->at(i).time << "," << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << "," << data->at(i).r.x << "," << data->at(i).r.y << "," << data->at(i).r.z << "," << data->at(i).quality << "," << (int)data->at(i).buttonState << std::endl;
 		}
 	}
@@ -34,11 +34,12 @@ void CSVExport::ExportPoint3Cloud(const std::vector<Point3>* data, const std::st
 	csvFile.open(filename);
 
 	// Print the column names on the top row.
+	csvFile << "sep=," << std::endl;
 	csvFile << 'X' << ',' << 'Y' << ',' << 'Z' << std::endl;
 
 	// Loop through and Write data unless data is empty.
 	if (!data->empty())	{
-		for (int i = 0; i < data->size(); i = i++) {
+		for (int i = 0; i < data->size(); i++) {
 			csvFile << data->at(i).x << "," << data->at(i).y << "," << data->at(i).z << std::endl;
 		}
 	}
